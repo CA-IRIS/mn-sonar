@@ -1,0 +1,178 @@
+<?xml version="1.0"?>
+
+<!-- ant build file for sonar project -->
+<project name="sonar" default="dist" basedir=".">
+	<property file="project.properties"/>
+	<property file="${user.home}/.ant.properties"/>
+	<property name="src.dir" value="src"/>
+	<property name="etc.dir" value="etc"/>
+	<property name="bin.dir" value="bin"/>
+	<property name="lib.dir" value="lib"/>
+	<property name="docs.dir" value="docs"/>
+	<property name="build.dir" value="build"/>
+	<property name="build.etc" value="${build.dir}/etc"/>
+	<property name="build.src" value="${build.dir}/src"/>
+	<property name="build.lib" value="${build.dir}/lib"/>
+	<property name="build.classes" value="${build.dir}/classes"/>
+	<property name="build.javadocs" value="${build.dir}/javadocs"/>
+	<property name="dist.client" value="${name}-client-${version}"/>
+	<property name="dist.server" value="${name}-server-${version}"/>
+	<property name="dist.test" value="${name}-test-${version}"/>
+	<property name="manifest.client" value="client-MANIFEST.MF"/>
+	<property name="manifest.server" value="server-MANIFEST.MF"/>
+	<property name="manifest.test" value="test-MANIFEST.MF"/>
+	<property name="client.jar" value="${name}-client-${version}.jar"/>
+	<property name="server.jar" value="${name}-server-${version}.jar"/>
+	<property name="test.jar" value="${name}-test-${version}.jar"/>
+	<property name="build.compiler.pedantic" value="true"/>
+
+	<!-- Prepare the build directory -->
+	<target name="prepare"
+	        description="Prepare the build directory">
+
+		<copy todir="${build.src}" filtering="true">
+			<fileset dir="${src.dir}"/>
+			<filterset begintoken="@@" endtoken="@@">
+				<filter token="VERSION" value="${version}"/>
+			</filterset>
+		</copy>
+
+		<copy todir="${build.etc}">
+			<fileset dir="${etc.dir}" />
+			<filterset begintoken="@@" endtoken="@@">
+				<filter token="VERSION" value="${version}"/>
+				<filter token="KEYSTORE.PASSWORD" value="${keystore.password}"/>
+				<filter token="SONAR.HOST" value="${sonar.host}"/>
+				<filter token="SONAR.PORT" value="${sonar.port}"/>
+			</filterset>
+		</copy>
+
+		<mkdir dir="${build.classes}"/>
+		<mkdir dir="${build.lib}"/>
+	</target>
+
+	<!-- Compile the source code -->
+	<target name="compile"
+	        depends="prepare"
+	        description="Compile all of the source files for the project">
+		<javac srcdir="${build.src}"
+		       destdir="${build.classes}"
+		       debug="off"
+		       deprecation="on"
+		       optimize="on"
+		       source="1.5"
+		       target="1.5">
+		</javac>
+	</target>
+
+	<!-- Create the server jar -->
+	<target name="server-jar"
+		depends="compile"
+		description="Create the server jar">
+		<jar jarfile="${build.lib}/${server.jar}">
+			<fileset dir="${build.classes}">
+				<include name="us/mn/state/dot/sonar/*.class"/>
+				<include name="us/mn/state/dot/sonar/server/*.class"/>
+			</fileset>
+		</jar>
+	</target>
+
+	<!-- Create the server distribution -->
+	<target name="server"
+		depends="server-jar"
+		description="Create the server distribution">
+		<copy todir="${dist.server}">
+			<fileset dir="${build.lib}">
+				<include name="${server.jar}"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- Create the client jar -->
+	<target name="client-jar"
+	        depends="compile"
+	        description="Create the client jar">
+		<jar jarfile="${build.lib}/${client.jar}">
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/sonar/*.class"/>
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/sonar/client/*.class"/>
+		</jar>
+	</target>
+
+	<!-- Create the client distribution -->
+	<target name="client"
+		depends="client-jar"
+		description="Create the client distribution">
+		<copy todir="${dist.client}">
+			<fileset dir="${build.lib}">
+				<include name="${client.jar}"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- Create the test jar -->
+	<target name="test-jar"
+	        depends="compile"
+	        description="Create the test jar">
+		<jar jarfile="${build.lib}/${test.jar}"
+		     manifest="${build.etc}/${manifest.test}">
+			<fileset dir="${etc.dir}">
+				<include name="sonar-client.keystore"/>
+				<include name="sonar-client.properties"/>
+			</fileset>
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/sonar/test/*.class"/>
+		</jar>
+	</target>
+
+	<!-- Create the test distribution -->
+	<target name="test"
+		depends="server-jar, client-jar, test-jar"
+		description="Create the test distribution">
+		<copy todir="${dist.test}">
+			<fileset dir="${build.lib}">
+				<include name="${client.jar}"/>
+				<include name="${server.jar}"/>
+				<include name="${test.jar}"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- Create the jars -->
+	<target name="jar"
+	        depends="server-jar, client-jar"
+	        description="Create the jars">
+	</target>
+
+	<!-- Create the full distribution -->
+	<target name="dist"
+	        depends="server, client"
+	        description="Create the full distribution">
+	</target>
+
+	<!-- Create the API documentation -->
+	<target name="docs"
+	        depends="prepare"
+	        description="Create the API documentation">
+		<mkdir dir="${build.javadocs}" />
+		<javadoc packagenames="${packages}"
+			 sourcepath="${src.dir}"
+		         destdir="${build.javadocs}"
+		         author="true"
+		         version="true"
+			 windowtitle="${name} version ${version} API"
+			 doctitle="${name} version ${version}"
+		         bottom="Copyright &#169; Minnesota Department of
+		                 Transportation. All Rights Reserved."/>
+	</target>
+
+	<!-- Clean up generated stuff -->
+	<target name="clean"
+	        description="Remove the build and distribution directories">
+		<delete dir="${build.dir}"/>
+		<delete dir="${dist.client}"/>
+		<delete dir="${dist.server}"/>
+		<delete dir="${dist.test}"/>
+	</target>
+</project>

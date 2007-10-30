@@ -1,0 +1,100 @@
+/*
+ * SONAR -- Simple Object Notification And Replication
+ * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+package us.mn.state.dot.sonar;
+
+import java.nio.BufferOverflowException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+
+/**
+ * A message encoder provides a Java API for encoding messages to the SONAR
+ * wire protocol.
+ *
+ * @author Douglas Lau
+ */
+public class MessageEncoder {
+
+	/** Threshold of space remaining in write buffer to flush */
+	static protected final int FLUSH_THRESHOLD = 1024;
+
+	/** Everything on the wire is encoded to UTF-8 */
+	static protected final Charset UTF8 = Charset.forName("UTF-8");
+
+	/** Character buffer used to build messages */
+	protected final CharBuffer m_buf;
+
+	/** Byte buffer to write encoded data */
+	protected final ByteBuffer w_buf;
+
+	/** Client conduit */
+	protected final Conduit conduit;
+
+	/** Create a new SONAR message encoder */
+	public MessageEncoder(ByteBuffer out, Conduit c) {
+		m_buf = CharBuffer.allocate(256);
+		w_buf = out;
+		conduit = c;
+	}
+
+	/** Encode one message with the given code, name and parameters */
+	public void encode(Message m, String name, String[] params) {
+		m_buf.clear();
+		m_buf.put(m.code);
+		if(name != null) {
+			m_buf.put(Message.DELIMITER.code);
+			m_buf.put(name);
+			if(params != null) {
+				for(String p: params) {
+					m_buf.put(Message.DELIMITER.code);
+					m_buf.put(p);
+				}
+			}
+		}
+		m_buf.put(Message.TERMINATOR.code);
+		m_buf.flip();
+		if(conduit.isConnected())
+			fillBuffer(UTF8.encode(m_buf));
+	}
+
+	/** Encode one message with the given code and name */
+	public void encode(Message m, String name) {
+		encode(m, name, null);
+	}
+
+	/** Encode one message with the given code */
+	public void encode(Message m) {
+		encode(m, null, null);
+	}
+
+	/** Fill the output buffer with encoded message data */
+	protected void fillBuffer(ByteBuffer b) {
+		try {
+			int remaining;
+			synchronized(w_buf) {
+				w_buf.put(b);
+				remaining = w_buf.remaining();
+			}
+			conduit.setWritePending(true);
+			if(remaining < FLUSH_THRESHOLD)
+				conduit.flush();
+		}
+		catch(BufferOverflowException e) {
+			System.err.println("SONAR: write buffer OVERFLOW: " +
+				conduit.getName());
+			conduit.disconnect();
+		}
+	}
+}
