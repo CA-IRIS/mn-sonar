@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2007  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -98,7 +98,7 @@ class ProxyCache extends Names {
 			if(names.length != 3)
 				throw ProtocolError.WRONG_PARAMETER_COUNT;
 			t = getTypeCache(names);
-			o = t.lookupObject(names[1]);
+			o = t.getProxy(names[1]);
 			a = names[2];
 		} else {
 			t = getTypeCache();

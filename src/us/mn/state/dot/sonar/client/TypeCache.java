@@ -57,6 +57,10 @@ public class TypeCache<T extends SonarObject> {
 	 * All access must be synchronized on the "children" lock. */
 	private final HashMap<String, T> children = new HashMap<String, T>();
 
+	/** A phantom is a new object which has had attributes set, but not
+	 * been declared with Message.OBJECT ("o") */
+	private T phantom;
+
 	/** Mapping from object identity to attribute hash.
 	 * All access must be synchronized on the "children" lock. */
 	private final HashMap<Integer, HashMap<String, Attribute>> attributes =
@@ -103,19 +107,35 @@ public class TypeCache<T extends SonarObject> {
 			l.proxyChanged(proxy, a);
 	}
 
-	/** Add a proxy to the type cache */
-	T add(String name) throws NamespaceError {
+	/** Create a proxy in the type cache */
+	T createProxy(String name) {
 		T o = (T)Proxy.newProxyInstance(LOADER, ifaces, invoker);
 		HashMap<String, Attribute> amap = invoker.createAttributes();
 		amap.put("typeName", new Attribute(tname));
 		amap.put("name", new Attribute(name));
 		synchronized(children) {
-			if(children.containsKey(name))
-				throw NamespaceError.NAME_EXISTS;
 			children.put(name, o);
 			attributes.put(hashCode(o), amap);
-			notifyProxyAdded(o);
+			phantom = o;
 		}
+		return o;
+	}
+
+	/** Get (or create) a proxy from the type cache */
+	T getProxy(String name) {
+		synchronized(children) {
+			if(children.containsKey(name))
+				return children.get(name);
+			else
+				return createProxy(name);
+		}
+	}
+
+	/** Add a proxy to the type cache */
+	T add(String name) {
+		T o = getProxy(name);
+		notifyProxyAdded(o);
+		phantom = null;
 		return o;
 	}
 
@@ -134,11 +154,10 @@ public class TypeCache<T extends SonarObject> {
 	/** Lookup a proxy from the given name */
 	public T lookupObject(String n) throws NamespaceError {
 		synchronized(children) {
-			T o = children.get(n);
-			if(o == null)
-				throw NamespaceError.NAME_UNKNOWN;
+			if(children.containsKey(n))
+				return children.get(n);
 			else
-				return o;
+				throw NamespaceError.NAME_UNKNOWN;
 		}
 	}
 
@@ -190,7 +209,8 @@ public class TypeCache<T extends SonarObject> {
 		synchronized(children) {
 			Attribute attr = lookupAttribute(o, a);
 			attr.unmarshall(v);
-			notifyProxyChanged(o, a);
+			if(o != phantom)
+				notifyProxyChanged(o, a);
 		}
 	}
 
