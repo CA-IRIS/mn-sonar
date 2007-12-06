@@ -58,9 +58,10 @@ class ProxyCache extends Names {
 
 	/** Get the TypeCache for the specified name */
 	protected TypeCache getTypeCache(String[] names) throws NamespaceError {
-		if(types.containsKey(names[0]))
-			return types.get(names[0]);
-		else
+		if(types.containsKey(names[0])) {
+			cur_type = types.get(names[0]);
+			return cur_type;
+		} else
 			throw NamespaceError.NAME_INVALID;
 	}
 
@@ -70,7 +71,7 @@ class ProxyCache extends Names {
 			String[] names = parse(name);
 			if(names.length != 2)
 				throw NamespaceError.NAME_INVALID;
-			getTypeCache(names).add(names[1]);
+			cur_obj = getTypeCache(names).add(names[1]);
 		} else
 			cur_obj = getTypeCache().add(name);
 	}
@@ -99,6 +100,7 @@ class ProxyCache extends Names {
 				throw ProtocolError.WRONG_PARAMETER_COUNT;
 			t = getTypeCache(names);
 			o = t.getProxy(names[1]);
+			cur_obj = o;
 			a = names[2];
 		} else {
 			t = getTypeCache();
