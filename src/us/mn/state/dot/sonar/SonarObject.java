@@ -16,10 +16,9 @@ package us.mn.state.dot.sonar;
 
 /**
  * This interface must be implemented by classes stored in a SONAR namespace.
- * Any class which allows SONAR clients to create objects must also define a
- * factory method: <code>static public SonarObject create(String name)</code>,
- * or <code>static public SonarObject doCreate(String name)</code>. The latter
- * form must be used when an exception may be thrown.
+ * Any implementation class which allows SONAR clients to create objects must
+ * also define a public constructor with one String argument, "name", and a
+ * <code>public void doStore()</code> method for storing objects in a database.
  *
  * @author Douglas Lau
  */

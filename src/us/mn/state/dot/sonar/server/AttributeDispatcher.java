@@ -15,6 +15,7 @@
 package us.mn.state.dot.sonar.server;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -33,11 +34,8 @@ import us.mn.state.dot.sonar.SonarObject;
  */
 public class AttributeDispatcher {
 
-	/** Method name (static) to create a new object */
-	static protected final String CREATE_METHOD = "create";
-
-	/** Alternate method name (static) to create a new object */
-	static protected final String DO_CREATE_METHOD = "doCreate";
+	/** Method name to store an object */
+	static protected final String DO_STORE_METHOD = "doStore";
 
 	/** Method name to destroy an object */
 	static protected final String DESTROY_METHOD = "destroy";
@@ -78,35 +76,41 @@ public class AttributeDispatcher {
 		return EMPTY_STRING;
 	}
 
-	/** Lookup a method on the specified class */
-	static protected Method lookup_method(Class c, String method) {
-		for(Method m: c.getMethods()) {
-			if(method.equalsIgnoreCase(m.getName()))
-				return m;
+	/** Check for a valid constructor */
+	static protected boolean is_valid_constructor(Constructor c) {
+		Class[] paramTypes = c.getParameterTypes();
+		return (paramTypes.length == 1) &&
+			(paramTypes[0] == String.class);
+	}
+
+	/** Lookup the constructor */
+	static protected Constructor lookup_constructor(Class c) {
+		for(Constructor con: c.getConstructors()) {
+			if(is_valid_constructor(con))
+				return con;
 		}
 		return null;
 	}
 
-	/** Check for a valid factory method */
-	static protected boolean valid_factory(Method m) {
-		return Modifier.isStatic(m.getModifiers()) &&
-			(m.getParameterTypes().length == 1) &&
-			(SonarObject.class.isAssignableFrom(m.getReturnType()));
+	/** Lookup a constructor to create new objects */
+	static protected Constructor lookup_constructor(SonarObject o) {
+		return lookup_constructor(o.getClass());
 	}
 
-	/** Lookup a factory method to create new objects */
-	static protected Method lookup_creator(SonarObject o) {
-		Class c = o.getClass();
-		Method m = lookup_method(c, DO_CREATE_METHOD);
-		if(m != null && valid_factory(m))
-			return m;
-		else {
-			m = lookup_method(c, CREATE_METHOD);
-			if(m != null && valid_factory(m))
-				return m;
-			else
-				return null;
+	/** Lookup a method on the specified class */
+	static protected Method lookup_method(Class c, String method) {
+		for(Method m: c.getMethods()) {
+			if(method.equalsIgnoreCase(m.getName())) {
+				if(!Modifier.isStatic(m.getModifiers()))
+					return m;
+			}
 		}
+		return null;
+	}
+
+	/** Lookup a method to store new objects */
+	static protected Method lookup_storer(SonarObject o) {
+		return lookup_method(o.getClass(), DO_STORE_METHOD);
 	}
 
 	/** Lookup a method to destroy objects */
@@ -117,11 +121,6 @@ public class AttributeDispatcher {
 			return m;
 		else
 			return lookup_method(c, DESTROY_METHOD);
-	}
-
-	/** Make an array of the given class and size */
-	static protected Object[] makeArray(Class a_type, int size) {
-		return (Object [])Array.newInstance(a_type, size);
 	}
 
 	/** Lookup all attribute setter or getter methods */
@@ -141,8 +140,11 @@ public class AttributeDispatcher {
 	/** Attributes which can be dispatched */
 	public final String[] attributes;
 
-	/** Factory method to create a new object */
-	protected final Method creator;
+	/** Constructor to create a new object */
+	protected final Constructor constructor;
+
+	/** Method to store an object */
+	protected final Method storer;
 
 	/** Method to destroy an object */
 	protected final Method destroyer;
@@ -156,7 +158,8 @@ public class AttributeDispatcher {
 	/** Create a new attribute dispatcher for the given object's type */
 	public AttributeDispatcher(SonarObject o) {
 		attributes = lookup_attributes(o.getClass());
-		creator = lookup_creator(o);
+		constructor = lookup_constructor(o);
+		storer = lookup_storer(o);
 		destroyer = lookup_destroyer(o);
 		setters = lookup_methods("set", o);
 		getters = lookup_methods("get", o);
@@ -165,6 +168,19 @@ public class AttributeDispatcher {
 		// in the interface specification.
 		setters.putAll(lookup_methods("doSet", o));
 		getters.putAll(lookup_methods("doGet", o));
+	}
+
+	/** Create a new object with the given name */
+	public SonarObject createObject(String name) throws SonarException {
+		if(constructor == null)
+			throw PermissionDenied.CANNOT_ADD;
+		Object[] params = { name };
+		try {
+			return (SonarObject)constructor.newInstance(params);
+		}
+		catch(Exception e) {
+			throw new SonarException(e);
+		}
 	}
 
 	/** Invoke a method on the given SONAR object */
@@ -179,40 +195,20 @@ public class AttributeDispatcher {
 		}
 	}
 
-	/** Invoke an array method on the given SONAR object */
-	protected Object invokeArray(SonarObject o, Method method, Class p_type,
-		String[] v) throws SonarException
-	{
-		Object[] params = makeArray(p_type, v.length);
-		for(int i = 0; i < params.length; i++)
-			params[i] = Marshaller.unmarshall(p_type, v[i]);
-		return _invoke(o, method, new Object[] { params });
-	}
-
 	/** Invoke a method on the given SONAR object */
 	protected Object invoke(SonarObject o, Method method, String[] v)
 		throws SonarException
 	{
-		Class[] p_type = method.getParameterTypes();
-		if(p_type.length == 1 && p_type[0].isArray()) {
-			return invokeArray(o, method,
-				p_type[0].getComponentType(), v);
-		}
-		if(p_type.length != v.length)
-			throw ProtocolError.WRONG_PARAMETER_COUNT;
-		Object[] params = new Object[p_type.length];
-		for(int i = 0; i < params.length; i++)
-			params[i] = Marshaller.unmarshall(p_type[i], v[i]);
+		Class[] p_types = method.getParameterTypes();
+		Object[] params = Marshaller.unmarshall(p_types, v);
 		return _invoke(o, method, params);
 	}
 
-	/** Create a new object with the given name */
-	public SonarObject createObject(String name) throws SonarException {
-		if(creator == null)
+	/** Store the given object */
+	public void storeObject(SonarObject o) throws SonarException {
+		if(storer == null)
 			throw PermissionDenied.CANNOT_ADD;
-		String[] params = { name };
-		Object o = invoke(null, creator, params);
-		return (SonarObject)o;
+		invoke(o, storer, EMPTY_STRING);
 	}
 
 	/** Destroy the given object */
@@ -230,6 +226,36 @@ public class AttributeDispatcher {
 		if(m == null)
 			throw PermissionDenied.CANNOT_WRITE;
 		invoke(o, m, v);
+	}
+
+	/** Lookup the named field from the given class */
+	static protected Field lookupField(Class c, String a)
+		throws SonarException
+	{
+		try {
+			Field f = c.getDeclaredField(a);
+			f.setAccessible(true);
+			return f;
+		}
+		catch(Exception e) {
+			throw new SonarException(e);
+		}
+	}
+
+	/** Set a field directly (through reflection) */
+	public void setField(SonarObject o, String a, String[] v)
+		throws SonarException
+	{
+		if(!setters.containsKey(a))
+			throw PermissionDenied.CANNOT_WRITE;
+		Field f = lookupField(o.getClass(), a);
+		Object param = Marshaller.unmarshall(f.getType(), v);
+		try {
+			f.set(o, param);
+		}
+		catch(Exception e) {
+			throw new SonarException(e);
+		}
 	}
 
 	/** Get the value of the named attribute */

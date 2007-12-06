@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2007  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ public class Marshaller {
 		return (Object [])Array.newInstance(t, size);
 	}
 
-	/** Unmarshall parameter strings into java array parameters */
+	/** Unmarshall parameter strings into a java array parameter */
 	static protected Object[] unmarshallArray(Class t, String[] v)
 		throws ProtocolError
 	{
@@ -98,7 +98,7 @@ public class Marshaller {
 		return values;
 	}
 
-	/** Unmarshall parameter strings into java parameters */
+	/** Unmarshall parameter strings into one java parameter */
 	static public Object unmarshall(Class t, String[] v)
 		throws ProtocolError
 	{
@@ -109,6 +109,23 @@ public class Marshaller {
 				throw ProtocolError.WRONG_PARAMETER_COUNT;
 			return unmarshall(t, v[0]);
 		}
+	}
+
+	/** Unmarshall multiple parameters */
+	static public Object[] unmarshall(Class[] pt, String[] v)
+		throws ProtocolError
+	{
+		if(pt.length == 1 && pt[0].isArray()) {
+			return new Object[] {
+				unmarshall(pt[0], v)
+			};
+		}
+		if(pt.length != v.length)
+			throw ProtocolError.WRONG_PARAMETER_COUNT;
+		Object[] params = new Object[pt.length];
+		for(int i = 0; i < params.length; i++)
+			params[i] = unmarshall(pt[i], v[i]);
+		return params;
 	}
 
 	/** Get the name of a SONAR type */
