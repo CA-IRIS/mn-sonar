@@ -94,12 +94,18 @@ public class Namespace extends Names {
 	}
 
 	/** Set the value of an attribute */
-	public void setAttribute(String tname, String oname, String aname,
-		String[] params) throws SonarException
+	public SonarObject setAttribute(String tname, String oname,
+		String aname, String[] params, SonarObject phantom)
+		throws SonarException
 	{
 		TypeNode t = getTypeNode(tname);
-		SonarObject o = t.lookupObject(oname);
-		t.setValue(o, aname, params);
+		if(phantom != null && phantom.getTypeName().equals(tname) &&
+			phantom.getName().equals(oname))
+		{
+			t.setField(phantom, aname, params);
+			return phantom;
+		}
+		return t.setValue(oname, aname, params);
 	}
 
 	/** Remove an object from the namespace */

@@ -95,6 +95,10 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 	/** Set of names the connection is watching */
 	protected final Set<String> watching = new HashSet<String>();
 
+	/** Phantom object for setting attributes before storing a new object
+	 * in the database. */
+	protected SonarObject phantom;
+
 	/** Create a new connection */
 	public ConnectionImpl(Server s, SelectionKey k, SocketChannel c)
 		throws SSLException
@@ -259,13 +263,26 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 		}
 	}
 
+	/** Get the specified object (either phantom or new object) */
+	protected SonarObject getObject(String tname, String oname)
+		throws SonarException
+	{
+		if(phantom != null && tname.equals(phantom.getTypeName()) &&
+			oname.equals(phantom.getName()))
+		{
+			return phantom;
+		} else
+			return namespace.createObject(tname, oname);
+	}
+
 	/** Create a new object in the server namespace */
 	protected void createObject(String name, String[] names)
 		throws SonarException
 	{
-		SonarObject o = namespace.createObject(names[0], names[1]);
+		SonarObject o = getObject(names[0], names[1]);
 		namespace.storeObject(o);
 		server.notifyObject(names, o);
+		phantom = null;
 	}
 
 	/** Set the value of an attribute */
@@ -275,9 +292,12 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 		String[] p = new String[params.size() - 2];
 		for(int i = 0; i < p.length; i++)
 			p[i] =  params.get(i + 2);
-		namespace.setAttribute(names[0], names[1], names[2], p);
-		String oname = Names.makePath(names[0], names[1]);
-		server.notifyAttribute(names[0], oname, name, p);
+		phantom = namespace.setAttribute(names[0], names[1], names[2],
+			p, phantom);
+		if(phantom == null) {
+			String oname = Names.makePath(names[0], names[1]);
+			server.notifyAttribute(names[0], oname, name, p);
+		}
 	}
 
 	/** Start writing data to client */

@@ -154,10 +154,27 @@ public class TypeNode {
 	}
 
 	/** Set the value of an attribute */
-	public void setValue(SonarObject o, String a, String[] v)
+	public SonarObject setValue(String oname, String a, String[] v)
 		throws SonarException
 	{
-		dispatcher.setValue(o, a, v);
+		synchronized(children) {
+			SonarObject o = children.get(oname);
+			if(o != null) {
+				dispatcher.setValue(o, a, v);
+				return null;
+			} else {
+				o = dispatcher.createObject(oname);
+				setField(o, a, v);
+				return o;
+			}
+		}
+	}
+
+	/** Set the field attribute value */
+	public void setField(SonarObject o, String a, String[] v)
+		throws SonarException
+	{
+		dispatcher.setField(o, a, v);
 	}
 
 	/** Find an object using the supplied checker callback */
