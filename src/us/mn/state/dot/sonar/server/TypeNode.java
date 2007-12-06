@@ -62,9 +62,18 @@ public class TypeNode {
 		synchronized(children) {
 			if(children.containsKey(name))
 				throw NamespaceError.NAME_EXISTS;
-			SonarObject o = dispatcher.createObject(name);
+		}
+		return dispatcher.createObject(name);
+	}
+
+	/** Store an object in the type node */
+	public void storeObject(SonarObject o) throws SonarException {
+		String name = o.getName();
+		synchronized(children) {
+			if(children.containsKey(name))
+				throw NamespaceError.NAME_EXISTS;
+			dispatcher.storeObject(o);
 			children.put(name, o);
-			return o;
 		}
 	}
 

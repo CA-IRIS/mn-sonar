@@ -88,6 +88,11 @@ public class Namespace extends Names {
 		return n.createObject(oname);
 	}
 
+	/** Store an object in the namespace */
+	public void storeObject(SonarObject o) throws SonarException {
+		getTypeNode(o).storeObject(o);
+	}
+
 	/** Set the value of an attribute */
 	public void setAttribute(String tname, String oname, String aname,
 		String[] params) throws SonarException

@@ -264,6 +264,7 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 		throws SonarException
 	{
 		SonarObject o = namespace.createObject(names[0], names[1]);
+		namespace.storeObject(o);
 		server.notifyObject(names, o);
 	}
 
