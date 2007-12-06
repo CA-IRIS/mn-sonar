@@ -113,7 +113,7 @@ public class Namespace extends Names {
 
 	/** Lookup the specified object by name */
 	public SonarObject lookupObject(String name) throws NamespaceError {
-		String[] names = Names.parse(name);
+		String[] names = parse(name);
 		if(names.length != 2)
 			throw NamespaceError.NAME_INVALID;
 		else
@@ -150,13 +150,7 @@ public class Namespace extends Names {
 		throws SonarException
 	{
 		TypeNode t = getTypeNode(o.getTypeName());
-		enc.encode(Message.TYPE, o.getTypeName());
-		enc.encode(Message.OBJECT, o.getName());
-		for(String a: t.getAttributes()) {
-			String[] v = t.getValue(o, a);
-			enc.encode(Message.ATTRIBUTE, a, v);
-		}
-		enc.encode(Message.TYPE);
+		t.enumerateObject(enc, o);
 	}
 
 	/** Enumerate all attributes of the named object */
@@ -181,7 +175,7 @@ public class Namespace extends Names {
 	public void enumerate(String name, MessageEncoder enc)
 		throws SonarException
 	{
-		String[] names = Names.parse(name);
+		String[] names = parse(name);
 		switch(names.length) {
 			case 0:
 				enumerateRoot(enc);

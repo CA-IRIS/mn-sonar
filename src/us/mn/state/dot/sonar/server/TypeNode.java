@@ -17,6 +17,7 @@ package us.mn.state.dot.sonar.server;
 import java.util.HashMap;
 import us.mn.state.dot.sonar.Message;
 import us.mn.state.dot.sonar.MessageEncoder;
+import us.mn.state.dot.sonar.Names;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
@@ -116,16 +117,30 @@ public class TypeNode {
 		return dispatcher.getValue(o, a);
 	}
 
+	/** Enumerate all attributes of the named object */
+	public void enumerateObject(MessageEncoder enc, SonarObject o)
+		throws SonarException
+	{
+		assert(o.getTypeName() == name);
+		boolean first = true;
+		for(String a: getAttributes()) {
+			String[] v = getValue(o, a);
+			if(first) {
+				a = Names.makePath(o, a);
+				first = false;
+			}
+			enc.encode(Message.ATTRIBUTE, a, v);
+		}
+		if(first)
+			enc.encode(Message.TYPE, name);
+		enc.encode(Message.OBJECT, o.getName());
+	}
+
 	/** Enumerate all the objects of the type node */
 	public void enumerateObjects(MessageEncoder enc) throws SonarException {
 		synchronized(children) {
-			for(SonarObject o: children.values()) {
-				enc.encode(Message.OBJECT, o.getName());
-				for(String a: getAttributes()) {
-					String[] v = getValue(o, a);
-					enc.encode(Message.ATTRIBUTE, a, v);
-				}
-			}
+			for(SonarObject o: children.values())
+				enumerateObject(enc, o);
 		}
 	}
 
