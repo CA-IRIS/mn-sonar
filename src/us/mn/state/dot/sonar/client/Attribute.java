@@ -58,9 +58,4 @@ class Attribute {
 	public String[] marshall(Object[] args) {
 		return Marshaller.marshall(type, args);
 	}
-
-	/** Marshall the attribute value */
-	public String[] marshall() {
-		return Marshaller.marshall(type, new Object[] { value });
-	}
 }

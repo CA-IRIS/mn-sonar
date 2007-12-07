@@ -227,9 +227,11 @@ public class TypeCache<T extends SonarObject> {
 	}
 
 	/** Create an object with the specified attributes */
-	public void createObject(String oname, Map<String, Attribute> amap) {
-		for(Map.Entry<String, Attribute> entry: amap.entrySet()) {
-			String[] values = entry.getValue().marshall();
+	public void createObject(String oname, Map<String, Object> amap) {
+		for(Map.Entry<String, Object> entry: amap.entrySet()) {
+			Object v = entry.getValue();
+			String[] values = Marshaller.marshall(v.getClass(),
+				new Object[] { v });
 			String name = Names.makePath(tname, oname,
 				entry.getKey());
 			conduit.setAttribute(name, values);
