@@ -226,6 +226,18 @@ public class TypeCache<T extends SonarObject> {
 		conduit.createObject(name);
 	}
 
+	/** Create an object with the specified attributes */
+	public void createObject(String oname, Map<String, Attribute> amap) {
+		for(Map.Entry<String, Attribute> entry: amap.entrySet()) {
+			String[] values = entry.getValue().marshall();
+			String name = Names.makePath(tname, oname,
+				entry.getKey());
+			conduit.setAttribute(name, values);
+		}
+		String name = Names.makePath(tname, oname);
+		conduit.createObject(name);
+	}
+
 	/** Get the map of names to SonarObjects of the specified type. All
 	 * access to this map must be synchronized. Any attempt to write to
 	 * the Map will invalidate the cache. */

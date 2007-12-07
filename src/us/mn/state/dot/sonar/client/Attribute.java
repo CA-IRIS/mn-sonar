@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2007  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,5 +57,10 @@ class Attribute {
 	/** Marshall the given attribute value */
 	public String[] marshall(Object[] args) {
 		return Marshaller.marshall(type, args);
+	}
+
+	/** Marshall the attribute value */
+	public String[] marshall() {
+		return Marshaller.marshall(type, new Object[] { value });
 	}
 }
