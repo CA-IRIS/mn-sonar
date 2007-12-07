@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2007  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,13 +32,22 @@ public class SonarException extends Exception {
 	}
 
 	/** Get the message for the root cause of the exception */
-	public String getMessage() {
+	protected String getRootCause() {
 		Throwable c = getCause();
-		if(c != null) {
-			while(c.getCause() != null)
-				c = c.getCause();
-			return c.getMessage();
-		} else
+		while(c.getCause() != null)
+			c = c.getCause();
+		String m = c.getMessage();
+		if(m != null)
+			return m;
+		else
+			return c.getClass().getName();
+	}
+
+	/** Get a (non-null) message for the specified exception */
+	public String getMessage() {
+		if(getCause() == null)
 			return super.getMessage();
+		else
+			return getRootCause();
 	}
 }
