@@ -41,9 +41,9 @@ public class TypeNode {
 	private final AttributeDispatcher dispatcher;
 
 	/** Create a namespace type node */
-	public TypeNode(SonarObject o) {
-		name = o.getTypeName();
-		dispatcher = new AttributeDispatcher(o);
+	public TypeNode(String n, Class c) {
+		name = n;
+		dispatcher = new AttributeDispatcher(c);
 	}
 
 	/** Add an object to the type node */

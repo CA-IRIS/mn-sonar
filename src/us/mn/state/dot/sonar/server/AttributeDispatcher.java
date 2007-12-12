@@ -92,11 +92,6 @@ public class AttributeDispatcher {
 		return null;
 	}
 
-	/** Lookup a constructor to create new objects */
-	static protected Constructor lookup_constructor(SonarObject o) {
-		return lookup_constructor(o.getClass());
-	}
-
 	/** Lookup a method on the specified class */
 	static protected Method lookup_method(Class c, String method) {
 		for(Method m: c.getMethods()) {
@@ -109,13 +104,12 @@ public class AttributeDispatcher {
 	}
 
 	/** Lookup a method to store new objects */
-	static protected Method lookup_storer(SonarObject o) {
-		return lookup_method(o.getClass(), DO_STORE_METHOD);
+	static protected Method lookup_storer(Class c) {
+		return lookup_method(c, DO_STORE_METHOD);
 	}
 
 	/** Lookup a method to destroy objects */
-	static protected Method lookup_destroyer(SonarObject o) {
-		Class c = o.getClass();
+	static protected Method lookup_destroyer(Class c) {
 		Method m = lookup_method(c, DO_DESTROY_METHOD);
 		if(m != null)
 			return m;
@@ -125,10 +119,9 @@ public class AttributeDispatcher {
 
 	/** Lookup all attribute setter or getter methods */
 	protected HashMap<String, Method> lookup_methods(String prefix,
-		SonarObject o)
+		Class c)
 	{
 		HashMap<String, Method> map = new HashMap<String, Method>();
-		Class c = o.getClass();
 		for(String a: attributes) {
 			Method m = lookup_method(c, prefix + a);
 			if(m != null)
@@ -156,18 +149,18 @@ public class AttributeDispatcher {
 	protected final HashMap<String, Method> getters;
 
 	/** Create a new attribute dispatcher for the given object's type */
-	public AttributeDispatcher(SonarObject o) {
-		attributes = lookup_attributes(o.getClass());
-		constructor = lookup_constructor(o);
-		storer = lookup_storer(o);
-		destroyer = lookup_destroyer(o);
-		setters = lookup_methods("set", o);
-		getters = lookup_methods("get", o);
+	public AttributeDispatcher(Class c) {
+		attributes = lookup_attributes(c);
+		constructor = lookup_constructor(c);
+		storer = lookup_storer(c);
+		destroyer = lookup_destroyer(c);
+		setters = lookup_methods("set", c);
+		getters = lookup_methods("get", c);
 		// Accessor methods with a "do" prefix are required for
 		// methods which can throw exceptions not declared
 		// in the interface specification.
-		setters.putAll(lookup_methods("doSet", o));
-		getters.putAll(lookup_methods("doGet", o));
+		setters.putAll(lookup_methods("doSet", c));
+		getters.putAll(lookup_methods("doGet", c));
 	}
 
 	/** Create a new object with the given name */

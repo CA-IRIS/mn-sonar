@@ -40,13 +40,17 @@ public class Namespace extends Names {
 	}
 
 	/** Register a new type in the namespace */
-	protected TypeNode registerType(SonarObject o) {
-		TypeNode node = new TypeNode(o);
-		String name = o.getTypeName();
+	public TypeNode registerType(String n, Class c) {
+		TypeNode node = new TypeNode(n, c);
 		synchronized(root) {
-			root.put(name, node);
+			root.put(n, node);
 		}
 		return node;
+	}
+
+	/** Register a new type in the namespace */
+	protected TypeNode registerType(SonarObject o) {
+		return registerType(o.getTypeName(), o.getClass());
 	}
 
 	/** Get a type node from the namespace */
