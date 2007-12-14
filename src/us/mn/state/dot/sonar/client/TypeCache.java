@@ -18,6 +18,7 @@ import java.lang.reflect.Proxy;
 import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Marshaller;
 import us.mn.state.dot.sonar.Names;
 import us.mn.state.dot.sonar.NamespaceError;
@@ -161,6 +162,13 @@ public class TypeCache<T extends SonarObject> {
 		}
 	}
 
+	/** Get a proxy with the given name (or null if none exists) */
+	public T getObject(String n) {
+		synchronized(children) {
+			return children.get(n);
+		}
+	}
+
 	/** Lookup the attribute map for the given object id */
 	protected HashMap<String, Attribute> lookupAttributeMap(int i) {
 		synchronized(children) {
@@ -261,5 +269,16 @@ public class TypeCache<T extends SonarObject> {
 		synchronized(children) {
 			listeners.remove(l);
 		}
+	}
+
+	/** Find an object using the supplied checker callback */
+	public T find(Checker c) {
+		synchronized(children) {
+			for(T proxy: children.values()) {
+				if(c.check(proxy))
+					return proxy;
+			}
+		}
+		return null;
 	}
 }

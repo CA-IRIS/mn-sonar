@@ -15,6 +15,7 @@
 package us.mn.state.dot.sonar.server;
 
 import java.util.HashMap;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Message;
 import us.mn.state.dot.sonar.MessageEncoder;
 import us.mn.state.dot.sonar.Names;
