@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,34 +31,36 @@ import javax.net.ssl.TrustManagerFactory;
  */
 public class Security {
 
-	/** Load a KeyStore from a file in the jks format */
-	static protected KeyStore _loadKeyStore(String keystore)
+	/** Load a KeyStore from an InputStream in the jks format */
+	static protected KeyStore _loadKeyStore(InputStream is)
 		throws IOException, GeneralSecurityException
 	{
-		KeyStore ks = KeyStore.getInstance("jks");
-		FileInputStream fis = new FileInputStream(keystore);
 		try {
-			ks.load(fis, null);
-			return ks;
-		}
-		finally {
-			fis.close();
-		}
-	}
-
-	/** Load a KeyStore from a resource in the jks format */
-	static protected KeyStore _loadKeyStoreResource(String keystore)
-		throws IOException, GeneralSecurityException
-	{
-		KeyStore ks = KeyStore.getInstance("jks");
-		InputStream is = Security.class.getResourceAsStream(keystore);
-		try {
+			KeyStore ks = KeyStore.getInstance("jks");
 			ks.load(is, null);
 			return ks;
 		}
 		finally {
 			is.close();
 		}
+	}
+
+	/** Load a KeyStore from a file in the jks format */
+	static protected KeyStore _loadKeyStore(String keystore)
+		throws IOException, GeneralSecurityException
+	{
+		return _loadKeyStore(new FileInputStream(keystore));
+	}
+
+	/** Load a KeyStore from a resource in the jks format */
+	static protected KeyStore _loadKeyStoreResource(String keystore)
+		throws IOException, GeneralSecurityException
+	{
+		InputStream is = Security.class.getResourceAsStream(keystore);
+		if(is != null)
+			return _loadKeyStore(is);
+		else
+			throw new IOException();
 	}
 
 	/** Load a KeyStore in the jks format */
