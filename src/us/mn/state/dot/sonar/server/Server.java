@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ public class Server extends Thread {
 	 * session.getApplicationBufferSize(), but since all client sessions
 	 * share the same buffer, it has to be defined here. Unfortunately,
 	 * this isn't future-proof. */
-	static protected final int SSL_UNWRAP_BUFFER_SIZE = 16384;
+	static protected final int SSL_UNWRAP_BUFFER_SIZE = 16660;
 
 	/** SSL wrap buffer size. This should really be taken from the
 	 * session.getPacketBufferSize(), but since all client sessions

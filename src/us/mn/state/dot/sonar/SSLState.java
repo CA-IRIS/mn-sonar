@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,8 +70,8 @@ public class SSLState {
 		conduit = c;
 		engine = e;
 		SSLSession session = engine.getSession();
-		assert sin.capacity() == session.getApplicationBufferSize();
-		assert sout.capacity() == session.getPacketBufferSize();
+		assert sin.capacity() >= session.getApplicationBufferSize();
+		assert sout.capacity() >= session.getPacketBufferSize();
 		out_buf = ByteBuffer.allocate(session.getPacketBufferSize());
 		in_buf = ByteBuffer.allocate(session.getPacketBufferSize());
 		w_buf = ByteBuffer.allocate(session.getApplicationBufferSize());
