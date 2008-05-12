@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -239,8 +239,6 @@ public class AttributeDispatcher {
 	public void setField(SonarObject o, String a, String[] v)
 		throws SonarException
 	{
-		if(!setters.containsKey(a))
-			throw PermissionDenied.CANNOT_WRITE;
 		Field f = lookupField(o.getClass(), a);
 		Object param = Marshaller.unmarshall(f.getType(), v);
 		try {
