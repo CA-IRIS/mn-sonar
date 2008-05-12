@@ -201,7 +201,6 @@ public class SSLState {
 				System.err.println("SSL: buffer OVERFLOW");
 				break;
 			case BUFFER_UNDERFLOW:
-				System.err.println("SSL: buffer UNDERFLOW");
 				break;
 			case CLOSED:
 				System.err.println("SSL: CLOSED");
