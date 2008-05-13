@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.sonar;
 
-import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -81,20 +80,13 @@ public class MessageEncoder {
 
 	/** Fill the output buffer with encoded message data */
 	protected void fillBuffer(ByteBuffer b) {
-		try {
-			int remaining;
-			synchronized(w_buf) {
-				w_buf.put(b);
-				remaining = w_buf.remaining();
-			}
-			conduit.setWritePending(true);
-			if(remaining < FLUSH_THRESHOLD)
-				conduit.flush();
+		int remaining;
+		synchronized(w_buf) {
+			w_buf.put(b);
+			remaining = w_buf.remaining();
 		}
-		catch(BufferOverflowException e) {
-			System.err.println("SONAR: write buffer OVERFLOW: " +
-				conduit.getName());
-			conduit.disconnect();
-		}
+		conduit.setWritePending(true);
+		if(remaining < FLUSH_THRESHOLD)
+			conduit.flush();
 	}
 }
