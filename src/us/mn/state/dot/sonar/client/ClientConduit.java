@@ -189,7 +189,7 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Start writing data to client */
-	protected void _startWrite() throws SSLException {
+	protected void startWrite() throws SSLException {
 		if(write_pending) {
 			if(state.doWrap()) {
 				key.selector().wakeup();
@@ -199,19 +199,14 @@ class ClientConduit extends Conduit {
 		}
 	}
 
-	/** Start writing data to client */
-	public void startWrite() {
+	/** Flush out all outgoing data in the conduit */
+	public void flush() {
 		try {
-			_startWrite();
+			startWrite();
 		}
 		catch(SSLException e) {
 			disconnect();
 		}
-	}
-
-	/** Flush out all outgoing data in the conduit */
-	public void flush() {
-		startWrite();
 	}
 
 	/** Process any incoming messages */
@@ -223,7 +218,7 @@ class ClientConduit extends Conduit {
 			processMessage(params);
 			params = state.decoder.decode();
 		}
-		startWrite();
+		flush();
 	}
 
 	/** Process one message from the client */

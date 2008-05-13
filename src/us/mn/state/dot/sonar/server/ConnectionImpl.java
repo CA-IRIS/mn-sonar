@@ -141,7 +141,7 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 	protected void notifyObject(SonarObject o) {
 		try {
 			namespace.enumerateObject(state.encoder, o);
-			startWrite();
+			flush();
 		}
 		catch(SonarException e) {
 			System.err.println("SONAR: notify: " + e.getMessage());
@@ -161,7 +161,7 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 	{
 		if(isWatching(tname) || isWatching(oname)) {
 			state.encoder.encode(Message.ATTRIBUTE, name, params);
-			startWrite();
+			flush();
 		}
 	}
 
@@ -169,7 +169,7 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 	public void notifyRemove(String name, String value) {
 		if(isWatching(name) || isWatching(value)) {
 			state.encoder.encode(Message.REMOVE, value);
-			startWrite();
+			flush();
 		}
 	}
 
@@ -218,7 +218,7 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 			processMessage(params);
 			params = state.decoder.decode();
 		}
-		startWrite();
+		flush();
 	}
 
 	/** Process one message from the client */
@@ -298,7 +298,7 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 	}
 
 	/** Start writing data to client */
-	protected void _startWrite() throws SSLException {
+	protected void startWrite() throws SSLException {
 		if(write_pending) {
 			if(state.doWrap()) {
 				key.selector().wakeup();
@@ -308,10 +308,10 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 		}
 	}
 
-	/** Start writing data to client */
-	public void startWrite() {
+	/** Tell the I/O thread to flush the output buffer */
+	public void flush() {
 		try {
-			_startWrite();
+			startWrite();
 		}
 		catch(SSLException e) {
 			System.err.println("SONAR: SSL error "+ e.getMessage());
@@ -327,11 +327,6 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 	/** Disable writing data back to the client */
 	public void disableWrite() {
 		key.interestOps(SelectionKey.OP_READ);
-	}
-
-	/** Tell the I/O thread to flush the output buffer */
-	public void flush() {
-		startWrite();
 	}
 
 	/** Respond to a LOGIN message */
