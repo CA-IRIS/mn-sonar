@@ -40,9 +40,6 @@ import us.mn.state.dot.sonar.User;
  */
 public class ConnectionImpl extends Conduit implements Connection, Task {
 
-	/** Time to allow I/O thread to flush output buffer */
-	static protected final int FLUSH_WAIT_MS = 50;
-
 	/** Define the set of valid messages from a client connection */
 	static protected final EnumSet<Message> MESSAGES = EnumSet.of(
 		Message.LOGIN, Message.QUIT, Message.ENUMERATE, Message.IGNORE,
@@ -297,16 +294,6 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 		if(phantom == null) {
 			String oname = Names.makePath(names[0], names[1]);
 			server.notifyAttribute(names[0], oname, name, p);
-		}
-	}
-
-	/** Sleep to allow the network thread to do some work */
-	protected void sleepBriefly() {
-		try {
-			Thread.sleep(FLUSH_WAIT_MS);
-		}
-		catch(InterruptedException e) {
-			// Shouldn't happen, and who cares?
 		}
 	}
 

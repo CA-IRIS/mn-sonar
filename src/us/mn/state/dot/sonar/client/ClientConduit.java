@@ -194,7 +194,8 @@ class ClientConduit extends Conduit {
 			if(state.doWrap()) {
 				key.selector().wakeup();
 				setWritePending(false);
-			}
+			} else
+				sleepBriefly();
 		}
 	}
 

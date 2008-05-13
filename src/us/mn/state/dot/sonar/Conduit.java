@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,19 @@ import java.util.List;
  * @author Douglas Lau
  */
 abstract public class Conduit {
+
+	/** Time to allow I/O thread to flush output buffer */
+	static protected final int FLUSH_WAIT_MS = 50;
+
+	/** Sleep to allow the network thread to do some work */
+	protected void sleepBriefly() {
+		try {
+			Thread.sleep(FLUSH_WAIT_MS);
+		}
+		catch(InterruptedException e) {
+			// Shouldn't happen, and who cares?
+		}
+	}
 
 	/** Get the name of the conduit */
 	abstract public String getName();
