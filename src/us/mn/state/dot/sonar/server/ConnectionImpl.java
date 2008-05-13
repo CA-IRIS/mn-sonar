@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -300,12 +300,24 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 		}
 	}
 
+	/** Sleep to allow the network thread to do some work */
+	protected void sleepBriefly() {
+		try {
+			Thread.sleep(FLUSH_WAIT_MS);
+		}
+		catch(InterruptedException e) {
+			// Shouldn't happen, and who cares?
+		}
+	}
+
 	/** Start writing data to client */
 	protected void _startWrite() throws SSLException {
 		if(write_pending) {
-			state.doWrap();
-			key.selector().wakeup();
-			setWritePending(false);
+			if(state.doWrap()) {
+				key.selector().wakeup();
+				setWritePending(false);
+			} else
+				sleepBriefly();
 		}
 	}
 
@@ -333,12 +345,6 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 	/** Tell the I/O thread to flush the output buffer */
 	public void flush() {
 		startWrite();
-		try {
-			Thread.sleep(FLUSH_WAIT_MS);
-		}
-		catch(InterruptedException e) {
-			// Shouldn't happen, and who cares?
-		}
 	}
 
 	/** Respond to a LOGIN message */

@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -191,9 +191,10 @@ class ClientConduit extends Conduit {
 	/** Start writing data to client */
 	protected void _startWrite() throws SSLException {
 		if(write_pending) {
-			state.doWrap();
-			key.selector().wakeup();
-			setWritePending(false);
+			if(state.doWrap()) {
+				key.selector().wakeup();
+				setWritePending(false);
+			}
 		}
 	}
 

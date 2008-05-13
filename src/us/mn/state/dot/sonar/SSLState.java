@@ -153,6 +153,8 @@ public class SSLState {
 
 	/** Wrap application data into SSL buffer */
 	public boolean doWrap() throws SSLException {
+		if(w_buf.position() > out_buf.remaining())
+			return false;
 		SSLEngineResult result;
 		synchronized(ssl_out) {
 			ssl_out.clear();
