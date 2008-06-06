@@ -29,6 +29,9 @@ public class MessageEncoder {
 	/** Number of tries to flush write buffer */
 	static protected final int FLUSH_TRIES = 10;
 
+	/** Threshold of bytes to start flushing write buffer */
+	static protected final int FLUSH_THRESHOLD = 1024;
+
 	/** Everything on the wire is encoded to UTF-8 */
 	static protected final Charset UTF8 = Charset.forName("UTF-8");
 
@@ -81,7 +84,7 @@ public class MessageEncoder {
 	/** Check if we must flush the write buffer */
 	protected boolean mustFlush(int n_bytes) {
 		synchronized(w_buf) {
-			return w_buf.remaining() < n_bytes;
+			return w_buf.remaining() < n_bytes + FLUSH_THRESHOLD;
 		}
 	}
 
