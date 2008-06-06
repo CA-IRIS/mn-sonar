@@ -101,7 +101,7 @@ public class MessageEncoder {
 
 	/** Fill the output buffer with encoded message data */
 	protected void fillBuffer(ByteBuffer b) {
-		if(ensureCapacity(b.position())) {
+		if(ensureCapacity(b.remaining())) {
 			synchronized(w_buf) {
 				w_buf.put(b);
 			}
