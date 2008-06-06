@@ -26,8 +26,8 @@ import java.nio.charset.Charset;
  */
 public class MessageEncoder {
 
-	/** Threshold of space remaining in write buffer to flush */
-	static protected final int FLUSH_THRESHOLD = 1024;
+	/** Number of tries to flush write buffer */
+	static protected final int FLUSH_TRIES = 10;
 
 	/** Everything on the wire is encoded to UTF-8 */
 	static protected final Charset UTF8 = Charset.forName("UTF-8");
@@ -78,15 +78,34 @@ public class MessageEncoder {
 		encode(m, null, null);
 	}
 
+	/** Check if we must flush the write buffer */
+	protected boolean mustFlush(int n_bytes) {
+		synchronized(w_buf) {
+			return w_buf.remaining() < n_bytes;
+		}
+	}
+
+	/** Ensure there is capacity in the write buffer */
+	protected boolean ensureCapacity(int n_bytes) {
+		for(int i = 0; i < FLUSH_TRIES; i++) {
+			if(mustFlush(n_bytes)) {
+				conduit.setWritePending(true);
+				conduit.flush();
+			} else
+				return true;
+		}
+		System.err.println("SONAR flush failed: " + conduit.getName());
+		conduit.disconnect();
+		return false;
+	}
+
 	/** Fill the output buffer with encoded message data */
 	protected void fillBuffer(ByteBuffer b) {
-		int remaining;
-		synchronized(w_buf) {
-			w_buf.put(b);
-			remaining = w_buf.remaining();
+		if(ensureCapacity(b.position())) {
+			synchronized(w_buf) {
+				w_buf.put(b);
+			}
+			conduit.setWritePending(true);
 		}
-		conduit.setWritePending(true);
-		if(remaining < FLUSH_THRESHOLD)
-			conduit.flush();
 	}
 }
