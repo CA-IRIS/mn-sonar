@@ -303,8 +303,8 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 			if(state.doWrap()) {
 				key.selector().wakeup();
 				setWritePending(false);
-			} else
-				sleepBriefly();
+			}
+			sleepBriefly();
 		}
 	}
 

@@ -194,8 +194,8 @@ class ClientConduit extends Conduit {
 			if(state.doWrap()) {
 				key.selector().wakeup();
 				setWritePending(false);
-			} else
-				sleepBriefly();
+			}
+			sleepBriefly();
 		}
 	}
 
@@ -207,6 +207,13 @@ class ClientConduit extends Conduit {
 		catch(SSLException e) {
 			disconnect();
 		}
+	}
+
+	/** Disconnect the conduit */
+	public void disconnect() {
+		super.disconnect();
+		loggedIn = false;
+		show_handler.display("Disconnected from server");
 	}
 
 	/** Process any incoming messages */

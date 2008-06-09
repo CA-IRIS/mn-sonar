@@ -24,7 +24,7 @@ import java.util.List;
 abstract public class Conduit {
 
 	/** Time to allow I/O thread to flush output buffer */
-	static protected final int FLUSH_WAIT_MS = 50;
+	static protected final int FLUSH_WAIT_MS = 100;
 
 	/** Sleep to allow the network thread to do some work */
 	protected void sleepBriefly() {
