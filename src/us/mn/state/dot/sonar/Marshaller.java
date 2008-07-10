@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,6 +62,8 @@ public class Marshaller {
 				return Boolean.valueOf(p);
 			else if(t == Float.TYPE || t == Float.class)
 				return Float.valueOf(p);
+			else if(t == Long.TYPE || t == Long.class)
+				return Long.valueOf(p);
 			else if(t == Double.TYPE || t == Double.class)
 				return Double.valueOf(p);
 		}
