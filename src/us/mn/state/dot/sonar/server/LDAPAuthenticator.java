@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +15,11 @@
 package us.mn.state.dot.sonar.server;
 
 import java.util.Hashtable;
+import java.util.LinkedList;
 import javax.naming.AuthenticationException;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.InitialDirContext;
-import javax.net.ssl.SSLContext;
 
 /**
  * Simple class to authenticate a user with an LDAP server.
@@ -28,45 +28,72 @@ import javax.net.ssl.SSLContext;
  */
 public class LDAPAuthenticator {
 
-	/** Environment for creating a directory context */
-	protected final Hashtable<String, Object> env =
-		new Hashtable<String, Object>();
+	/** LDAP provider */
+	protected class Provider {
 
-	/** Create a new LDAP authenticator */
-	public LDAPAuthenticator(String host, int port) {
-		env.put(Context.INITIAL_CONTEXT_FACTORY,
-			"com.sun.jndi.ldap.LdapCtxFactory");
-		env.put(Context.PROVIDER_URL, "ldap://" + host + ":" + port);
+		/** Environment for creating a directory context */
+		protected final Hashtable<String, Object> env =
+			new Hashtable<String, Object>();
+
+		/** Create a new LDAP provider */
+		protected Provider(String url) {
+			env.put(Context.INITIAL_CONTEXT_FACTORY,
+				"com.sun.jndi.ldap.LdapCtxFactory");
+			env.put(Context.PROVIDER_URL, url);
+			if(url.startsWith("ldaps")) {
+				env.put(Context.SECURITY_PROTOCOL, "ssl");
+				env.put("java.naming.ldap.factory.socket",
+					LDAPSocketFactory.class.getName());
+			}
+		}
+
+		/** Authenticate a user's credentials */
+		protected void authenticate(String dn, char[] pwd)
+			throws AuthenticationException, NamingException
+		{
+			env.put(Context.SECURITY_PRINCIPAL, dn);
+			env.put(Context.SECURITY_CREDENTIALS, pwd);
+			try {
+				InitialDirContext ctx =
+					new InitialDirContext(env);
+				ctx.close();
+			}
+			finally {
+				// We shouldn't keep these around
+				env.remove(Context.SECURITY_PRINCIPAL);
+				env.remove(Context.SECURITY_CREDENTIALS);
+			}
+		}
 	}
 
-	/** Create a new LDAP authenticator with SSL */
-	public LDAPAuthenticator(SSLContext context, String host, int port) {
-		LDAPSocketFactory.FACTORY = context.getSocketFactory();
-		env.put(Context.INITIAL_CONTEXT_FACTORY,
-			"com.sun.jndi.ldap.LdapCtxFactory");
-		env.put(Context.PROVIDER_URL, "ldap://" + host + ":" + port);
-		env.put(Context.SECURITY_PROTOCOL, "ssl");
-		env.put("java.naming.ldap.factory.socket",
-			"us.mn.state.dot.sonar.server.LDAPSocketFactory");
+	/** List of LDAP providers */
+	protected final LinkedList<Provider> providers =
+		new LinkedList<Provider>();
+
+	/** Create a new LDAP authenticator */
+	public LDAPAuthenticator(String urls) {
+		for(String url: urls.split("[ \t]+"))
+			providers.add(new Provider(url));
 	}
 
 	/** Authenticate a user's credentials */
 	public void authenticate(String dn, char[] pwd) throws PermissionDenied
 	{
-		if(pwd == null || pwd.length == 0)
-			throw PermissionDenied.AUTHENTICATION_FAILED;
-		env.put(Context.SECURITY_PRINCIPAL, dn);
-		env.put(Context.SECURITY_CREDENTIALS, pwd);
-		try {
-			InitialDirContext ctx = new InitialDirContext(env);
-			ctx.close();
+		if(pwd != null && pwd.length > 0) {
+			for(Provider p: providers) {
+				try {
+					p.authenticate(dn, pwd);
+					return;
+				}
+				catch(AuthenticationException e) {
+					// Try next provider
+				}
+				catch(NamingException e) {
+					e.printStackTrace();
+					// Try next provider
+				}
+			}
 		}
-		catch(AuthenticationException e) {
-			throw PermissionDenied.AUTHENTICATION_FAILED;
-		}
-		catch(NamingException e) {
-			e.printStackTrace();
-			throw PermissionDenied.AUTHENTICATION_FAILED;
-		}
+		throw PermissionDenied.AUTHENTICATION_FAILED;
 	}
 }

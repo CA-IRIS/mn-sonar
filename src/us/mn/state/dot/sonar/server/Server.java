@@ -109,21 +109,11 @@ public class Server extends Thread {
 		channel = createChannel(getPort(props));
 		channel.register(selector, SelectionKey.OP_ACCEPT);
 		context = Security.createContext(props);
-		String ldap_host = props.getProperty("ldap.host");
-		if(ldap_host == null)
-			throw new ConfigurationError("LDAP host not specified");
-		String ldap_port = props.getProperty("ldap.port");
-		if(ldap_port == null)
-			throw new ConfigurationError("LDAP port not specified");
-		String ldap_ssl = props.getProperty("ldap.ssl");
-		if(ldap_ssl == null)
-			throw new ConfigurationError("LDAP SSL not specified");
-		if(ldap_ssl.equalsIgnoreCase("true"))
-			authenticator = new LDAPAuthenticator(context,
-				ldap_host, Integer.valueOf(ldap_port));
-		else
-			authenticator = new LDAPAuthenticator(ldap_host,
-				Integer.valueOf(ldap_port));
+		LDAPSocketFactory.FACTORY = context.getSocketFactory();
+		String ldap_urls = props.getProperty("sonar.ldap.urls");
+		if(ldap_urls == null)
+			throw new ConfigurationError("LDAP urls not specified");
+		authenticator = new LDAPAuthenticator(ldap_urls);
 		session_file = props.getProperty("sonar.session.file");
 		setDaemon(true);
 		ssl_buf = ByteBuffer.allocate(SSL_UNWRAP_BUFFER_SIZE);

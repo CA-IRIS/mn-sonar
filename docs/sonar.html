@@ -111,12 +111,8 @@
 	keystore.file=/etc/sonar/keystore
 	# Keystore password
 	keystore.password=********
-	# Hostname of LDAP server
-	ldap.host=ldapp.dot.state.mn.us
-	# Port to connect on LDAP server
-	ldap.port=636
-	# Use SSL encryption
-	ldap.ssl=true
+	# List of LDAP URLs for authentication
+	sonar.ldap.urls=ldaps://ldap.example.com:636 ldap://openldap.example.com:389
 	# Port to listen for SONAR clients
 	sonar.port=1037
 </pre>
@@ -133,18 +129,10 @@
 		The password required to access the keystore referenced by
 		the keystore.file property.
 	</dd>
-	<dt>ldap.host</dt>
+	<dt>sonar.ldap.urls</dt>
 	<dd>
-		The hostname of the LDAP server to use for authenticating
-		users.
-	</dd>
-	<dt>ldap.port</dt>
-	<dd>
-		The port to access the LDAP server.
-	</dd>
-	<dt>ldap.ssl</dt>
-	<dd>
-		Use SSL encryption with LDAP server (true or false).
+		List of URLs of LDAP servers to use for authenticating
+		users. Each URL must be seperated by spaces or tabs.
 	</dd>
 	<dt>sonar.port</dt>
 	<dd>
