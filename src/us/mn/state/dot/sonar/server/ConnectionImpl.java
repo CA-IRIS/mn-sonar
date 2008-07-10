@@ -20,6 +20,7 @@ import java.nio.channels.SocketChannel;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import javax.net.ssl.SSLException;
 import us.mn.state.dot.sonar.Conduit;
@@ -53,6 +54,14 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 		throw ProtocolError.INVALID_MESSAGE_CODE;
 	}
 
+	/** Random number generator for session IDs */
+	static protected final Random RAND = new Random();
+
+	/** Create a new session ID */
+	static protected long createSessionId() {
+		return RAND.nextLong();
+	}
+
 	/** Get the SONAR type name */
 	public String getTypeName() {
 		return SONAR_TYPE;
@@ -72,6 +81,14 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 	/** Get the user logged in on the connection */
 	public User getUser() {
 		return user;
+	}
+
+	/** Session ID (random cookie) */
+	protected final long sessionId;
+
+	/** Get the SONAR session ID */
+	public long getSessionId() {
+		return sessionId;
 	}
 
 	/** Server for the connection */
@@ -114,6 +131,7 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 		hostport = h.toString();
 		user = null;
 		connected = true;
+		sessionId = createSessionId();
 	}
 
 	/** Start watching the specified name */
