@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.sonar.server;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -83,6 +84,9 @@ public class Server extends Thread {
 	protected final Map<SelectionKey, ConnectionImpl> clients =
 		new HashMap<SelectionKey, ConnectionImpl>();
 
+	/** File to write session list */
+	protected final String session_file;
+
 	/** Task processor thread */
 	protected final TaskProcessor processor = new TaskProcessor();
 
@@ -120,6 +124,7 @@ public class Server extends Thread {
 		else
 			authenticator = new LDAPAuthenticator(ldap_host,
 				Integer.valueOf(ldap_port));
+		session_file = props.getProperty("sonar.session.file");
 		setDaemon(true);
 		ssl_buf = ByteBuffer.allocate(SSL_UNWRAP_BUFFER_SIZE);
 		ssl_out = ByteBuffer.allocate(SSL_WRAP_BUFFER_SIZE);
@@ -169,10 +174,35 @@ public class Server extends Thread {
 		ConnectionImpl c;
 		synchronized(clients) {
 			c = clients.remove(key);
+			updateSessionList();
 		}
 		if(c != null) {
 			System.err.println("SONAR: Disconnected " +c.getName());
 			removeObject(c);
+		}
+	}
+
+	/** Update list of valid session IDs */
+	protected void updateSessionList() {
+		if(session_file == null)
+			return;
+		try {
+			FileWriter fw = new FileWriter(session_file);
+			try {
+				for(ConnectionImpl c: clients.values()) {
+					fw.write(String.valueOf(
+						c.getSessionId()));
+					fw.append('\n');
+				}
+			}
+			finally {
+				fw.close();
+			}
+		}
+		catch(IOException e) {
+			System.err.println("SONAR: Error writing session " +
+				"file: " + session_file + " (" +
+				e.getMessage() + ")");
 		}
 	}
 
@@ -191,6 +221,7 @@ public class Server extends Thread {
 		addObject(con);
 		synchronized(clients) {
 			clients.put(key, con);
+			updateSessionList();
 		}
 	}
 
