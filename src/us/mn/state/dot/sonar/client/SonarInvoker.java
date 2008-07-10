@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import java.util.Map;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.sonar.User;
 
 /**
  * A SonarInvoker handles method invocations on SonarObject proxies.
@@ -93,14 +94,18 @@ class SonarInvoker implements InvocationHandler {
 			cache.setAttribute(o, setters.get(method), args);
 			return null;
 		} else {
-			String n = method.getName();
-			if(n.equals("hashCode"))
+			String m = method.getName();
+			if(m.equals("hashCode"))
 				return System.identityHashCode(proxy);
-			if(n.equals("equals"))
+			if(m.equals("equals"))
 				return proxy == args[0];
-			if(n.equals("destroy")) {
+			if(m.equals("destroy")) {
 				cache.removeObject(o);
 				return null;
+			}
+			if(o instanceof User) {
+				return UserPermission.invokeMethod((User)o, m,
+					args[0]);
 			}
 		}
 		throw NamespaceError.NAME_UNKNOWN;
