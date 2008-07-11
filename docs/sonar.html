@@ -268,7 +268,8 @@
 	<dt>s [text message]</dt>
 	<dd>
 		Show a warning or error message to user. This should cause
-		a dialog box to appear on the client user interface.
+		a dialog box to appear on the client user interface. The first
+		show message after logon is the client connection name.
 	</dd>
 </dl>
 </li>
@@ -276,9 +277,10 @@
 <h3>Example session:</h3>
 <pre>
 client:
-	l lau1dou *******
+	l username *******
 server:
 	t
+	s 192.168.1.50:12345
 client:
 	e
 server:
