@@ -359,7 +359,10 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 		server.getAuthenticator().authenticate(u.getDn(),
 			password.toCharArray());
 		user = u;
+		// The first TYPE message indicates a successful login
 		state.encoder.encode(Message.TYPE);
+		// Send the connection name to the client first
+		state.encoder.encode(Message.SHOW, hostport);
 		server.setAttribute(this, "user", new String[] { name });
 	}
 

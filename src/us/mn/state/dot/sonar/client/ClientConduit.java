@@ -113,6 +113,14 @@ class ClientConduit extends Conduit {
 	/** Flag to determine if login was accepted */
 	protected boolean loggedIn = false;
 
+	/** Name of connection */
+	protected String connection = null;
+
+	/** Get the connection name */
+	public String getConnection() {
+		return connection;
+	}
+
 	/** Check if the user successfully logged in */
 	public boolean isLoggedIn() {
 		return loggedIn;
@@ -307,6 +315,10 @@ class ClientConduit extends Conduit {
 		if(p.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		String m = p.get(1);
-		show_handler.display(m);
+		// First SHOW message after login is the connection name
+		if(loggedIn && connection == null)
+			connection = m;
+		else
+			show_handler.display(m);
 	}
 }
