@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,6 +104,11 @@ public class TypeNode {
 		synchronized(children) {
 			return children.get(n);
 		}
+	}
+
+	/** Get an object with the given name (or null if it does not exist) */
+	public SonarObject getObject(String n) {
+		return _lookupObject(n);
 	}
 
 	/** Lookup an object from the given name */

@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -134,6 +134,23 @@ public class Namespace extends Names {
 			throw NamespaceError.NAME_INVALID;
 		else
 			return lookupObject(names[0], names[1]);
+	}
+
+	/** Get the specified object */
+	public SonarObject getObject(String tname, String oname)
+		throws NamespaceError
+	{
+		TypeNode t = getTypeNode(tname);
+		return t.getObject(oname);
+	}
+
+	/** Get the specified object */
+	public SonarObject getObject(String name) throws NamespaceError {
+		String[] names = parse(name);
+		if(names.length != 2)
+			throw NamespaceError.NAME_INVALID;
+		else
+			return getObject(names[0], names[1]);
 	}
 
 	/** Remove an object from the namespace */
