@@ -53,6 +53,8 @@ public class Marshaller {
 	{
 		if(t == String.class)
 			return p;
+		if("".equals(p))
+			return null;
 		try {
 			if(t == Integer.TYPE || t == Integer.class)
 				return Integer.valueOf(p);
@@ -70,8 +72,6 @@ public class Marshaller {
 		catch(NumberFormatException e) {
 			throw ProtocolError.INVALID_PARAMETER;
 		}
-		if("".equals(p))
-			return null;
 		if(SonarObject.class.isAssignableFrom(t)) {
 			try {
 				return lookup_reference(t, p);
