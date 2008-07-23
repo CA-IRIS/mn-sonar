@@ -89,7 +89,8 @@ public class LDAPAuthenticator {
 					// Try next provider
 				}
 				catch(NamingException e) {
-					e.printStackTrace();
+					System.err.println("SONAR:" +
+						e.getMessage() + ", " + dn);
 					// Try next provider
 				}
 			}
