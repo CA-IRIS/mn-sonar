@@ -47,6 +47,15 @@ public class LDAPAuthenticator {
 			}
 		}
 
+		/** Get a string representation of the provider (URL) */
+		public String toString() {
+			Object url = env.get(Context.PROVIDER_URL);
+			if(url != null)
+				return url.toString();
+			else
+				return "";
+		}
+
 		/** Authenticate a user's credentials */
 		protected void authenticate(String dn, char[] pwd)
 			throws AuthenticationException, NamingException
@@ -89,7 +98,7 @@ public class LDAPAuthenticator {
 					// Try next provider
 				}
 				catch(NamingException e) {
-					System.err.println("SONAR:" +
+					System.err.println("SONAR: " + p + " " +
 						e.getMessage() + ", " + dn);
 					// Try next provider
 				}
