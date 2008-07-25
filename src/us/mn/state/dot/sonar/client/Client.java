@@ -58,6 +58,7 @@ public class Client extends Thread {
 		conduit = new ClientConduit(props, selector, createSSLEngine(),
 			handler);
 		setDaemon(true);
+		setPriority(Thread.MAX_PRIORITY);
 		start();
 	}
 
