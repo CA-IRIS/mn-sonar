@@ -131,7 +131,7 @@ public class AttributeDispatcher {
 	}
 
 	/** Attributes which can be dispatched */
-	public final String[] attributes;
+	protected final String[] attributes;
 
 	/** Constructor to create a new object */
 	protected final Constructor constructor;
@@ -147,6 +147,11 @@ public class AttributeDispatcher {
 
 	/** Mapping of attribute names to getter methods */
 	protected final HashMap<String, Method> getters;
+
+	/** Get an array of readable attributes */
+	public String[] getReadableAttributes() {
+		return getters.keySet().toArray(EMPTY_STRING);
+	}
 
 	/** Create a new attribute dispatcher for the given object's type */
 	public AttributeDispatcher(Class c) {

@@ -120,11 +120,6 @@ public class TypeNode {
 			return o;
 	}
 
-	/** Get the type attributes */
-	public String[] getAttributes() {
-		return dispatcher.attributes;
-	}
-
 	/** Get the value of an attribute */
 	public String[] getValue(SonarObject o, String a)
 		throws SonarException
@@ -138,7 +133,7 @@ public class TypeNode {
 	{
 		assert(o.getTypeName() == name);
 		boolean first = true;
-		for(String a: getAttributes()) {
+		for(String a: dispatcher.getReadableAttributes()) {
 			String[] v = getValue(o, a);
 			if(first) {
 				a = Names.makePath(o, a);
