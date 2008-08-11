@@ -99,6 +99,8 @@ class SonarInvoker implements InvocationHandler {
 				return System.identityHashCode(proxy);
 			if(m.equals("equals"))
 				return proxy == args[0];
+			if(m.equals("toString"))
+				return cache.getAttribute(o, "name");
 			if(m.equals("destroy")) {
 				cache.removeObject(o);
 				return null;
