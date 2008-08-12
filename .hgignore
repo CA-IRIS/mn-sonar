@@ -1,0 +1,4 @@
+(^|/)lib($|/)
+(^|/)build($|/)
+(^|/)sonar-server-*
+(^|/)sonar-client-*
