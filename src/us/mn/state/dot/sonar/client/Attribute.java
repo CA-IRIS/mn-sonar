@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,5 +57,15 @@ class Attribute {
 	/** Marshall the given attribute value */
 	public String[] marshall(Object[] args) {
 		return Marshaller.marshall(type, args);
+	}
+
+	/** Check if the attribute value equals the given value */
+	public boolean valueEquals(Object[] v) {
+		if(value == null && v == null)
+			return true;
+		else if(v != null && v[0].equals(value))
+			return true;
+		else
+			return false;
 	}
 }
