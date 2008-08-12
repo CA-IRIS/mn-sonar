@@ -61,9 +61,9 @@ class Attribute {
 
 	/** Check if the attribute value equals the given value */
 	public boolean valueEquals(Object[] v) {
-		if(value == null && v == null)
+		if(value == null && v[0] == null)
 			return true;
-		else if(v != null && v[0].equals(value))
+		else if(value != null && value.equals(v[0]))
 			return true;
 		else
 			return false;
