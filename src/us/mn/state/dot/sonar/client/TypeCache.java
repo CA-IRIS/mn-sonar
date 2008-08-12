@@ -135,7 +135,9 @@ public class TypeCache<T extends SonarObject> {
 	/** Add a proxy to the type cache */
 	T add(String name) {
 		T o = getProxy(name);
-		notifyProxyAdded(o);
+		synchronized(children) {
+			notifyProxyAdded(o);
+		}
 		phantom = null;
 		return o;
 	}
