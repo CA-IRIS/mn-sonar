@@ -27,7 +27,7 @@ import java.nio.charset.Charset;
 public class MessageEncoder {
 
 	/** Number of tries to flush write buffer */
-	static protected final int FLUSH_TRIES = 40;
+	static protected final int FLUSH_TRIES = 80;
 
 	/** Threshold of bytes to start flushing write buffer */
 	static protected final int FLUSH_THRESHOLD = 1024;
