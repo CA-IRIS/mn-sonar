@@ -199,10 +199,9 @@ class ClientConduit extends Conduit {
 	/** Start writing data to client */
 	protected void startWrite() throws SSLException {
 		if(write_pending) {
-			if(state.doWrap()) {
-				key.selector().wakeup();
+			if(state.doWrap())
 				setWritePending(false);
-			}
+			key.selector().wakeup();
 			sleepBriefly();
 		}
 	}
