@@ -30,6 +30,9 @@ import javax.net.ssl.SSLSession;
  */
 public class SSLState {
 
+	/** Size (in bytes) of output network buffer */
+	static protected final int NETWORK_BUFFER_SIZE = 1 << 18;
+
 	/** Conduit */
 	protected final Conduit conduit;
 
@@ -72,7 +75,7 @@ public class SSLState {
 		SSLSession session = engine.getSession();
 		assert sin.capacity() >= session.getApplicationBufferSize();
 		assert sout.capacity() >= session.getPacketBufferSize();
-		out_buf = ByteBuffer.allocate(session.getPacketBufferSize());
+		out_buf = ByteBuffer.allocate(NETWORK_BUFFER_SIZE);
 		in_buf = ByteBuffer.allocate(session.getPacketBufferSize());
 		w_buf = ByteBuffer.allocate(session.getApplicationBufferSize());
 		r_buf = ByteBuffer.allocate(session.getApplicationBufferSize());
