@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -228,6 +229,23 @@ public class Server extends Thread {
 		updateSessionList();
 	}
 
+	/** Check if a new client is connecting */
+	protected boolean checkAccept(SelectionKey key) {
+		try {
+			if(key.isAcceptable())
+				doAccept();
+			else
+				return false;
+		}
+		catch(CancelledKeyException e) {
+			disconnect(key);
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
+		return true;
+	}
+
 	/** Create an SSL engine in the server context */
 	public SSLEngine createSSLEngine() {
 		SSLEngine engine = context.createSSLEngine();
@@ -241,11 +259,18 @@ public class Server extends Thread {
 		synchronized(clients) {
 			c = clients.get(key);
 		}
+		if(c == null) {
+			disconnect(key);
+			return;
+		}
 		try {
 			if(key.isWritable())
 				c.doWrite();
 			if(key.isReadable())
 				c.doRead();
+		}
+		catch(CancelledKeyException e) {
+			disconnect(key);
 		}
 		catch(IOException e) {
 			c.disconnect();
@@ -257,10 +282,8 @@ public class Server extends Thread {
 		selector.select();
 		Set<SelectionKey> readySet = selector.selectedKeys();
 		for(SelectionKey key: readySet) {
-			if(key.isAcceptable()) {
-				doAccept();
+			if(checkAccept(key))
 				continue;
-			}
 			serviceClient(key);
 		}
 		readySet.clear();
