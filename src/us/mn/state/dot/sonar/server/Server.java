@@ -24,6 +24,8 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -158,15 +160,25 @@ public class Server extends Thread {
 		return namespace;
 	}
 
+	/** Get a list of active connections */
+	protected List<ConnectionImpl> getConnectionList() {
+		LinkedList<ConnectionImpl> clist =
+			new LinkedList<ConnectionImpl>();
+		synchronized(clients) {
+			clist.addAll(clients.values());
+		}
+		return clist;
+	}
+
 	/** Disconnect the client associated with the selection key */
 	public void disconnect(SelectionKey key) {
 		key.cancel();
 		ConnectionImpl c;
 		synchronized(clients) {
 			c = clients.remove(key);
-			updateSessionList();
 		}
 		if(c != null) {
+			updateSessionList();
 			System.err.println("SONAR: Disconnected " +c.getName());
 			removeObject(c);
 		}
@@ -176,10 +188,11 @@ public class Server extends Thread {
 	protected void updateSessionList() {
 		if(session_file == null)
 			return;
+		List<ConnectionImpl> clist = getConnectionList();
 		try {
 			FileWriter fw = new FileWriter(session_file);
 			try {
-				for(ConnectionImpl c: clients.values()) {
+				for(ConnectionImpl c: clist) {
 					fw.write(String.valueOf(
 						c.getSessionId()));
 					fw.append('\n');
@@ -211,8 +224,8 @@ public class Server extends Thread {
 		addObject(con);
 		synchronized(clients) {
 			clients.put(key, con);
-			updateSessionList();
 		}
+		updateSessionList();
 	}
 
 	/** Create an SSL engine in the server context */
@@ -265,29 +278,26 @@ public class Server extends Thread {
 
 	/** Notify all connections watching a name of an object add */
 	public void notifyObject(String[] names, SonarObject o) {
-		synchronized(clients) {
-			for(ConnectionImpl c: clients.values())
-				c.notifyObject(names, o);
-		}
+		List<ConnectionImpl> clist = getConnectionList();
+		for(ConnectionImpl c: clist)
+			c.notifyObject(names, o);
 	}
 
 	/** Notify all connections watching a name of an attribute change */
 	public void notifyAttribute(String tname, String oname, String name,
 		String[] params)
 	{
-		synchronized(clients) {
-			for(ConnectionImpl c: clients.values())
-				c.notifyAttribute(tname, oname, name, params);
-		}
+		List<ConnectionImpl> clist = getConnectionList();
+		for(ConnectionImpl c: clist)
+			c.notifyAttribute(tname, oname, name, params);
 	}
 
 	/** Notify all connections watching a name of an object remove */
 	public void notifyRemove(String name, String value) {
-		synchronized(clients) {
-			for(ConnectionImpl c: clients.values()) {
-				c.notifyRemove(name, value);
-				c.stopWatching(value);
-			}
+		List<ConnectionImpl> clist = getConnectionList();
+		for(ConnectionImpl c: clist) {
+			c.notifyRemove(name, value);
+			c.stopWatching(value);
 		}
 	}
 
