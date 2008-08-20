@@ -357,6 +357,8 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 		UserImpl u = lookupUser(name);
 		server.getAuthenticator().authenticate(u.getDn(),
 			password.toCharArray());
+		System.err.println("SONAR: Login " + name + " from " +
+			getName());
 		user = u;
 		// The first TYPE message indicates a successful login
 		state.encoder.encode(Message.TYPE);
