@@ -15,6 +15,7 @@
 package us.mn.state.dot.sonar.server;
 
 import java.io.IOException;
+import java.nio.BufferOverflowException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.EnumSet;
@@ -329,6 +330,10 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 	public void flush() {
 		try {
 			startWrite();
+		}
+		catch(BufferOverflowException e) {
+			System.err.println("SONAR: buffer overflow");
+			disconnect();
 		}
 		catch(SSLException e) {
 			System.err.println("SONAR: SSL error "+ e.getMessage());
