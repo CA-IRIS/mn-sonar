@@ -54,7 +54,7 @@ public class SSLState {
 	protected final ByteBuffer ssl_out;
 
 	/** Byte buffer to unwrap incoming SSL data */
-	protected final ByteBuffer ssl_buf;
+	protected final ByteBuffer ssl_in;
 
 	/** Decoder for messages received */
 	public final MessageDecoder decoder;
@@ -73,7 +73,7 @@ public class SSLState {
 		net_in = ByteBuffer.allocate(p_size);
 		w_buf = ByteBuffer.allocate(a_size);
 		r_buf = ByteBuffer.allocate(a_size);
-		ssl_buf = ByteBuffer.allocate(a_size);
+		ssl_in = ByteBuffer.allocate(a_size);
 		ssl_out = ByteBuffer.allocate(p_size);
 		decoder = new MessageDecoder(r_buf);
 		encoder = new MessageEncoder(w_buf, conduit);
@@ -170,11 +170,11 @@ public class SSLState {
 		try {
 			if(!net_in.hasRemaining())
 				return false;
-			ssl_buf.clear();
-			result = engine.unwrap(net_in, ssl_buf);
-			ssl_buf.flip();
+			ssl_in.clear();
+			result = engine.unwrap(net_in, ssl_in);
+			ssl_in.flip();
 			synchronized(r_buf) {
-				r_buf.put(ssl_buf);
+				r_buf.put(ssl_in);
 			}
 		}
 		finally {
