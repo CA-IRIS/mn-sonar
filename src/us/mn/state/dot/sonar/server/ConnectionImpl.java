@@ -207,6 +207,7 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 			if(!net_out.hasRemaining())
 				disableWrite();
 		}
+		// FIXME: this should not happen on the Server thread
 		state.doWrite();
 	}
 

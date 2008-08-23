@@ -202,6 +202,7 @@ class ClientConduit extends Conduit {
 			if(!net_out.hasRemaining())
 				disableWrite();
 		}
+		// FIXME: move this to a different thread
 		state.doWrite();
 	}
 
