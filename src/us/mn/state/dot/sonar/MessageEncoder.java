@@ -39,7 +39,7 @@ public class MessageEncoder {
 	protected final CharBuffer m_buf;
 
 	/** Byte buffer to write encoded data */
-	protected final ByteBuffer w_buf;
+	protected final ByteBuffer app_out;
 
 	/** Client conduit */
 	protected final Conduit conduit;
@@ -47,7 +47,7 @@ public class MessageEncoder {
 	/** Create a new SONAR message encoder */
 	public MessageEncoder(ByteBuffer out, Conduit c) {
 		m_buf = CharBuffer.allocate(256);
-		w_buf = out;
+		app_out = out;
 		conduit = c;
 	}
 
@@ -83,8 +83,8 @@ public class MessageEncoder {
 
 	/** Check if we must flush the write buffer */
 	protected boolean mustFlush(int n_bytes) {
-		synchronized(w_buf) {
-			return w_buf.remaining() < n_bytes + FLUSH_THRESHOLD;
+		synchronized(app_out) {
+			return app_out.remaining() < n_bytes + FLUSH_THRESHOLD;
 		}
 	}
 
@@ -105,8 +105,8 @@ public class MessageEncoder {
 	/** Fill the output buffer with encoded message data */
 	protected void fillBuffer(ByteBuffer b) {
 		if(ensureCapacity(b.remaining())) {
-			synchronized(w_buf) {
-				w_buf.put(b);
+			synchronized(app_out) {
+				app_out.put(b);
 			}
 			conduit.setWritePending(true);
 		}
