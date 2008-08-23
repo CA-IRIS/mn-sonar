@@ -94,7 +94,7 @@ public class SSLState {
 		doWrapHandshake();
 	}
 
-	/** Read available data from the specified channel */
+	/** Read available data from network input buffer */
 	public void doRead() throws IOException {
 		doHandshake();
 		while(doUnwrap());
