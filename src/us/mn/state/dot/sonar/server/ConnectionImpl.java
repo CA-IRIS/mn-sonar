@@ -15,6 +15,7 @@
 package us.mn.state.dot.sonar.server;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.BufferOverflowException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
@@ -198,7 +199,15 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 
 	/** Write pending data to the socket channel */
 	public void doWrite() throws IOException {
-		state.doWrite(channel);
+		ByteBuffer out_buf = state.getNetOutBuffer();
+		synchronized(out_buf) {
+			out_buf.flip();
+			channel.write(out_buf);
+			out_buf.compact();
+			if(!out_buf.hasRemaining())
+				disableWrite();
+		}
+		state.doWrite();
 	}
 
 	/** Disconnect the client connection */

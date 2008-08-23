@@ -17,6 +17,7 @@ package us.mn.state.dot.sonar.client;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -193,7 +194,15 @@ class ClientConduit extends Conduit {
 
 	/** Write pending data to the socket channel */
 	public void doWrite() throws IOException {
-		state.doWrite(channel);
+		ByteBuffer out_buf = state.getNetOutBuffer();
+		synchronized(out_buf) {
+			out_buf.flip();
+			channel.write(out_buf);
+			out_buf.compact();
+			if(!out_buf.hasRemaining())
+				disableWrite();
+		}
+		state.doWrite();
 	}
 
 	/** Start writing data to client */
