@@ -82,4 +82,14 @@ public class MessageDecoder {
 		}
 		return null;
 	}
+
+	/** Debug the SONAR parameters */
+	public void debugParameters() {
+		StringBuilder b = new StringBuilder();
+		for(String s: params) {
+			b.append(s);
+			b.append(' ');
+		}
+		System.err.println(b.toString());
+	}
 }
