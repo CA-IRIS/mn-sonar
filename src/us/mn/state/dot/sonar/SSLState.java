@@ -73,8 +73,8 @@ public class SSLState {
 		net_in = ByteBuffer.allocate(p_size);
 		app_out = ByteBuffer.allocate(a_size);
 		app_in = ByteBuffer.allocate(a_size);
-		ssl_in = ByteBuffer.allocate(a_size);
 		ssl_out = ByteBuffer.allocate(p_size);
+		ssl_in = ByteBuffer.allocate(a_size);
 		decoder = new MessageDecoder(app_in);
 		encoder = new MessageEncoder(app_out, conduit);
 		engine.beginHandshake();
