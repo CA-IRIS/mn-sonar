@@ -42,7 +42,7 @@ public class SSLState {
 	protected final ByteBuffer net_out;
 
 	/** Byte buffer to store incoming encrypted network data */
-	protected final ByteBuffer in_buf;
+	protected final ByteBuffer net_in;
 
 	/** Byte buffer to store outgoing SONAR data */
 	protected final ByteBuffer w_buf;
@@ -70,7 +70,7 @@ public class SSLState {
 		int p_size = session.getPacketBufferSize();
 		int a_size = session.getApplicationBufferSize();
 		net_out = ByteBuffer.allocate(p_size);
-		in_buf = ByteBuffer.allocate(p_size);
+		net_in = ByteBuffer.allocate(p_size);
 		w_buf = ByteBuffer.allocate(a_size);
 		r_buf = ByteBuffer.allocate(a_size);
 		ssl_buf = ByteBuffer.allocate(a_size);
@@ -92,7 +92,7 @@ public class SSLState {
 
 	/** Read available data from the specified channel */
 	public void doRead(ReadableByteChannel c) throws IOException {
-		int nbytes = c.read(in_buf);
+		int nbytes = c.read(net_in);
 		if(nbytes > 0) {
 			doHandshake();
 			while(doUnwrap());
@@ -166,19 +166,19 @@ public class SSLState {
 	/** Unwrap SSL data into appcliation buffer */
 	protected boolean doUnwrap() throws SSLException {
 		SSLEngineResult result;
-		in_buf.flip();
+		net_in.flip();
 		try {
-			if(!in_buf.hasRemaining())
+			if(!net_in.hasRemaining())
 				return false;
 			ssl_buf.clear();
-			result = engine.unwrap(in_buf, ssl_buf);
+			result = engine.unwrap(net_in, ssl_buf);
 			ssl_buf.flip();
 			synchronized(r_buf) {
 				r_buf.put(ssl_buf);
 			}
 		}
 		finally {
-			in_buf.compact();
+			net_in.compact();
 		}
 		return checkStatus(result);
 	}
