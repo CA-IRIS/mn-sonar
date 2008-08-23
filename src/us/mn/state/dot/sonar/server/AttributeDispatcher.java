@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.TreeSet;
 import us.mn.state.dot.sonar.Marshaller;
 import us.mn.state.dot.sonar.ProtocolError;
@@ -50,30 +51,31 @@ public class AttributeDispatcher {
 	static protected final String[] EMPTY_STRING = new String[0];
 
 	/** Lookup all the attributes of the specified interface */
-	static protected String[] _lookup_attributes(Class iface) {
-		TreeSet<String> attributes = new TreeSet<String>();
+	static protected Set<String> _lookup_attributes(Class iface) {
+		TreeSet<String> attrib = new TreeSet<String>();
 		for(Method m: iface.getDeclaredMethods()) {
 			String n = m.getName();
 			if(n.startsWith("get") || n.startsWith("set")) {
 				String a = n.substring(3, 4).toLowerCase() +
 					n.substring(4);
-				attributes.add(a);
+				attrib.add(a);
 			}
 		}
-		return (String [])attributes.toArray(EMPTY_STRING);
+		return attrib;
 	}
 
 	/** Lookup all the attributes of the specified class */
 	static protected String[] lookup_attributes(Class c) {
+		TreeSet<String> attrib = new TreeSet<String>();
 		while(c != null) {
 			Class[] ifaces = c.getInterfaces();
 			for(Class i: ifaces) {
 				if(SonarObject.class.isAssignableFrom(i))
-					return _lookup_attributes(i);
+					attrib.addAll(_lookup_attributes(i));
 			}
 			c = c.getSuperclass();
 		}
-		return EMPTY_STRING;
+		return (String [])attrib.toArray(EMPTY_STRING);
 	}
 
 	/** Check for a valid constructor */
