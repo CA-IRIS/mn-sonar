@@ -16,7 +16,6 @@ package us.mn.state.dot.sonar;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLException;
@@ -85,19 +84,20 @@ public class SSLState {
 		return net_out;
 	}
 
+	/** Ge the network in buffer */
+	public ByteBuffer getNetInBuffer() {
+		return net_in;
+	}
+
 	/** Write encoded data to a channel */
 	public void doWrite() throws IOException {
 		doWrapHandshake();
 	}
 
 	/** Read available data from the specified channel */
-	public void doRead(ReadableByteChannel c) throws IOException {
-		int nbytes = c.read(net_in);
-		if(nbytes > 0) {
-			doHandshake();
-			while(doUnwrap());
-		} else if(nbytes < 0)
-			throw new IOException("EOF");
+	public void doRead() throws IOException {
+		doHandshake();
+		while(doUnwrap());
 	}
 
 	/** Do any pending handshake stuff */

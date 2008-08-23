@@ -188,7 +188,12 @@ class ClientConduit extends Conduit {
 
 	/** Read messages from the socket channel */
 	public void doRead() throws IOException {
-		state.doRead(channel);
+		ByteBuffer net_in = state.getNetInBuffer();
+		int nbytes = channel.read(net_in);
+		if(nbytes > 0)
+			state.doRead();
+		else if(nbytes < 0)
+			throw new IOException("EOF");
 		processMessages();
 	}
 
