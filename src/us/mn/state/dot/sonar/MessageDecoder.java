@@ -32,7 +32,7 @@ public class MessageDecoder {
 	static protected final Charset UTF8 = Charset.forName("UTF-8");
 
 	/** Byte buffer where encoded message data is stored */
-	protected final ByteBuffer r_buf;
+	protected final ByteBuffer app_in;
 
 	/** Character buffer to hold decoded message data */
 	protected CharBuffer c_buf;
@@ -45,7 +45,7 @@ public class MessageDecoder {
 
 	/** Create a new SONAR message decoder */
 	public MessageDecoder(ByteBuffer in) {
-		r_buf = in;
+		app_in = in;
 		m_buf = CharBuffer.allocate(256);
 		m_buf.clear();
 		c_buf = CharBuffer.allocate(256);
@@ -64,10 +64,10 @@ public class MessageDecoder {
 	public List<String> decode() {
 		params.clear();
 		if(!c_buf.hasRemaining()) {
-			synchronized(r_buf) {
-				r_buf.flip();
-				c_buf = UTF8.decode(r_buf);
-				r_buf.compact();
+			synchronized(app_in) {
+				app_in.flip();
+				c_buf = UTF8.decode(app_in);
+				app_in.compact();
 			}
 		}
 		while(c_buf.hasRemaining()) {

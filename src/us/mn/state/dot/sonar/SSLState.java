@@ -48,7 +48,7 @@ public class SSLState {
 	protected final ByteBuffer app_out;
 
 	/** Byte buffer to store incoming SONAR data */
-	protected final ByteBuffer r_buf;
+	protected final ByteBuffer app_in;
 
 	/** Byte buffer to wrap outgoing SSL data */
 	protected final ByteBuffer ssl_out;
@@ -72,10 +72,10 @@ public class SSLState {
 		net_out = ByteBuffer.allocate(p_size);
 		net_in = ByteBuffer.allocate(p_size);
 		app_out = ByteBuffer.allocate(a_size);
-		r_buf = ByteBuffer.allocate(a_size);
+		app_in = ByteBuffer.allocate(a_size);
 		ssl_in = ByteBuffer.allocate(a_size);
 		ssl_out = ByteBuffer.allocate(p_size);
-		decoder = new MessageDecoder(r_buf);
+		decoder = new MessageDecoder(app_in);
 		encoder = new MessageEncoder(app_out, conduit);
 		engine.beginHandshake();
 	}
@@ -173,8 +173,8 @@ public class SSLState {
 			ssl_in.clear();
 			result = engine.unwrap(net_in, ssl_in);
 			ssl_in.flip();
-			synchronized(r_buf) {
-				r_buf.put(ssl_in);
+			synchronized(app_in) {
+				app_in.put(ssl_in);
 			}
 		}
 		finally {
