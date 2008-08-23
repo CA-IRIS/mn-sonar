@@ -39,7 +39,7 @@ public class SSLState {
 	protected SSLEngineResult.HandshakeStatus hs;
 
 	/** Byte buffer to store outgoing encrypted network data */
-	protected final ByteBuffer out_buf;
+	protected final ByteBuffer net_out;
 
 	/** Byte buffer to store incoming encrypted network data */
 	protected final ByteBuffer in_buf;
@@ -69,7 +69,7 @@ public class SSLState {
 		SSLSession session = engine.getSession();
 		int p_size = session.getPacketBufferSize();
 		int a_size = session.getApplicationBufferSize();
-		out_buf = ByteBuffer.allocate(p_size);
+		net_out = ByteBuffer.allocate(p_size);
 		in_buf = ByteBuffer.allocate(p_size);
 		w_buf = ByteBuffer.allocate(a_size);
 		r_buf = ByteBuffer.allocate(a_size);
@@ -82,7 +82,7 @@ public class SSLState {
 
 	/** Get the network out buffer */
 	public ByteBuffer getNetOutBuffer() {
-		return out_buf;
+		return net_out;
 	}
 
 	/** Write encoded data to a channel */
@@ -140,7 +140,7 @@ public class SSLState {
 
 	/** Wrap application data into SSL buffer */
 	public boolean doWrap() throws SSLException {
-		if(w_buf.position() > out_buf.remaining())
+		if(w_buf.position() > net_out.remaining())
 			return false;
 		SSLEngineResult result;
 		synchronized(ssl_out) {
@@ -155,8 +155,8 @@ public class SSLState {
 				}
 			}
 			ssl_out.flip();
-			synchronized(out_buf) {
-				out_buf.put(ssl_out);
+			synchronized(net_out) {
+				net_out.put(ssl_out);
 			}
 		}
 		conduit.enableWrite();

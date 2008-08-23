@@ -199,12 +199,12 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 
 	/** Write pending data to the socket channel */
 	public void doWrite() throws IOException {
-		ByteBuffer out_buf = state.getNetOutBuffer();
-		synchronized(out_buf) {
-			out_buf.flip();
-			channel.write(out_buf);
-			out_buf.compact();
-			if(!out_buf.hasRemaining())
+		ByteBuffer net_out = state.getNetOutBuffer();
+		synchronized(net_out) {
+			net_out.flip();
+			channel.write(net_out);
+			net_out.compact();
+			if(!net_out.hasRemaining())
 				disableWrite();
 		}
 		state.doWrite();
