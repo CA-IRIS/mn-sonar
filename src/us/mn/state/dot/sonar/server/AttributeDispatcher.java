@@ -20,7 +20,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.TreeSet;
 import us.mn.state.dot.sonar.Marshaller;
 import us.mn.state.dot.sonar.ProtocolError;
@@ -50,32 +49,11 @@ public class AttributeDispatcher {
 	/** Empty array of strings */
 	static protected final String[] EMPTY_STRING = new String[0];
 
-	/** Lookup all the attributes of the specified interface */
-	static protected Set<String> _lookup_attributes(Class iface) {
-		TreeSet<String> attrib = new TreeSet<String>();
-		for(Method m: iface.getDeclaredMethods()) {
-			String n = m.getName();
-			if(n.startsWith("get") || n.startsWith("set")) {
-				String a = n.substring(3, 4).toLowerCase() +
-					n.substring(4);
-				attrib.add(a);
-			}
-		}
-		return attrib;
-	}
-
-	/** Lookup all the attributes of the specified class */
-	static protected String[] lookup_attributes(Class c) {
-		TreeSet<String> attrib = new TreeSet<String>();
-		while(c != null) {
-			Class[] ifaces = c.getInterfaces();
-			for(Class i: ifaces) {
-				if(SonarObject.class.isAssignableFrom(i))
-					attrib.addAll(_lookup_attributes(i));
-			}
-			c = c.getSuperclass();
-		}
-		return (String [])attrib.toArray(EMPTY_STRING);
+	/** Test if a class is an interface extending SonarObject */
+	static protected boolean is_sonar_iface(Class iface) {
+		return iface.isInterface() &&
+		       SonarObject.class.isAssignableFrom(iface) &&
+		       (iface != SonarObject.class);
 	}
 
 	/** Check for a valid constructor */
@@ -133,7 +111,7 @@ public class AttributeDispatcher {
 	}
 
 	/** Attributes which can be dispatched */
-	protected final String[] attributes;
+	protected final TreeSet<String> attributes = new TreeSet<String>();
 
 	/** Constructor to create a new object */
 	protected final Constructor constructor;
@@ -155,9 +133,34 @@ public class AttributeDispatcher {
 		return getters.keySet().toArray(EMPTY_STRING);
 	}
 
+	/** Lookup all the attributes of the specified class */
+	protected void lookup_attributes(Class c) {
+		while(c != null) {
+			for(Class iface: c.getInterfaces()) {
+				if(is_sonar_iface(iface)) {
+					lookup_iface_attributes(iface);
+					lookup_attributes(iface);
+				}
+			}
+			c = c.getSuperclass();
+		}
+	}
+
+	/** Lookup all the attributes of the specified interface */
+	protected void lookup_iface_attributes(Class iface) {
+		for(Method m: iface.getDeclaredMethods()) {
+			String n = m.getName();
+			if(n.startsWith("get") || n.startsWith("set")) {
+				String a = n.substring(3, 4).toLowerCase() +
+					n.substring(4);
+				attributes.add(a);
+			}
+		}
+	}
+
 	/** Create a new attribute dispatcher for the given object's type */
 	public AttributeDispatcher(Class c) {
-		attributes = lookup_attributes(c);
+		lookup_attributes(c);
 		constructor = lookup_constructor(c);
 		storer = lookup_storer(c);
 		destroyer = lookup_destroyer(c);
