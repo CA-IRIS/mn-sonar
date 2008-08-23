@@ -27,6 +27,8 @@ import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Security;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.sonar.Task;
+import us.mn.state.dot.sonar.TaskProcessor;
 
 /**
  * The SONAR client processes all data transfers with the server.
@@ -44,6 +46,12 @@ public class Client extends Thread {
 	/** Client conduit */
 	protected final ClientConduit conduit;
 
+	/** Task processor thread */
+	protected final TaskProcessor processor = new TaskProcessor();
+
+	/** Message processor task */
+	protected final MessageProcessor m_proc = new MessageProcessor();
+
 	/** Get the connection name */
 	public String getConnection() {
 		return conduit.getConnection();
@@ -53,10 +61,11 @@ public class Client extends Thread {
 	public Client(Properties props, ShowHandler handler) throws IOException,
 		ConfigurationError
 	{
+		super("SONAR Client");
 		selector = Selector.open();
 		context = Security.createContext(props);
-		conduit = new ClientConduit(props, selector, createSSLEngine(),
-			handler);
+		conduit = new ClientConduit(props, this, selector,
+			createSSLEngine(), handler);
 		setDaemon(true);
 		setPriority(Thread.MAX_PRIORITY);
 		start();
@@ -109,10 +118,17 @@ public class Client extends Thread {
 	}
 
 	/** Login to the SONAR server */
-	public void login(String user, String password)
+	public void login(final String user, final String password)
 		throws AuthenticationException
 	{
-		conduit.login(user, password);
+		processor.add(new Task() {
+			public String getName() {
+				return "LoginTask";
+			}
+			public void perform() {
+				conduit.login(user, password);
+			}
+		});
 		for(int i = 0; i < 100; i++) {
 			if(conduit.isLoggedIn())
 				return;
@@ -124,5 +140,37 @@ public class Client extends Thread {
 			}
 		}
 		throw new AuthenticationException("Login failed");
+	}
+
+	/** Process messages on the conduit */
+	public void processMessages() {
+//		if(!m_proc.isQueued()) {
+			m_proc.setQueued(true);
+			processor.add(m_proc);
+//		}
+	}
+
+	/** Message processor for handling incoming messages */
+	protected class MessageProcessor implements Task {
+		protected boolean queued = false;
+		public boolean isQueued() {
+			return queued;
+		}
+		public void setQueued(boolean q) {
+			queued = q;
+		}
+		public String getName() {
+			return "MessageProcessor";
+		}
+		public void perform() throws IOException {
+			try {
+				conduit.processMessages();
+			}
+			catch(IOException e) {
+				conduit.disconnect();
+				throw e;
+			}
+			setQueued(false);
+		}
 	}
 }

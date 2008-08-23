@@ -39,6 +39,8 @@ import us.mn.state.dot.sonar.PropertyLoader;
 import us.mn.state.dot.sonar.Security;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.sonar.Task;
+import us.mn.state.dot.sonar.TaskProcessor;
 
 /**
  * The SONAR server processes all data transfers with client connections.
@@ -180,9 +182,22 @@ public class Server extends Thread {
 		}
 	}
 
-	/** Process data on one connection */
-	public void processConnection(ConnectionImpl c) {
-		processor.add(c);
+	/** Process messages on one connection */
+	public void processMessages(final ConnectionImpl c) {
+		processor.add(new Task() {
+			public String getName() {
+				return "MessageProcessor";
+			}
+			public void perform() throws IOException {
+				try {
+					c.processMessages();
+				}
+				catch(IOException e) {
+					c.disconnect();
+					throw e;
+				}
+			}
+		});
 	}
 
 	/** Accept a new client connection */
@@ -277,7 +292,7 @@ public class Server extends Thread {
 	}
 
 	/** Notify all connections watching a name of an attribute change */
-	public void notifyAttribute(String tname, String oname, String name,
+	void notifyAttribute(String tname, String oname, String name,
 		String[] params)
 	{
 		List<ConnectionImpl> clist = getConnectionList();

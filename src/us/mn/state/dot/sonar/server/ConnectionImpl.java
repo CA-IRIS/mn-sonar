@@ -41,7 +41,7 @@ import us.mn.state.dot.sonar.User;
  *
  * @author Douglas Lau
  */
-public class ConnectionImpl extends Conduit implements Connection, Task {
+public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Define the set of valid messages from a client connection */
 	static protected final EnumSet<Message> MESSAGES = EnumSet.of(
@@ -193,13 +193,17 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 
 	/** Read messages from the socket channel */
 	public void doRead() throws IOException {
+System.err.print("ConnectionImpl.doRead");
+		int nbytes;
 		ByteBuffer net_in = state.getNetInBuffer();
-		int nbytes = channel.read(net_in);
+		synchronized(net_in) {
+			nbytes = channel.read(net_in);
+System.err.println(" " + nbytes + " bytes");
+		}
 		if(nbytes > 0)
-			state.doRead();
+			server.processMessages(this);
 		else if(nbytes < 0)
 			throw new IOException("EOF");
-		server.processConnection(this);
 	}
 
 	/** Write pending data to the socket channel */
@@ -208,12 +212,10 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 		synchronized(net_out) {
 			net_out.flip();
 			channel.write(net_out);
-			net_out.compact();
 			if(!net_out.hasRemaining())
 				disableWrite();
+			net_out.compact();
 		}
-		// FIXME: this should not happen on the Server thread
-		state.doWrite();
 	}
 
 	/** Disconnect the client connection */
@@ -242,13 +244,15 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 	}
 
 	/** Process any incoming messages */
-	public void perform() {
+	public void processMessages() throws IOException {
 		if(!isConnected())
 			return;
-		List<String> params = state.decoder.decode();
-		while(params != null) {
-			processMessage(params);
-			params = state.decoder.decode();
+		while(state.doRead()) {
+			List<String> params = state.decoder.decode();
+			while(params != null) {
+				processMessage(params);
+				params = state.decoder.decode();
+			}
 		}
 		flush();
 	}
@@ -330,13 +334,9 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 	}
 
 	/** Start writing data to client */
-	protected void startWrite() throws SSLException {
-		if(write_pending) {
-			if(state.doWrap())
-				setWritePending(false);
-			key.selector().wakeup();
+	protected void startWrite() throws IOException {
+		if(state.doWrite())
 			sleepBriefly();
-		}
 	}
 
 	/** Tell the I/O thread to flush the output buffer */
@@ -348,8 +348,8 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 			System.err.println("SONAR: buffer overflow");
 			disconnect();
 		}
-		catch(SSLException e) {
-			System.err.println("SONAR: SSL error "+ e.getMessage());
+		catch(IOException e) {
+			System.err.println("SONAR: error " + e.getMessage());
 			disconnect();
 		}
 	}
@@ -357,6 +357,7 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 	/** Enable writing data back to the client */
 	public void enableWrite() {
 		key.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+		key.selector().wakeup();
 	}
 
 	/** Disable writing data back to the client */

@@ -89,15 +89,16 @@ public class SSLState {
 		return net_in;
 	}
 
-	/** Write encoded data to a channel */
-	public void doWrite() throws IOException {
-		doWrapHandshake();
+	/** Read available data from network input buffer */
+	public boolean doRead() throws IOException {
+		doHandshake();
+		return doUnwrap();
 	}
 
-	/** Read available data from network input buffer */
-	public void doRead() throws IOException {
+	/** Write data to the network output buffer */
+	public boolean doWrite() throws IOException {
 		doHandshake();
-		while(doUnwrap());
+		return doWrap();
 	}
 
 	/** Do any pending handshake stuff */
@@ -119,7 +120,8 @@ public class SSLState {
 				doWrap();
 				return false;
 			case NEED_UNWRAP:
-				return doUnwrap();
+				doUnwrap();
+				return true;
 		}
 		return false;
 	}
@@ -131,56 +133,44 @@ public class SSLState {
 			task.run();
 	}
 
-	/** Do handshake wrap if needed */
-	protected void doWrapHandshake() throws SSLException {
-		hs = engine.getHandshakeStatus();
-		if(hs == SSLEngineResult.HandshakeStatus.NEED_WRAP)
-			doWrap();
-	}
-
 	/** Wrap application data into SSL buffer */
-	public boolean doWrap() throws SSLException {
-		if(app_out.position() > net_out.remaining())
-			return false;
-		SSLEngineResult result;
-		synchronized(ssl_out) {
-			ssl_out.clear();
-			synchronized(app_out) {
-				app_out.flip();
-				try {
-					result = engine.wrap(app_out, ssl_out);
-				}
-				finally {
-					app_out.compact();
-				}
-			}
-			ssl_out.flip();
-			synchronized(net_out) {
-				net_out.put(ssl_out);
-			}
+	protected boolean doWrap() throws SSLException {
+		ssl_out.clear();
+		app_out.flip();
+		try {
+			engine.wrap(app_out, ssl_out);
 		}
-		conduit.enableWrite();
-		return checkStatus(result);
+		finally {
+			app_out.compact();
+		}
+		ssl_out.flip();
+		int n_bytes;
+		synchronized(net_out) {
+			net_out.put(ssl_out);
+			n_bytes = net_out.position();
+		}
+		if(n_bytes > 0)
+			conduit.enableWrite();
+		return n_bytes > 0;
 	}
 
 	/** Unwrap SSL data into appcliation buffer */
 	protected boolean doUnwrap() throws SSLException {
-		SSLEngineResult result;
-		net_in.flip();
-		try {
-			if(!net_in.hasRemaining())
-				return false;
-			ssl_in.clear();
-			result = engine.unwrap(net_in, ssl_in);
-			ssl_in.flip();
-			synchronized(app_in) {
+		synchronized(net_in) {
+			net_in.flip();
+			try {
+				if(!net_in.hasRemaining())
+					return false;
+				ssl_in.clear();
+				engine.unwrap(net_in, ssl_in);
+				ssl_in.flip();
 				app_in.put(ssl_in);
 			}
+			finally {
+				net_in.compact();
+			}
 		}
-		finally {
-			net_in.compact();
-		}
-		return checkStatus(result);
+		return app_in.position() > 0;
 	}
 
 	/** Check the status of the SSL engine */

@@ -83,9 +83,7 @@ public class MessageEncoder {
 
 	/** Check if we must flush the write buffer */
 	protected boolean mustFlush(int n_bytes) {
-		synchronized(app_out) {
-			return app_out.remaining() < n_bytes + FLUSH_THRESHOLD;
-		}
+		return app_out.remaining() < n_bytes + FLUSH_THRESHOLD;
 	}
 
 	/** Ensure there is capacity in the write buffer */
@@ -105,9 +103,7 @@ public class MessageEncoder {
 	/** Fill the output buffer with encoded message data */
 	protected void fillBuffer(ByteBuffer b) {
 		if(ensureCapacity(b.remaining())) {
-			synchronized(app_out) {
-				app_out.put(b);
-			}
+			app_out.put(b);
 			conduit.setWritePending(true);
 		}
 	}

@@ -99,6 +99,9 @@ class ClientConduit extends Conduit {
 	/** Socket channel to communicate with the server */
 	protected final SocketChannel channel;
 
+	/** Client thread */
+	protected final Client client;
+
 	/** Key for selecting on the channel */
 	protected final SelectionKey key;
 
@@ -128,11 +131,12 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Create a new client conduit */
-	public ClientConduit(Properties props, Selector selector,
+	public ClientConduit(Properties props, Client c, Selector selector,
 		SSLEngine engine, ShowHandler handler)
 		throws ConfigurationError, IOException
 	{
 		channel = createChannel(props);
+		client = c;
 		key = channel.register(selector, SelectionKey.OP_CONNECT);
 		engine.setUseClientMode(true);
 		state = new SSLState(this, engine);
@@ -143,8 +147,6 @@ class ClientConduit extends Conduit {
 
 	/** Attempt to log in to the SONAR server */
 	public void login(String name, String pwd) {
-		while(state.isHandshaking())
-			Thread.yield();
 		state.encoder.encode(Message.LOGIN, name, new String[] {pwd});
 		flush();
 	}
@@ -183,18 +185,22 @@ class ClientConduit extends Conduit {
 	/** Complete the connection on the socket channel */
 	public void doConnect() throws IOException {
 		if(channel.finishConnect())
-			enableWrite();
+			disableWrite();
 	}
 
 	/** Read messages from the socket channel */
 	public void doRead() throws IOException {
+System.err.print("ClientConduit.doRead");
+		int nbytes;
 		ByteBuffer net_in = state.getNetInBuffer();
-		int nbytes = channel.read(net_in);
+		synchronized(net_in) {
+			nbytes = channel.read(net_in);
+System.err.println(" " + nbytes + " bytes");
+		}
 		if(nbytes > 0)
-			state.doRead();
+			client.processMessages();
 		else if(nbytes < 0)
 			throw new IOException("EOF");
-		processMessages();
 	}
 
 	/** Write pending data to the socket channel */
@@ -203,22 +209,16 @@ class ClientConduit extends Conduit {
 		synchronized(net_out) {
 			net_out.flip();
 			channel.write(net_out);
-			net_out.compact();
 			if(!net_out.hasRemaining())
 				disableWrite();
+			net_out.compact();
 		}
-		// FIXME: move this to a different thread
-		state.doWrite();
 	}
 
 	/** Start writing data to client */
-	protected void startWrite() throws SSLException {
-		if(write_pending) {
-			if(state.doWrap())
-				setWritePending(false);
-			key.selector().wakeup();
+	protected void startWrite() throws IOException {
+		if(state.doWrite())
 			sleepBriefly();
-		}
 	}
 
 	/** Flush out all outgoing data in the conduit */
@@ -226,7 +226,7 @@ class ClientConduit extends Conduit {
 		try {
 			startWrite();
 		}
-		catch(SSLException e) {
+		catch(IOException e) {
 			disconnect();
 		}
 	}
@@ -239,13 +239,15 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Process any incoming messages */
-	public void processMessages() {
+	public void processMessages() throws IOException {
 		if(!isConnected())
 			return;
-		List<String> params = state.decoder.decode();
-		while(params != null) {
-			processMessage(params);
-			params = state.decoder.decode();
+		while(state.doRead()) {
+			List<String> params = state.decoder.decode();
+			while(params != null) {
+				processMessage(params);
+				params = state.decoder.decode();
+			}
 		}
 		flush();
 	}
@@ -276,6 +278,7 @@ class ClientConduit extends Conduit {
 	/** Enable writing data back to the client */
 	public void enableWrite() {
 		key.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+		key.selector().wakeup();
 	}
 
 	/** Disable writing data back to the client */

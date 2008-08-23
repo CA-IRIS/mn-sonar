@@ -64,11 +64,9 @@ public class MessageDecoder {
 	public List<String> decode() {
 		params.clear();
 		if(!c_buf.hasRemaining()) {
-			synchronized(app_in) {
-				app_in.flip();
-				c_buf = UTF8.decode(app_in);
-				app_in.compact();
-			}
+			app_in.flip();
+			c_buf = UTF8.decode(app_in);
+			app_in.compact();
 		}
 		while(c_buf.hasRemaining()) {
 			char c = c_buf.get();

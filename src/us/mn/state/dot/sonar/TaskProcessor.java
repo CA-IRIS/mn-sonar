@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.sonar.server;
+package us.mn.state.dot.sonar;
 
 import java.nio.channels.CancelledKeyException;
 import java.util.LinkedList;
@@ -37,7 +37,9 @@ public class TaskProcessor extends Thread {
 	/** Get the next task on the "todo" list */
 	protected synchronized Task next() {
 		while(todo.isEmpty()) {
-			try { wait(); }
+			try {
+				wait();
+			}
 			catch(InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -51,21 +53,11 @@ public class TaskProcessor extends Thread {
 			t.perform();
 		}
 		catch(CancelledKeyException e) {
-			System.err.println("SONAR: Already cancelled " +
-				t.getName());
-			if(t instanceof ConnectionImpl) {
-				ConnectionImpl c = (ConnectionImpl)t;
-				c.destroy();
-			}
+			System.err.println("SONAR: Key already cancelled");
 		}
 		catch(Exception e) {
-			System.err.println("SONAR: Connection " +
-				t.getName());
+			System.err.println("SONAR: error " + e.getMessage());
 			e.printStackTrace();
-			if(t instanceof ConnectionImpl) {
-				ConnectionImpl c = (ConnectionImpl)t;
-				c.destroy();
-			}
 		}
 	}
 
