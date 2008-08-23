@@ -122,9 +122,7 @@ public class ConnectionImpl extends Conduit implements Connection, Task {
 		namespace = server.getNamespace();
 		key = k;
 		channel = c;
-		state = new SSLState(this, server.createSSLEngine(),
-			server.getSSLUnwrapBuffer(),
-			server.getSSLWrapBuffer());
+		state = new SSLState(this, server.createSSLEngine());
 		StringBuilder h = new StringBuilder();
 		h.append(c.socket().getInetAddress().getHostAddress());
 		h.append(':');

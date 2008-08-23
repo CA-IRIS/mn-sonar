@@ -47,18 +47,6 @@ import us.mn.state.dot.sonar.SonarObject;
  */
 public class Server extends Thread {
 
-	/** SSL unwrap buffer size. This should really be taken from the
-	 * session.getApplicationBufferSize(), but since all client sessions
-	 * share the same buffer, it has to be defined here. Unfortunately,
-	 * this isn't future-proof. */
-	static protected final int SSL_UNWRAP_BUFFER_SIZE = 16660;
-
-	/** SSL wrap buffer size. This should really be taken from the
-	 * session.getPacketBufferSize(), but since all client sessions
-	 * share the same buffer, it has to be defined here. Unfortunately,
-	 * this isn't future-proof. */
-	static protected final int SSL_WRAP_BUFFER_SIZE = 16665;
-
 	/** SONAR server configuration file */
 	static protected final String PROP_FILE = "/etc/sonar/sonar.properties";
 
@@ -73,12 +61,6 @@ public class Server extends Thread {
 
 	/** SSL context */
 	protected final SSLContext context;
-
-	/** SSL unwrap buffer, shared by all clients */
-	protected final ByteBuffer ssl_buf;
-
-	/** SSL wrap buffer, shared by all clients */
-	protected final ByteBuffer ssl_out;
 
 	/** LDAP authenticator for user credentials */
 	protected final LDAPAuthenticator authenticator;
@@ -119,24 +101,12 @@ public class Server extends Thread {
 		authenticator = new LDAPAuthenticator(ldap_urls);
 		session_file = props.getProperty("sonar.session.file");
 		setDaemon(true);
-		ssl_buf = ByteBuffer.allocate(SSL_UNWRAP_BUFFER_SIZE);
-		ssl_out = ByteBuffer.allocate(SSL_WRAP_BUFFER_SIZE);
 		start();
 	}
 
 	/** Create a new SONAR server */
 	public Server(Namespace n) throws IOException, ConfigurationError {
 		this(n, PropertyLoader.load(PROP_FILE));
-	}
-
-	/** Get the (shared) SSL unwrap buffer */
-	public ByteBuffer getSSLUnwrapBuffer() {
-		return ssl_buf;
-	}
-
-	/** Get the (shared) SSL wrap buffer */
-	public ByteBuffer getSSLWrapBuffer() {
-		return ssl_out;
 	}
 
 	/** Create and configure a server socket channel */

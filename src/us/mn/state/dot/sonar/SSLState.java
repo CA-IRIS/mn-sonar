@@ -64,31 +64,21 @@ public class SSLState {
 	public final MessageEncoder encoder;
 
 	/** Create a new SONAR SSL state */
-	public SSLState(Conduit c, SSLEngine e, ByteBuffer sin, ByteBuffer sout)
-		throws SSLException
-	{
+	public SSLState(Conduit c, SSLEngine e) throws SSLException {
 		conduit = c;
 		engine = e;
 		SSLSession session = engine.getSession();
-		assert sin.capacity() >= session.getApplicationBufferSize();
-		assert sout.capacity() >= session.getPacketBufferSize();
-		out_buf = ByteBuffer.allocate(session.getPacketBufferSize());
-		in_buf = ByteBuffer.allocate(session.getPacketBufferSize());
-		w_buf = ByteBuffer.allocate(session.getApplicationBufferSize());
-		r_buf = ByteBuffer.allocate(session.getApplicationBufferSize());
-		ssl_buf = sin;
-		ssl_out = sout;
+		int p_size = session.getPacketBufferSize();
+		int a_size = session.getApplicationBufferSize();
+		out_buf = ByteBuffer.allocate(p_size);
+		in_buf = ByteBuffer.allocate(p_size);
+		w_buf = ByteBuffer.allocate(a_size);
+		r_buf = ByteBuffer.allocate(a_size);
+		ssl_buf = ByteBuffer.allocate(a_size);
+		ssl_out = ByteBuffer.allocate(p_size);
 		decoder = new MessageDecoder(r_buf);
 		encoder = new MessageEncoder(w_buf, conduit);
 		engine.beginHandshake();
-	}
-
-	/** Create a new SONAR SSL state with unshared SSL buffers */
-	public SSLState(Conduit c, SSLEngine e) throws SSLException {
-		this(c, e, ByteBuffer.allocate(
-			e.getSession().getApplicationBufferSize()),
-			ByteBuffer.allocate(
-			e.getSession().getPacketBufferSize()));
 	}
 
 	/** Write encoded data to a channel */
