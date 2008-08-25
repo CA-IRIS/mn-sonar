@@ -28,9 +28,6 @@ import javax.net.ssl.SSLSession;
  */
 public class SSLState {
 
-	/** Size (in bytes) of network buffers */
-	static protected final int NETWORK_BUFFER_SIZE = 1 << 18;
-
 	/** Conduit */
 	protected final Conduit conduit;
 
@@ -73,8 +70,6 @@ public class SSLState {
 		int a_size = session.getApplicationBufferSize();
 		net_out = ByteBuffer.allocate(p_size);
 		net_in = ByteBuffer.allocate(p_size);
-//		net_out = ByteBuffer.allocate(NETWORK_BUFFER_SIZE);
-//		net_in = ByteBuffer.allocate(NETWORK_BUFFER_SIZE);
 		app_out = ByteBuffer.allocate(a_size);
 		app_in = ByteBuffer.allocate(a_size);
 		ssl_out = ByteBuffer.allocate(p_size);
@@ -136,6 +131,10 @@ public class SSLState {
 
 	/** Wrap application data into SSL buffer */
 	protected void doWrap() throws SSLException {
+		synchronized(net_out) {
+			if(net_out.position() > 0)
+				return;
+		}
 		ssl_out.clear();
 		app_out.flip();
 		try {

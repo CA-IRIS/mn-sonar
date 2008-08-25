@@ -193,12 +193,10 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Read messages from the socket channel */
 	public void doRead() throws IOException {
-System.err.print("ConnectionImpl.doRead");
 		int nbytes;
 		ByteBuffer net_in = state.getNetInBuffer();
 		synchronized(net_in) {
 			nbytes = channel.read(net_in);
-System.err.println(" " + nbytes + " bytes");
 		}
 		if(nbytes > 0)
 			server.processMessages(this);
@@ -208,13 +206,10 @@ System.err.println(" " + nbytes + " bytes");
 
 	/** Write pending data to the socket channel */
 	public void doWrite() throws IOException {
-System.err.print("ConnectionImpl.doWrite");
 		ByteBuffer net_out = state.getNetOutBuffer();
 		synchronized(net_out) {
 			net_out.flip();
-int r = net_out.remaining();
 			channel.write(net_out);
-System.err.println(" " + (r - net_out.remaining()) + " bytes");
 			if(!net_out.hasRemaining())
 				disableWrite();
 			net_out.compact();

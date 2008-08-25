@@ -190,13 +190,10 @@ class ClientConduit extends Conduit {
 
 	/** Read messages from the socket channel */
 	public void doRead() throws IOException {
-System.err.print("ClientConduit.doRead");
 		int nbytes;
 		ByteBuffer net_in = state.getNetInBuffer();
 		synchronized(net_in) {
 			nbytes = channel.read(net_in);
-System.err.print(" " + nbytes + " bytes   ");
-System.err.println("net_in: " + net_in.position());
 		}
 		if(nbytes > 0)
 			client.processMessages();
@@ -206,13 +203,10 @@ System.err.println("net_in: " + net_in.position());
 
 	/** Write pending data to the socket channel */
 	public void doWrite() throws IOException {
-System.err.print("ClientConduit.doWrite");
 		ByteBuffer net_out = state.getNetOutBuffer();
 		synchronized(net_out) {
 			net_out.flip();
-int r = net_out.remaining();
 			channel.write(net_out);
-System.err.println(" " + (r - net_out.remaining()) + " bytes");
 			if(!net_out.hasRemaining())
 				disableWrite();
 			net_out.compact();
