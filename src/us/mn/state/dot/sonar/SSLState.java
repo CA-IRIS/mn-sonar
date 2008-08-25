@@ -124,20 +124,7 @@ public class SSLState {
 	/** Write data to the network output buffer */
 	public boolean doWrite() throws IOException {
 		doWrap();
-		return app_out.position() > 0 && !isHandshaking();
-	}
-
-	/** Check if handshaking needs to be done */
-	protected boolean isHandshaking() {
-		hs = engine.getHandshakeStatus();
-		switch(hs) {
-			case NEED_TASK:
-			case NEED_WRAP:
-			case NEED_UNWRAP:
-				return true;
-			default:
-				return false;
-		}
+		return app_out.position() > 0;
 	}
 
 	/** Perform a delegated SSL engine task */
