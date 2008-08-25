@@ -103,8 +103,6 @@ public class SSLState {
 	protected boolean doHandshake() throws SSLException {
 		hs = engine.getHandshakeStatus();
 		switch(hs) {
-			case FINISHED:
-				return false;
 			case NEED_TASK:
 				doTask();
 				return true;
