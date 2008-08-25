@@ -208,10 +208,13 @@ System.err.println(" " + nbytes + " bytes");
 
 	/** Write pending data to the socket channel */
 	public void doWrite() throws IOException {
+System.err.print("ConnectionImpl.doWrite");
 		ByteBuffer net_out = state.getNetOutBuffer();
 		synchronized(net_out) {
 			net_out.flip();
+int r = net_out.remaining();
 			channel.write(net_out);
+System.err.println(" " + (r - net_out.remaining()) + " bytes");
 			if(!net_out.hasRemaining())
 				disableWrite();
 			net_out.compact();
@@ -336,13 +339,16 @@ System.err.println(" " + nbytes + " bytes");
 	/** Start writing data to client */
 	protected void startWrite() throws IOException {
 		if(state.doWrite())
+			server.flush(this);
+		else
 			sleepBriefly();
 	}
 
 	/** Tell the I/O thread to flush the output buffer */
 	public void flush() {
 		try {
-			startWrite();
+			if(isConnected())
+				startWrite();
 		}
 		catch(BufferOverflowException e) {
 			System.err.println("SONAR: buffer overflow");

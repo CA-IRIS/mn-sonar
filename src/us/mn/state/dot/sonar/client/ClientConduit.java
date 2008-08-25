@@ -195,7 +195,8 @@ System.err.print("ClientConduit.doRead");
 		ByteBuffer net_in = state.getNetInBuffer();
 		synchronized(net_in) {
 			nbytes = channel.read(net_in);
-System.err.println(" " + nbytes + " bytes");
+System.err.print(" " + nbytes + " bytes   ");
+System.err.println("net_in: " + net_in.position());
 		}
 		if(nbytes > 0)
 			client.processMessages();
@@ -205,10 +206,13 @@ System.err.println(" " + nbytes + " bytes");
 
 	/** Write pending data to the socket channel */
 	public void doWrite() throws IOException {
+System.err.print("ClientConduit.doWrite");
 		ByteBuffer net_out = state.getNetOutBuffer();
 		synchronized(net_out) {
 			net_out.flip();
+int r = net_out.remaining();
 			channel.write(net_out);
+System.err.println(" " + (r - net_out.remaining()) + " bytes");
 			if(!net_out.hasRemaining())
 				disableWrite();
 			net_out.compact();
@@ -218,13 +222,16 @@ System.err.println(" " + nbytes + " bytes");
 	/** Start writing data to client */
 	protected void startWrite() throws IOException {
 		if(state.doWrite())
+			client.flush();
+		else
 			sleepBriefly();
 	}
 
 	/** Flush out all outgoing data in the conduit */
 	public void flush() {
 		try {
-			startWrite();
+			if(isConnected())
+				startWrite();
 		}
 		catch(IOException e) {
 			disconnect();

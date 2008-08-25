@@ -144,21 +144,11 @@ public class Client extends Thread {
 
 	/** Process messages on the conduit */
 	public void processMessages() {
-//		if(!m_proc.isQueued()) {
-			m_proc.setQueued(true);
-			processor.add(m_proc);
-//		}
+		processor.add(m_proc);
 	}
 
 	/** Message processor for handling incoming messages */
 	protected class MessageProcessor implements Task {
-		protected boolean queued = false;
-		public boolean isQueued() {
-			return queued;
-		}
-		public void setQueued(boolean q) {
-			queued = q;
-		}
 		public String getName() {
 			return "MessageProcessor";
 		}
@@ -170,7 +160,18 @@ public class Client extends Thread {
 				conduit.disconnect();
 				throw e;
 			}
-			setQueued(false);
 		}
+	}
+
+	/** Message processor for handling incoming messages */
+	public void flush() {
+		processor.add(new Task() {
+			public String getName() {
+				return "Flusher";
+			}
+			public void perform() {
+				conduit.flush();
+			}
+		});
 	}
 }

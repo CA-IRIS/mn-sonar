@@ -28,6 +28,9 @@ import javax.net.ssl.SSLSession;
  */
 public class SSLState {
 
+	/** Size (in bytes) of network buffers */
+	static protected final int NETWORK_BUFFER_SIZE = 1 << 18;
+
 	/** Conduit */
 	protected final Conduit conduit;
 
@@ -70,6 +73,8 @@ public class SSLState {
 		int a_size = session.getApplicationBufferSize();
 		net_out = ByteBuffer.allocate(p_size);
 		net_in = ByteBuffer.allocate(p_size);
+//		net_out = ByteBuffer.allocate(NETWORK_BUFFER_SIZE);
+//		net_in = ByteBuffer.allocate(NETWORK_BUFFER_SIZE);
 		app_out = ByteBuffer.allocate(a_size);
 		app_in = ByteBuffer.allocate(a_size);
 		ssl_out = ByteBuffer.allocate(p_size);
@@ -91,39 +96,57 @@ public class SSLState {
 
 	/** Read available data from network input buffer */
 	public boolean doRead() throws IOException {
-		doHandshake();
-		return doUnwrap();
-	}
-
-	/** Write data to the network output buffer */
-	public boolean doWrite() throws IOException {
-		doHandshake();
-		return doWrap();
-	}
-
-	/** Do any pending handshake stuff */
-	public void doHandshake() throws SSLException {
-		while(_doHandshake());
+		doUnwrap();
+		while(doHandshake());
+		synchronized(net_in) {
+			return net_in.position() > 0 ||
+				app_in.position() > 0;
+		}
 	}
 
 	/** Do something to progress handshaking */
-	protected boolean _doHandshake() throws SSLException {
+	protected boolean doHandshake() throws SSLException {
 		hs = engine.getHandshakeStatus();
 		switch(hs) {
-			case NOT_HANDSHAKING:
 			case FINISHED:
+System.err.println("FINISHED handshaking");
 				return false;
 			case NEED_TASK:
 				doTask();
 				return true;
 			case NEED_WRAP:
 				doWrap();
-				return false;
-			case NEED_UNWRAP:
-				doUnwrap();
 				return true;
+			default:
+				return false;
 		}
-		return false;
+	}
+
+	/** Write data to the network output buffer */
+	public boolean doWrite() throws IOException {
+System.err.print("SSLState.doWrite");
+System.err.print("    app_out.position() " + app_out.position());
+		doWrap();
+System.err.println(" -> " + app_out.position());
+		return app_out.position() > 0 && !isHandshaking();
+	}
+
+	/** Check if handshaking needs to be done */
+	protected boolean isHandshaking() {
+		hs = engine.getHandshakeStatus();
+		switch(hs) {
+			case NEED_TASK:
+System.err.println("NEED_TASK");
+				return true;
+			case NEED_WRAP:
+System.err.println("NEED_WRAP");
+				return true;
+			case NEED_UNWRAP:
+System.err.println("NEED_UNWRAP");
+				return true;
+			default:
+				return false;
+		}
 	}
 
 	/** Perform a delegated SSL engine task */
@@ -134,7 +157,7 @@ public class SSLState {
 	}
 
 	/** Wrap application data into SSL buffer */
-	protected boolean doWrap() throws SSLException {
+	protected void doWrap() throws SSLException {
 		ssl_out.clear();
 		app_out.flip();
 		try {
@@ -151,16 +174,15 @@ public class SSLState {
 		}
 		if(n_bytes > 0)
 			conduit.enableWrite();
-		return n_bytes > 0;
 	}
 
 	/** Unwrap SSL data into appcliation buffer */
-	protected boolean doUnwrap() throws SSLException {
+	protected void doUnwrap() throws SSLException {
 		synchronized(net_in) {
 			net_in.flip();
 			try {
 				if(!net_in.hasRemaining())
-					return false;
+					return;
 				ssl_in.clear();
 				engine.unwrap(net_in, ssl_in);
 				ssl_in.flip();
@@ -170,7 +192,6 @@ public class SSLState {
 				net_in.compact();
 			}
 		}
-		return app_in.position() > 0;
 	}
 
 	/** Check the status of the SSL engine */
@@ -186,10 +207,5 @@ public class SSLState {
 				break;
 		}
 		return result.getStatus() == SSLEngineResult.Status.OK;
-	}
-
-	/** Check if the handshake is still in progress */
-	public boolean isHandshaking() {
-		return hs != SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING;
 	}
 }

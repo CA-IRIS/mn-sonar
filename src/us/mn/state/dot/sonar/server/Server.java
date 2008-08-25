@@ -200,6 +200,18 @@ public class Server extends Thread {
 		});
 	}
 
+	/** Flush outgoing data for one connection */
+	public void flush(final ConnectionImpl c) {
+		processor.add(new Task() {
+			public String getName() {
+				return "Flusher";
+			}
+			public void perform() {
+				c.flush();
+			}
+		});
+	}
+
 	/** Accept a new client connection */
 	protected void doAccept() throws IOException {
 		SocketChannel c = channel.accept();
