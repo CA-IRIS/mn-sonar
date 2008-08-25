@@ -109,7 +109,6 @@ public class SSLState {
 		hs = engine.getHandshakeStatus();
 		switch(hs) {
 			case FINISHED:
-System.err.println("FINISHED handshaking");
 				return false;
 			case NEED_TASK:
 				doTask();
@@ -124,10 +123,7 @@ System.err.println("FINISHED handshaking");
 
 	/** Write data to the network output buffer */
 	public boolean doWrite() throws IOException {
-System.err.print("SSLState.doWrite");
-System.err.print("    app_out.position() " + app_out.position());
 		doWrap();
-System.err.println(" -> " + app_out.position());
 		return app_out.position() > 0 && !isHandshaking();
 	}
 
@@ -136,13 +132,8 @@ System.err.println(" -> " + app_out.position());
 		hs = engine.getHandshakeStatus();
 		switch(hs) {
 			case NEED_TASK:
-System.err.println("NEED_TASK");
-				return true;
 			case NEED_WRAP:
-System.err.println("NEED_WRAP");
-				return true;
 			case NEED_UNWRAP:
-System.err.println("NEED_UNWRAP");
 				return true;
 			default:
 				return false;
