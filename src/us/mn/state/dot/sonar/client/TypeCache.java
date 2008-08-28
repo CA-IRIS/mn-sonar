@@ -184,8 +184,11 @@ public class TypeCache<T extends SonarObject> {
 	{
 		int i = System.identityHashCode(o);
 		HashMap<String, Attribute> amap = lookupAttributeMap(i);
-		if(amap == null)
-			throw NamespaceError.NAME_UNKNOWN;
+		if(amap == null) {
+			// This happens if a proxy has been removed, but
+			// references still exist in other data structures.
+			return new Attribute(Object.class);
+		}
 		Attribute attr = amap.get(a);
 		if(attr == null)
 			throw NamespaceError.NAME_UNKNOWN;
