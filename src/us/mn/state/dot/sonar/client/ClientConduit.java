@@ -217,8 +217,7 @@ class ClientConduit extends Conduit {
 	protected void startWrite() throws IOException {
 		if(state.doWrite())
 			client.flush();
-		else
-			sleepBriefly();
+		sleepBriefly();
 	}
 
 	/** Flush out all outgoing data in the conduit */

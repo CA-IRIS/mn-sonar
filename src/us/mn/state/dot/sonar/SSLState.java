@@ -133,8 +133,10 @@ public class SSLState {
 	/** Wrap application data into SSL buffer */
 	protected void doWrap() throws SSLException {
 		synchronized(net_out) {
-			if(net_out.position() > 0)
+			if(net_out.position() > 0) {
+				conduit.enableWrite();
 				return;
+			}
 		}
 		ssl_out.clear();
 		app_out.flip();
