@@ -80,7 +80,7 @@ public class Client extends Thread {
 
 	/** Client loop to perfrom socket I/O */
 	public void run() {
-		while(conduit.isConnected()) {
+		while(true) {
 			try {
 				doSelect();
 			}
@@ -129,7 +129,7 @@ public class Client extends Thread {
 				conduit.login(user, password);
 			}
 		});
-		for(int i = 0; i < 100; i++) {
+		for(int i = 0; i < 200; i++) {
 			if(conduit.isLoggedIn())
 				return;
 			try {

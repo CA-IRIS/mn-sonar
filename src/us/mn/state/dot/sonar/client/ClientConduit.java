@@ -142,7 +142,7 @@ class ClientConduit extends Conduit {
 		state = new SSLState(this, engine);
 		cache = new ProxyCache();
 		show_handler = handler;
-		connected = true;
+		connected = false;
 	}
 
 	/** Attempt to log in to the SONAR server */
@@ -184,8 +184,11 @@ class ClientConduit extends Conduit {
 
 	/** Complete the connection on the socket channel */
 	public void doConnect() throws IOException {
-		if(channel.finishConnect())
+		if(channel.finishConnect()) {
+			connected = true;
 			disableWrite();
+			flush();
+		}
 	}
 
 	/** Read messages from the socket channel */

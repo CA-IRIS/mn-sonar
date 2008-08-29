@@ -80,8 +80,7 @@ public class MessageEncoder {
 		}
 		m_buf.put(Message.TERMINATOR.code);
 		m_buf.flip();
-		if(conduit.isConnected())
-			fillBuffer(UTF8.encode(m_buf));
+		fillBuffer(UTF8.encode(m_buf));
 	}
 
 	/** Encode one message with the given code and name */
