@@ -89,10 +89,9 @@ public class MessageEncoder {
 	/** Ensure there is capacity in the write buffer */
 	protected boolean ensureCapacity(int n_bytes) {
 		for(int i = 0; i < FLUSH_TRIES; i++) {
-			if(mustFlush(n_bytes)) {
-				conduit.setWritePending(true);
+			if(mustFlush(n_bytes))
 				conduit.flush();
-			} else
+			else
 				return true;
 		}
 		System.err.println("SONAR flush failed: " + conduit.getName());
@@ -102,9 +101,7 @@ public class MessageEncoder {
 
 	/** Fill the output buffer with encoded message data */
 	protected void fillBuffer(ByteBuffer b) {
-		if(ensureCapacity(b.remaining())) {
+		if(ensureCapacity(b.remaining()))
 			app_out.put(b);
-			conduit.setWritePending(true);
-		}
 	}
 }

@@ -52,14 +52,6 @@ abstract public class Conduit {
 		connected = false;
 	}
 
-	/** Flag to indicate that write data is pending */
-	protected boolean write_pending = false;
-
-	/** Set the write pending flag */
-	public void setWritePending(boolean p) {
-		write_pending = p;
-	}
-
 	/** Flush out all outgoing data in the conduit */
 	abstract public void flush();
 
