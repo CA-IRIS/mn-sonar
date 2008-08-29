@@ -71,7 +71,7 @@ public class SSLState {
 		SSLSession session = engine.getSession();
 		int p_size = session.getPacketBufferSize();
 		int a_size = session.getApplicationBufferSize();
-		net_out = ByteBuffer.allocate(p_size);
+		net_out = ByteBuffer.allocate(NETWORK_BUFFER_SIZE);
 		net_in = ByteBuffer.allocate(NETWORK_BUFFER_SIZE);
 		app_out = ByteBuffer.allocate(a_size);
 		app_in = ByteBuffer.allocate(a_size);
@@ -96,10 +96,7 @@ public class SSLState {
 	public boolean doRead() throws IOException {
 		doUnwrap();
 		while(doHandshake());
-		synchronized(net_in) {
-			return net_in.position() > 0 ||
-				app_in.position() > 0;
-		}
+		return app_in.position() > 0;
 	}
 
 	/** Do something to progress handshaking */
@@ -112,6 +109,8 @@ public class SSLState {
 			case NEED_WRAP:
 				doWrap();
 				return true;
+			case NEED_UNWRAP:
+				return doUnwrap();
 			default:
 				return false;
 		}
@@ -132,12 +131,6 @@ public class SSLState {
 
 	/** Wrap application data into SSL buffer */
 	protected void doWrap() throws SSLException {
-		synchronized(net_out) {
-			if(net_out.position() > 0) {
-				conduit.enableWrite();
-				return;
-			}
-		}
 		ssl_out.clear();
 		app_out.flip();
 		try {
@@ -157,12 +150,12 @@ public class SSLState {
 	}
 
 	/** Unwrap SSL data into appcliation buffer */
-	protected void doUnwrap() throws SSLException {
+	protected boolean doUnwrap() throws SSLException {
 		synchronized(net_in) {
 			net_in.flip();
 			try {
 				if(!net_in.hasRemaining())
-					return;
+					return false;
 				ssl_in.clear();
 				engine.unwrap(net_in, ssl_in);
 				ssl_in.flip();
@@ -172,6 +165,7 @@ public class SSLState {
 				net_in.compact();
 			}
 		}
+		return true;
 	}
 
 	/** Check the status of the SSL engine */
