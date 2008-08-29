@@ -52,6 +52,9 @@ public class Server extends Thread {
 	/** SONAR debug log */
 	static protected final DebugLog DEBUG = new DebugLog("sonar");
 
+	/** SONAR task debug log */
+	static protected final DebugLog DEBUG_TASK = new DebugLog("sonar_task");
+
 	/** SONAR server configuration file */
 	static protected final String PROP_FILE = "/etc/sonar/sonar.properties";
 
@@ -192,7 +195,7 @@ public class Server extends Thread {
 				return "MessageProcessor";
 			}
 			public void perform() throws IOException {
-				DEBUG.log("Processing messages for " +
+				DEBUG_TASK.log("Processing messages for " +
 					c.getName());
 				try {
 					c.processMessages();
@@ -212,6 +215,7 @@ public class Server extends Thread {
 				return "Flusher";
 			}
 			public void perform() {
+				DEBUG_TASK.log("Flushing for " + c.getName());
 				c.flush();
 			}
 		});
@@ -344,6 +348,7 @@ public class Server extends Thread {
 				return "ObjectAdder";
 			}
 			public void perform() throws NamespaceError {
+				DEBUG_TASK.log("Adding object " + o.getName());
 				doAddObject(o);
 			}
 		});
@@ -365,6 +370,7 @@ public class Server extends Thread {
 				return "ObjectRemover";
 			}
 			public void perform() throws SonarException {
+				DEBUG_TASK.log("Removing object " +o.getName());
 				doRemoveObject(o);
 			}
 		});
@@ -385,6 +391,8 @@ public class Server extends Thread {
 				return "AttributeSetter";
 			}
 			public void perform() throws NamespaceError {
+				DEBUG_TASK.log("Setting attribute " + a +
+					" on " + o.getName());
 				doSetAttribute(o, a, v);
 			}
 		});
