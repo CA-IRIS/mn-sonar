@@ -192,6 +192,8 @@ public class Server extends Thread {
 				return "MessageProcessor";
 			}
 			public void perform() throws IOException {
+				DEBUG.log("Processing messages for " +
+					c.getName());
 				try {
 					c.processMessages();
 				}
@@ -231,11 +233,11 @@ public class Server extends Thread {
 
 	/** Check if a new client is connecting */
 	protected boolean checkAccept(SelectionKey key) {
-		DEBUG.log("Accepting connection");
 		try {
-			if(key.isAcceptable())
+			if(key.isAcceptable()) {
+				DEBUG.log("Accepting connection");
 				doAccept();
-			else
+			} else
 				return false;
 		}
 		catch(CancelledKeyException e) {
