@@ -26,11 +26,24 @@ import java.nio.charset.Charset;
  */
 public class MessageEncoder {
 
+	/** Threshold of bytes to start flushing write buffer */
+	static protected final int FLUSH_THRESHOLD = 1024;
+
 	/** Number of tries to flush write buffer */
 	static protected final int FLUSH_TRIES = 40;
 
-	/** Threshold of bytes to start flushing write buffer */
-	static protected final int FLUSH_THRESHOLD = 1024;
+	/** Time to allow I/O thread to flush output buffer */
+	static protected final int FLUSH_WAIT_MS = 100;
+
+	/** Sleep to allow the network thread to do some work */
+	protected void sleepBriefly() {
+		try {
+			Thread.sleep(FLUSH_WAIT_MS);
+		}
+		catch(InterruptedException e) {
+			// Shouldn't happen, and who cares?
+		}
+	}
 
 	/** Everything on the wire is encoded to UTF-8 */
 	static protected final Charset UTF8 = Charset.forName("UTF-8");
@@ -89,9 +102,10 @@ public class MessageEncoder {
 	/** Ensure there is capacity in the write buffer */
 	protected boolean ensureCapacity(int n_bytes) {
 		for(int i = 0; i < FLUSH_TRIES; i++) {
-			if(mustFlush(n_bytes))
+			if(mustFlush(n_bytes)) {
 				conduit.flush();
-			else
+				sleepBriefly();
+			} else
 				return true;
 		}
 		System.err.println("SONAR flush failed: " + conduit.getName());

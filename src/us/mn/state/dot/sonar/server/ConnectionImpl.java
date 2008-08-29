@@ -335,7 +335,6 @@ public class ConnectionImpl extends Conduit implements Connection {
 	protected void startWrite() throws IOException {
 		if(state.doWrite())
 			server.flush(this);
-		sleepBriefly();
 	}
 
 	/** Tell the I/O thread to flush the output buffer */
