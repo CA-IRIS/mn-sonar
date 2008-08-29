@@ -49,6 +49,9 @@ import us.mn.state.dot.sonar.TaskProcessor;
  */
 public class Server extends Thread {
 
+	/** SONAR debug log */
+	static protected final DebugLog DEBUG = new DebugLog("sonar");
+
 	/** SONAR server configuration file */
 	static protected final String PROP_FILE = "/etc/sonar/sonar.properties";
 
@@ -228,6 +231,7 @@ public class Server extends Thread {
 
 	/** Check if a new client is connecting */
 	protected boolean checkAccept(SelectionKey key) {
+		DEBUG.log("Accepting connection");
 		try {
 			if(key.isAcceptable())
 				doAccept();
@@ -261,10 +265,14 @@ public class Server extends Thread {
 			return;
 		}
 		try {
-			if(key.isWritable())
+			if(key.isWritable()) {
+				DEBUG.log("Writing data to " + c.getName());
 				c.doWrite();
-			if(key.isReadable())
+			}
+			if(key.isReadable()) {
+				DEBUG.log("Reading data from " + c.getName());
 				c.doRead();
+			}
 		}
 		catch(CancelledKeyException e) {
 			disconnect(key);
