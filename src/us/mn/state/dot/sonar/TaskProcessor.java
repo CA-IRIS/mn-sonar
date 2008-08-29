@@ -16,6 +16,7 @@ package us.mn.state.dot.sonar;
 
 import java.nio.channels.CancelledKeyException;
 import java.util.LinkedList;
+import javax.net.ssl.SSLException;
 
 /**
  * Thread which processes tasks on server namespace.
@@ -54,6 +55,9 @@ public class TaskProcessor extends Thread {
 		}
 		catch(CancelledKeyException e) {
 			System.err.println("SONAR: Key already cancelled");
+		}
+		catch(SSLException e) {
+			System.err.println("SONAR: SSL error " +e.getMessage());
 		}
 		catch(Exception e) {
 			System.err.println("SONAR: error " + e.getMessage());
