@@ -20,12 +20,12 @@ import java.nio.channels.Selector;
 import java.util.Properties;
 import java.util.Map;
 import java.util.Set;
-import javax.naming.AuthenticationException;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Security;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.Task;
 import us.mn.state.dot.sonar.TaskProcessor;
@@ -149,7 +149,7 @@ public class Client extends Thread {
 
 	/** Login to the SONAR server */
 	public void login(final String user, final String password)
-		throws AuthenticationException
+		throws SonarException
 	{
 		processor.add(new Task() {
 			public String getName() {
@@ -159,17 +159,18 @@ public class Client extends Thread {
 				conduit.login(user, password);
 			}
 		});
+		// Wait for up to 20 seconds
 		for(int i = 0; i < 200; i++) {
 			if(conduit.isLoggedIn())
 				return;
 			try {
-				Thread.sleep(50);
+				Thread.sleep(100);
 			}
 			catch(InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-		throw new AuthenticationException("Login failed");
+		throw new SonarException("Login timed out");
 	}
 
 	/** Process messages on the conduit */
