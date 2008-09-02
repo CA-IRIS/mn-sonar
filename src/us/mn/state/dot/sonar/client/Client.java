@@ -117,6 +117,36 @@ public class Client extends Thread {
 		conduit.queryAll(tc);
 	}
 
+	/** Populate the specified type cache */
+	public void populate(TypeCache tc, boolean wait) {
+		if(wait) {
+			EnumerationWaiter ew = new EnumerationWaiter();
+			tc.addProxyListener(ew);
+			populate(tc);
+			while(!ew.complete) {
+				try {
+					Thread.sleep(100);
+				}
+				catch(InterruptedException e) {
+					// Ignore
+				}
+			}
+			tc.removeProxyListener(ew);
+		} else
+			populate(tc);
+	}
+
+	/** Simple class to wait for enumeration of a type to complete */
+	protected class EnumerationWaiter implements ProxyListener {
+		protected boolean complete = false;
+		public void proxyAdded(SonarObject proxy) { }
+		public void enumerationComplete() {
+			complete = true;
+		}
+		public void proxyRemoved(SonarObject proxy) { }
+		public void proxyChanged(SonarObject proxy, String a) { }
+	}
+
 	/** Login to the SONAR server */
 	public void login(final String user, final String password)
 		throws AuthenticationException
