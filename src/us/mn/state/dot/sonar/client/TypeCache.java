@@ -96,6 +96,12 @@ public class TypeCache<T extends SonarObject> {
 			l.proxyAdded(proxy);
 	}
 
+	/** Notify proxy listeners that enumeration has completed */
+	protected void notifyEnumerationComplete() {
+		for(ProxyListener<T> l: listeners)
+			l.enumerationComplete();
+	}
+
 	/** Notify proxy listeners that a proxy has been removed */
 	protected void notifyProxyRemoved(T proxy) {
 		for(ProxyListener<T> l: listeners)
@@ -140,6 +146,13 @@ public class TypeCache<T extends SonarObject> {
 		}
 		phantom = null;
 		return o;
+	}
+
+	/** Enumeration of proxy type is complete */
+	void enumerationComplete() {
+		synchronized(children) {
+			notifyEnumerationComplete();
+		}
 	}
 
 	/** Remove a proxy from the type cache */

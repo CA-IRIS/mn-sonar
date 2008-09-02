@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -115,6 +115,8 @@ class ProxyCache extends Names {
 	/** Process a TYPE message from the server */
 	public void setCurrentType(String t) throws NamespaceError {
 		if(t.equals("") || types.containsKey(t)) {
+			if(t.equals("") && cur_type != null)
+				cur_type.enumerationComplete();
 			TypeCache tc = types.get(t);
 			cur_type = tc;
 			cur_obj = null;

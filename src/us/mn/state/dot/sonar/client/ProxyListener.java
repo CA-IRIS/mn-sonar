@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,9 @@ public interface ProxyListener<T extends SonarObject> extends EventListener {
 
 	/** A new proxy has been added */
 	void proxyAdded(T proxy);
+
+	/** All proxies have been enumerated */
+	void enumerationComplete();
 
 	/** A proxy has been removed */
 	void proxyRemoved(T proxy);

@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,6 +104,9 @@ public class Main {
 			public void proxyAdded(Role proxy) {
 				System.err.println("ROLE " + proxy.getName() +
 					": " + proxy.getPattern());
+			}
+			public void enumerationComplete() {
+				System.err.println("All roles enumerated");
 			}
 			public void proxyRemoved(Role proxy) {
 System.err.println("role proxy removed: " + proxy.getName());
