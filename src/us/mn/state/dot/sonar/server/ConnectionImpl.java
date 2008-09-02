@@ -123,7 +123,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		namespace = server.getNamespace();
 		key = k;
 		channel = c;
-		state = new SSLState(this, server.createSSLEngine());
+		state = new SSLState(this, server.createSSLEngine(), true);
 		StringBuilder h = new StringBuilder();
 		h.append(c.socket().getInetAddress().getHostAddress());
 		h.append(':');

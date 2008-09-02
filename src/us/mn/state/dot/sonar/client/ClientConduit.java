@@ -139,7 +139,7 @@ class ClientConduit extends Conduit {
 		client = c;
 		key = channel.register(selector, SelectionKey.OP_CONNECT);
 		engine.setUseClientMode(true);
-		state = new SSLState(this, engine);
+		state = new SSLState(this, engine, false);
 		cache = new ProxyCache();
 		show_handler = handler;
 		connected = false;

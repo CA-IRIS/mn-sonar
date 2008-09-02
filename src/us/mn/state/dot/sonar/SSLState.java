@@ -28,8 +28,11 @@ import javax.net.ssl.SSLSession;
  */
 public class SSLState {
 
+	/** Size (in bytes) of small network buffers */
+	static protected final int NETWORK_SMALL_SIZE = 1 << 16;
+
 	/** Size (in bytes) of network buffers */
-	static protected final int NETWORK_BUFFER_SIZE = 1 << 20;
+	static protected final int NETWORK_LARGE_SIZE = 1 << 21;
 
 	/** Conduit */
 	protected final Conduit conduit;
@@ -65,14 +68,21 @@ public class SSLState {
 	public final MessageEncoder encoder;
 
 	/** Create a new SONAR SSL state */
-	public SSLState(Conduit c, SSLEngine e) throws SSLException {
+	public SSLState(Conduit c, SSLEngine e, boolean outbound)
+		throws SSLException
+	{
 		conduit = c;
 		engine = e;
 		SSLSession session = engine.getSession();
 		int p_size = session.getPacketBufferSize();
 		int a_size = session.getApplicationBufferSize();
-		net_out = ByteBuffer.allocate(NETWORK_BUFFER_SIZE);
-		net_in = ByteBuffer.allocate(NETWORK_BUFFER_SIZE);
+		if(outbound) {
+			net_out = ByteBuffer.allocate(NETWORK_LARGE_SIZE);
+			net_in = ByteBuffer.allocate(NETWORK_SMALL_SIZE);
+		} else {
+			net_out = ByteBuffer.allocate(NETWORK_SMALL_SIZE);
+			net_in = ByteBuffer.allocate(NETWORK_LARGE_SIZE);
+		}
 		app_out = ByteBuffer.allocate(a_size);
 		app_in = ByteBuffer.allocate(a_size);
 		ssl_out = ByteBuffer.allocate(p_size);
