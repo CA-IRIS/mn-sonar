@@ -340,8 +340,11 @@ class ClientConduit extends Conduit {
 		// First SHOW message after login is the connection name
 		if(loggedIn && connection == null)
 			connection = m;
-		else if(m.startsWith("Permission denied"))
+		// NOTE: this is a bit fragile
+		else if(m.contains("Authentication failed"))
 			handler.handle(new AuthenticationException(m));
+		else if(m.startsWith("Permission denied"))
+			handler.handle(new PermissionException(m));
 		else
 			handler.handle(new SonarShowException(m));
 	}
