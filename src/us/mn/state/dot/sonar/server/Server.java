@@ -287,6 +287,8 @@ public class Server extends Thread {
 			disconnect(key);
 		}
 		catch(IOException e) {
+			System.err.println("SONAR: I/O error " +
+				 e.getMessage() + " on " + c.getName());
 			c.disconnect();
 		}
 	}
