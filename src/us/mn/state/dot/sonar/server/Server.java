@@ -32,6 +32,7 @@ import java.util.Properties;
 import java.util.Set;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLException;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Names;
 import us.mn.state.dot.sonar.NamespaceError;
@@ -194,15 +195,17 @@ public class Server extends Thread {
 			public String getName() {
 				return "MessageProcessor";
 			}
-			public void perform() throws IOException {
+			public void perform() {
 				DEBUG_TASK.log("Processing messages for " +
 					c.getName());
 				try {
 					c.processMessages();
 				}
-				catch(IOException e) {
+				catch(SSLException e) {
+					System.err.println("SONAR: SSL error " +
+						e.getMessage() + " on " +
+						c.getName());
 					c.disconnect();
-					throw e;
 				}
 			}
 		});

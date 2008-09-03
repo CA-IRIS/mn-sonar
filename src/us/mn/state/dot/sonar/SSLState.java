@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.sonar;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
@@ -103,7 +102,7 @@ public class SSLState {
 	}
 
 	/** Read available data from network input buffer */
-	public boolean doRead() throws IOException {
+	public boolean doRead() throws SSLException {
 		doUnwrap();
 		while(doHandshake());
 		return app_in.position() > 0;
@@ -127,7 +126,7 @@ public class SSLState {
 	}
 
 	/** Write data to the network output buffer */
-	public boolean doWrite() throws IOException {
+	public boolean doWrite() throws SSLException {
 		doWrap();
 		return app_out.position() > 0;
 	}

@@ -242,7 +242,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Process any incoming messages */
-	public void processMessages() throws IOException {
+	public void processMessages() throws SSLException {
 		if(!isConnected())
 			return;
 		while(state.doRead()) {
