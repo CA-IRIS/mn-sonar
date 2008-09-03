@@ -24,8 +24,10 @@ import java.nio.channels.SocketChannel;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Properties;
+import javax.naming.AuthenticationException;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
+import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Message;
@@ -111,8 +113,8 @@ class ClientConduit extends Conduit {
 	/** Cache of all proxy objects */
 	protected final ProxyCache cache;
 
-	/** Handler for SHOW messages */
-	protected final ShowHandler show_handler;
+	/** Exception handler */
+	protected final ExceptionHandler handler;
 
 	/** Flag to determine if login was accepted */
 	protected boolean loggedIn = false;
@@ -132,7 +134,7 @@ class ClientConduit extends Conduit {
 
 	/** Create a new client conduit */
 	public ClientConduit(Properties props, Client c, Selector selector,
-		SSLEngine engine, ShowHandler handler)
+		SSLEngine engine, ExceptionHandler h)
 		throws ConfigurationError, IOException
 	{
 		channel = createChannel(props);
@@ -141,7 +143,7 @@ class ClientConduit extends Conduit {
 		engine.setUseClientMode(true);
 		state = new SSLState(this, engine, false);
 		cache = new ProxyCache();
-		show_handler = handler;
+		handler = h;
 		connected = false;
 	}
 
@@ -229,6 +231,7 @@ class ClientConduit extends Conduit {
 				startWrite();
 		}
 		catch(IOException e) {
+			handler.handle(e);
 			disconnect();
 		}
 	}
@@ -237,7 +240,7 @@ class ClientConduit extends Conduit {
 	public void disconnect() {
 		super.disconnect();
 		loggedIn = false;
-		show_handler.display("Disconnected from server");
+		handler.handle(new SonarException("Disconnected from server"));
 	}
 
 	/** Process any incoming messages */
@@ -261,7 +264,7 @@ class ClientConduit extends Conduit {
 				_processMessage(params);
 		}
 		catch(SonarException e) {
-			e.printStackTrace();
+			handler.handle(e);
 			disconnect();
 		}
 	}
@@ -337,7 +340,9 @@ class ClientConduit extends Conduit {
 		// First SHOW message after login is the connection name
 		if(loggedIn && connection == null)
 			connection = m;
+		else if(m.startsWith("Permission denied"))
+			handler.handle(new AuthenticationException(m));
 		else
-			show_handler.display(m);
+			handler.handle(new SonarShowException(m));
 	}
 }

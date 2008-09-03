@@ -33,6 +33,9 @@ import java.util.Set;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
+import us.mn.state.dot.sched.ExceptionHandler;
+import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Names;
 import us.mn.state.dot.sonar.NamespaceError;
@@ -40,8 +43,6 @@ import us.mn.state.dot.sonar.PropertyLoader;
 import us.mn.state.dot.sonar.Security;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.sonar.Task;
-import us.mn.state.dot.sonar.TaskProcessor;
 
 /**
  * The SONAR server processes all data transfers with client connections.
@@ -82,7 +83,24 @@ public class Server extends Thread {
 	protected final String session_file;
 
 	/** Task processor thread */
-	protected final TaskProcessor processor = new TaskProcessor();
+	protected final Scheduler processor = new Scheduler("Task Processor",
+		new ExceptionHandler() {
+			public boolean handle(Exception e) {
+				if(e instanceof CancelledKeyException) {
+					System.err.println(
+						"SONAR: Key already cancelled");
+				} else if(e instanceof SSLException) {
+					System.err.println("SONAR: SSL error " +
+						e.getMessage());
+				} else {
+					System.err.println("SONAR: error " +
+						e.getMessage());
+					e.printStackTrace();
+				}
+				return true;
+			}
+		}
+	);
 
 	/** Get the port from a set of properties */
 	static protected int getPort(Properties p) throws ConfigurationError {
@@ -191,10 +209,7 @@ public class Server extends Thread {
 
 	/** Process messages on one connection */
 	public void processMessages(final ConnectionImpl c) {
-		processor.add(new Task() {
-			public String getName() {
-				return "MessageProcessor";
-			}
+		processor.addJob(new Job() {
 			public void perform() {
 				DEBUG_TASK.log("Processing messages for " +
 					c.getName());
@@ -213,10 +228,7 @@ public class Server extends Thread {
 
 	/** Flush outgoing data for one connection */
 	public void flush(final ConnectionImpl c) {
-		processor.add(new Task() {
-			public String getName() {
-				return "Flusher";
-			}
+		processor.addJob(new Job() {
 			public void perform() {
 				DEBUG_TASK.log("Flushing for " + c.getName());
 				c.flush();
@@ -348,10 +360,7 @@ public class Server extends Thread {
 
 	/** Add the specified object to the server's namespace */
 	public void addObject(final SonarObject o) {
-		processor.add(new Task() {
-			public String getName() {
-				return "ObjectAdder";
-			}
+		processor.addJob(new Job() {
 			public void perform() throws NamespaceError {
 				DEBUG_TASK.log("Adding object " + o.getName());
 				doAddObject(o);
@@ -370,10 +379,7 @@ public class Server extends Thread {
 
 	/** Remove the specified object from the server's namespace */
 	public void removeObject(final SonarObject o) {
-		processor.add(new Task() {
-			public String getName() {
-				return "ObjectRemover";
-			}
+		processor.addJob(new Job() {
 			public void perform() throws SonarException {
 				DEBUG_TASK.log("Removing object " +o.getName());
 				doRemoveObject(o);
@@ -391,10 +397,7 @@ public class Server extends Thread {
 	public void setAttribute(final SonarObject o, final String a,
 		final String[] v)
 	{
-		processor.add(new Task() {
-			public String getName() {
-				return "AttributeSetter";
-			}
+		processor.addJob(new Job() {
 			public void perform() throws NamespaceError {
 				DEBUG_TASK.log("Setting attribute " + a +
 					" on " + o.getName());

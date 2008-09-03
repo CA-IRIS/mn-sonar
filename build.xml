@@ -21,10 +21,30 @@
 	<property name="manifest.client" value="client-MANIFEST.MF"/>
 	<property name="manifest.server" value="server-MANIFEST.MF"/>
 	<property name="manifest.test" value="test-MANIFEST.MF"/>
+	<property name="scheduler.jar"
+		  value="scheduler-${scheduler.version}.jar"/>
 	<property name="client.jar" value="${name}-client-${version}.jar"/>
 	<property name="server.jar" value="${name}-server-${version}.jar"/>
 	<property name="test.jar" value="${name}-test-${version}.jar"/>
 	<property name="build.compiler.pedantic" value="true"/>
+	<path id="classpath">
+		<fileset dir="${lib.dir}" includes="*.jar"/>
+	</path>
+
+	<!-- Check for one file dependancy -->
+	<target name="check-dep">
+		<available property="file.exists"
+			   file="${lib.dir}/${file.dep}"/>
+		<fail unless="file.exists"
+		      message="Missing dependency: ${lib.dir}/${file.dep}"/>
+	</target>
+
+	<!-- Check for dependancies -->
+	<target name="check">
+		<antcall target="check-dep">
+			<param name="file.dep" value="${scheduler.jar}"/>
+		</antcall>
+	</target>
 
 	<!-- Prepare the build directory -->
 	<target name="prepare"
@@ -53,7 +73,7 @@
 
 	<!-- Compile the source code -->
 	<target name="compile"
-	        depends="prepare"
+	        depends="check,prepare"
 	        description="Compile all of the source files for the project">
 		<javac srcdir="${build.src}"
 		       destdir="${build.classes}"
@@ -61,6 +81,7 @@
 		       deprecation="on"
 		       source="1.5"
 		       target="1.5">
+			<classpath refid="classpath"/>
 		</javac>
 	</target>
 

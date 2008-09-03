@@ -15,6 +15,7 @@
 package us.mn.state.dot.sonar.test;
 
 import java.util.Map;
+import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.PropertyLoader;
 import us.mn.state.dot.sonar.Role;
@@ -22,7 +23,6 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.ProxyListener;
-import us.mn.state.dot.sonar.client.ShowHandler;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.sonar.server.Namespace;
 import us.mn.state.dot.sonar.server.RoleImpl;
@@ -92,9 +92,11 @@ public class Main {
 
 	static protected void testClient() throws Exception {
 		Client c = new Client(PropertyLoader.load(PROP_LOC),
-			new ShowHandler() {
-				public void display(String m) {
-					System.err.println("SHOW: " + m);
+			new ExceptionHandler() {
+				public boolean handle(Exception e) {
+					System.err.println("SHOW: " +
+						e.getMessage());
+					return true;
 				}
 			}
 		);

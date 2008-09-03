@@ -22,13 +22,14 @@ import java.util.Map;
 import java.util.Set;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
+import us.mn.state.dot.sched.ExceptionHandler;
+import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Security;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.sonar.Task;
-import us.mn.state.dot.sonar.TaskProcessor;
 
 /**
  * The SONAR client processes all data transfers with the server.
@@ -36,6 +37,9 @@ import us.mn.state.dot.sonar.TaskProcessor;
  * @author Douglas Lau
  */
 public class Client extends Thread {
+
+	/** Exception handler */
+	protected final ExceptionHandler handler;
 
 	/** Selector for non-blocking I/O */
 	protected final Selector selector;
@@ -47,7 +51,7 @@ public class Client extends Thread {
 	protected final ClientConduit conduit;
 
 	/** Task processor thread */
-	protected final TaskProcessor processor = new TaskProcessor();
+	protected final Scheduler processor = new Scheduler("Task Processor");
 
 	/** Message processor task */
 	protected final MessageProcessor m_proc = new MessageProcessor();
@@ -58,10 +62,11 @@ public class Client extends Thread {
 	}
 
 	/** Create a new SONAR client */
-	public Client(Properties props, ShowHandler handler) throws IOException,
+	public Client(Properties props, ExceptionHandler h) throws IOException,
 		ConfigurationError
 	{
 		super("SONAR Client");
+		handler = h;
 		selector = Selector.open();
 		context = Security.createContext(props);
 		conduit = new ClientConduit(props, this, selector,
@@ -85,7 +90,7 @@ public class Client extends Thread {
 				doSelect();
 			}
 			catch(Exception e) {
-				e.printStackTrace();
+				handler.handle(e);
 				break;
 			}
 		}
@@ -151,10 +156,7 @@ public class Client extends Thread {
 	public void login(final String user, final String password)
 		throws SonarException
 	{
-		processor.add(new Task() {
-			public String getName() {
-				return "LoginTask";
-			}
+		processor.addJob(new Job() {
 			public void perform() {
 				conduit.login(user, password);
 			}
@@ -167,7 +169,7 @@ public class Client extends Thread {
 				Thread.sleep(100);
 			}
 			catch(InterruptedException e) {
-				e.printStackTrace();
+				handler.handle(e);
 			}
 		}
 		throw new SonarException("Login timed out");
@@ -175,14 +177,11 @@ public class Client extends Thread {
 
 	/** Process messages on the conduit */
 	public void processMessages() {
-		processor.add(m_proc);
+		processor.addJob(m_proc);
 	}
 
 	/** Message processor for handling incoming messages */
-	protected class MessageProcessor implements Task {
-		public String getName() {
-			return "MessageProcessor";
-		}
+	protected class MessageProcessor extends Job {
 		public void perform() throws IOException {
 			try {
 				conduit.processMessages();
@@ -196,10 +195,7 @@ public class Client extends Thread {
 
 	/** Message processor for handling incoming messages */
 	public void flush() {
-		processor.add(new Task() {
-			public String getName() {
-				return "Flusher";
-			}
+		processor.addJob(new Job() {
 			public void perform() {
 				conduit.flush();
 			}

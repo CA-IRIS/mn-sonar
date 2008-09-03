@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,18 +12,17 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.sonar;
+package us.mn.state.dot.sonar.client;
 
 /**
- * A simple task interface
+ * This exception wraps a SHOW message from the SONAR server.
  *
  * @author Douglas Lau
  */
-public interface Task {
+public class SonarShowException extends Exception {
 
-	/** Get the task name */
-	String getName();
-
-	/** Perform the task */
-	void perform() throws Exception;
+	/** Create a new SONAR SHOW exception */
+	public SonarShowException(String m) {
+		super(m);
+	}
 }
