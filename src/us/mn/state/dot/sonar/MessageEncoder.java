@@ -65,7 +65,9 @@ public class MessageEncoder {
 	}
 
 	/** Encode one message with the given code, name and parameters */
-	public void encode(Message m, String name, String[] params) {
+	public void encode(Message m, String name, String[] params)
+		throws FlushError
+	{
 		m_buf.clear();
 		m_buf.put(m.code);
 		if(name != null) {
@@ -84,12 +86,12 @@ public class MessageEncoder {
 	}
 
 	/** Encode one message with the given code and name */
-	public void encode(Message m, String name) {
+	public void encode(Message m, String name) throws FlushError {
 		encode(m, name, null);
 	}
 
 	/** Encode one message with the given code */
-	public void encode(Message m) {
+	public void encode(Message m) throws FlushError {
 		encode(m, null, null);
 	}
 
@@ -99,22 +101,20 @@ public class MessageEncoder {
 	}
 
 	/** Ensure there is capacity in the write buffer */
-	protected boolean ensureCapacity(int n_bytes) {
+	protected void ensureCapacity(int n_bytes) throws FlushError {
 		for(int i = 0; i < FLUSH_TRIES; i++) {
 			if(mustFlush(n_bytes)) {
 				conduit.flush();
 				sleepBriefly();
 			} else
-				return true;
+				return;
 		}
-		System.err.println("SONAR flush failed: " + conduit.getName());
-		conduit.disconnect();
-		return false;
+		throw new FlushError(conduit.getName());
 	}
 
 	/** Fill the output buffer with encoded message data */
-	protected void fillBuffer(ByteBuffer b) {
-		if(ensureCapacity(b.remaining()))
-			app_out.put(b);
+	protected void fillBuffer(ByteBuffer b) throws FlushError {
+		ensureCapacity(b.remaining());
+		app_out.put(b);
 	}
 }

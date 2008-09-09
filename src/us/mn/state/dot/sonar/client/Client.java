@@ -27,6 +27,7 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.ConfigurationError;
+import us.mn.state.dot.sonar.FlushError;
 import us.mn.state.dot.sonar.Security;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
@@ -97,7 +98,7 @@ public class Client extends Thread {
 	}
 
 	/** Quit the client connection */
-	public void quit() {
+	public void quit() throws FlushError {
 		conduit.quit();
 	}
 
@@ -117,13 +118,13 @@ public class Client extends Thread {
 	}
 
 	/** Populate the specified type cache */
-	public void populate(TypeCache tc) {
+	public void populate(TypeCache tc) throws FlushError {
 		tc.setConduit(conduit);
 		conduit.queryAll(tc);
 	}
 
 	/** Populate the specified type cache */
-	public void populate(TypeCache tc, boolean wait) {
+	public void populate(TypeCache tc, boolean wait) throws FlushError {
 		if(wait) {
 			EnumerationWaiter ew = new EnumerationWaiter();
 			tc.addProxyListener(ew);
@@ -157,7 +158,7 @@ public class Client extends Thread {
 		throws SonarException
 	{
 		processor.addJob(new Job() {
-			public void perform() {
+			public void perform() throws FlushError {
 				conduit.login(user, password);
 			}
 		});

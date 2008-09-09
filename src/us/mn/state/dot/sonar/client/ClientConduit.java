@@ -30,6 +30,7 @@ import javax.net.ssl.SSLException;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.ConfigurationError;
+import us.mn.state.dot.sonar.FlushError;
 import us.mn.state.dot.sonar.Message;
 import us.mn.state.dot.sonar.ProtocolError;
 import us.mn.state.dot.sonar.SonarException;
@@ -148,38 +149,40 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Attempt to log in to the SONAR server */
-	public void login(String name, String pwd) {
+	public void login(String name, String pwd) throws FlushError {
 		state.encoder.encode(Message.LOGIN, name, new String[] {pwd});
 		flush();
 	}
 
 	/** Quit the SONAR session */
-	public void quit() {
+	public void quit() throws FlushError {
 		state.encoder.encode(Message.QUIT);
 		flush();
 	}
 
 	/** Query all SONAR objects of the given type */
-	public void queryAll(TypeCache tcache) {
+	public void queryAll(TypeCache tcache) throws FlushError {
 		cache.addType(tcache);
 		state.encoder.encode(Message.ENUMERATE, tcache.tname);
 		flush();
 	}
 
 	/** Create the specified object name */
-	public void createObject(String name) {
+	public void createObject(String name) throws FlushError {
 		state.encoder.encode(Message.OBJECT, name);
 		flush();
 	}
 
 	/** Request an attribute change */
-	public void setAttribute(String name, String[] params) {
+	public void setAttribute(String name, String[] params)
+		throws FlushError
+	{
 		state.encoder.encode(Message.ATTRIBUTE, name, params);
 		flush();
 	}
 
 	/** Remove the specified object name */
-	public void removeObject(String name) {
+	public void removeObject(String name) throws FlushError {
 		state.encoder.encode(Message.REMOVE, name);
 		flush();
 	}

@@ -37,6 +37,7 @@ import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.ConfigurationError;
+import us.mn.state.dot.sonar.FlushError;
 import us.mn.state.dot.sonar.Names;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.PropertyLoader;
@@ -218,6 +219,12 @@ public class Server extends Thread {
 				}
 				catch(SSLException e) {
 					System.err.println("SONAR: SSL error " +
+						e.getMessage() + " on " +
+						c.getName());
+					c.disconnect();
+				}
+				catch(FlushError e) {
+					System.err.println("SONAR: error " +
 						e.getMessage() + " on " +
 						c.getName());
 					c.disconnect();

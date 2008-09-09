@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.FlushError;
 import us.mn.state.dot.sonar.Marshaller;
 import us.mn.state.dot.sonar.Names;
 import us.mn.state.dot.sonar.NamespaceError;
@@ -243,29 +244,39 @@ public class TypeCache<T extends SonarObject> {
 	}
 
 	/** Remove the specified object */
-	void removeObject(T o) {
+	void removeObject(T o) throws FlushError {
 		String name = Names.makePath(o);
 		conduit.removeObject(name);
 	}
 
 	/** Create the specified object name */
 	public void createObject(String oname) {
-		String name = Names.makePath(tname, oname);
-		conduit.createObject(name);
+		try {
+			String name = Names.makePath(tname, oname);
+			conduit.createObject(name);
+		}
+		catch(FlushError e) {
+			e.printStackTrace();
+		}
 	}
 
 	/** Create an object with the specified attributes */
 	public void createObject(String oname, Map<String, Object> amap) {
-		for(Map.Entry<String, Object> entry: amap.entrySet()) {
-			Object v = entry.getValue();
-			String[] values = Marshaller.marshall(v.getClass(),
-				new Object[] { v });
-			String name = Names.makePath(tname, oname,
-				entry.getKey());
-			conduit.setAttribute(name, values);
+		try {
+			for(Map.Entry<String, Object> entry: amap.entrySet()) {
+				Object v = entry.getValue();
+				String[] values = Marshaller.marshall(
+					v.getClass(), new Object[] { v });
+				String name = Names.makePath(tname, oname,
+					entry.getKey());
+				conduit.setAttribute(name, values);
+			}
+			String name = Names.makePath(tname, oname);
+			conduit.createObject(name);
 		}
-		String name = Names.makePath(tname, oname);
-		conduit.createObject(name);
+		catch(FlushError e) {
+			e.printStackTrace();
+		}
 	}
 
 	/** Get the map of names to SonarObjects of the specified type. All

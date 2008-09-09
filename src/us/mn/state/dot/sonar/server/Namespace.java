@@ -16,6 +16,7 @@ package us.mn.state.dot.sonar.server;
 
 import java.util.HashMap;
 import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.FlushError;
 import us.mn.state.dot.sonar.Message;
 import us.mn.state.dot.sonar.MessageEncoder;
 import us.mn.state.dot.sonar.Names;
@@ -160,7 +161,9 @@ public class Namespace extends Names {
 	}
 
 	/** Enumerate the root of the namespace */
-	protected void enumerateRoot(MessageEncoder enc) {
+	protected void enumerateRoot(MessageEncoder enc)
+		throws FlushError
+	{
 		synchronized(root) {
 			for(TypeNode t: root.values())
 				enc.encode(Message.TYPE, t.name);

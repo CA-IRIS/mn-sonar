@@ -27,6 +27,7 @@ import java.util.Set;
 import javax.net.ssl.SSLException;
 import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.Connection;
+import us.mn.state.dot.sonar.FlushError;
 import us.mn.state.dot.sonar.Message;
 import us.mn.state.dot.sonar.Names;
 import us.mn.state.dot.sonar.NamespaceError;
@@ -177,17 +178,39 @@ public class ConnectionImpl extends Conduit implements Connection {
 	public void notifyAttribute(String tname, String oname, String name,
 		String[] params)
 	{
-		if(isWatching(tname) || isWatching(oname)) {
+		if(isWatching(tname) || isWatching(oname))
+			notifyAttribute(name, params);
+	}
+
+	/** Notify the client of an attribute change */
+	protected void notifyAttribute(String name, String[] params) {
+		try {
 			state.encoder.encode(Message.ATTRIBUTE, name, params);
 			flush();
+		}
+		catch(FlushError e) {
+			System.err.println("SONAR: notify attr: " +
+				e.getMessage());
+			disconnect();
 		}
 	}
 
 	/** Notify the client of a name being removed */
 	public void notifyRemove(String name, String value) {
-		if(isWatching(name) || isWatching(value)) {
+		if(isWatching(name) || isWatching(value))
+			notifyRemove(value);
+	}
+
+	/** Notify the client of a name being removed */
+	protected void notifyRemove(String value) {
+		try {
 			state.encoder.encode(Message.REMOVE, value);
 			flush();
+		}
+		catch(FlushError e) {
+			System.err.println("SONAR: notify remove: " +
+				e.getMessage());
+			disconnect();
 		}
 	}
 
@@ -242,7 +265,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Process any incoming messages */
-	public void processMessages() throws SSLException {
+	public void processMessages() throws SSLException, FlushError {
 		if(!isConnected())
 			return;
 		while(state.doRead()) {
@@ -256,7 +279,9 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Process one message from the client */
-	protected void processMessage(List<String> params) {
+	protected void processMessage(List<String> params)
+		throws FlushError
+	{
 		try {
 			if(params.size() > 0)
 				_processMessage(params);
