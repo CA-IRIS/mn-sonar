@@ -332,9 +332,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Create a new object in the server namespace */
-	protected void createObject(String name, String[] names)
-		throws SonarException
-	{
+	protected void createObject(String[] names) throws SonarException {
 		SonarObject o = getObject(names[0], names[1]);
 		namespace.storeObject(o);
 		server.notifyObject(names, o);
@@ -450,7 +448,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		if(names.length == 2) {
 			if(!user.canAdd(name))
 				throw PermissionDenied.INSUFFICIENT_PRIVILEGES;
-			createObject(name, names);
+			createObject(names);
 		} else
 			throw NamespaceError.NAME_INVALID;
 	}
