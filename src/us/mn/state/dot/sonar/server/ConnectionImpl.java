@@ -334,8 +334,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Create a new object in the server namespace */
 	protected void createObject(String[] names) throws SonarException {
 		SonarObject o = getObject(names[0], names[1]);
-		namespace.storeObject(o);
-		server.notifyObject(names, o);
+		server.createObject(o);
 		phantom = null;
 	}
 

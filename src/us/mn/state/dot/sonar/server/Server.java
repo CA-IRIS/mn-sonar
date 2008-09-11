@@ -384,6 +384,15 @@ public class Server extends Thread {
 		notifyObject(names, o);
 	}
 
+	/** Create (synchronously) an object in the server's namespace */
+	public void createObject(SonarObject o) throws SonarException {
+		namespace.storeObject(o);
+		String[] names = new String[] {
+			o.getTypeName(), o.getName()
+		};
+		notifyObject(names, o);
+	}
+
 	/** Remove the specified object from the server's namespace */
 	public void removeObject(final SonarObject o) {
 		processor.addJob(new Job() {

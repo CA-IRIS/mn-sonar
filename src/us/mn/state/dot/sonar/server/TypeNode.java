@@ -49,6 +49,7 @@ public class TypeNode {
 
 	/** Add an object to the type node */
 	public void add(SonarObject o) throws NamespaceError {
+		// FIXME: all callers should just use storeObject instead
 		String name = o.getName();
 		synchronized(children) {
 			if(children.containsKey(name))
