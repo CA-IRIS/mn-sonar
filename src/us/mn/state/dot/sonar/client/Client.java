@@ -57,6 +57,9 @@ public class Client extends Thread {
 	/** Message processor task */
 	protected final MessageProcessor m_proc = new MessageProcessor();
 
+	/** Flag to indicate the client is quitting */
+	protected boolean quitting = false;
+
 	/** Get the connection name */
 	public String getConnection() {
 		return conduit.getConnection();
@@ -90,8 +93,9 @@ public class Client extends Thread {
 			try {
 				doSelect();
 			}
-			catch(Exception e) {
-				handler.handle(e);
+			catch(IOException e) {
+				if(!quitting)
+					handler.handle(e);
 				break;
 			}
 		}
@@ -99,6 +103,7 @@ public class Client extends Thread {
 
 	/** Quit the client connection */
 	public void quit() throws FlushError {
+		quitting = true;
 		conduit.quit();
 	}
 
