@@ -163,18 +163,19 @@ public class SSLState {
 		synchronized(net_in) {
 			net_in.flip();
 			try {
-				if(!net_in.hasRemaining())
-					return false;
-				ssl_in.clear();
-				engine.unwrap(net_in, ssl_in);
-				ssl_in.flip();
-				app_in.put(ssl_in);
+				int n_rem = net_in.remaining();
+				if(n_rem > 0) {
+					ssl_in.clear();
+					engine.unwrap(net_in, ssl_in);
+					ssl_in.flip();
+					app_in.put(ssl_in);
+				}
+				return net_in.remaining() < n_rem;
 			}
 			finally {
 				net_in.compact();
 			}
 		}
-		return true;
 	}
 
 	/** Check the status of the SSL engine */
