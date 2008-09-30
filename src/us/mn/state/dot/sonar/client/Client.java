@@ -190,7 +190,8 @@ public class Client extends Thread {
 				conduit.processMessages();
 			}
 			catch(IOException e) {
-				conduit.disconnect();
+				conduit.disconnect("I/O error: " +
+					e.getMessage());
 				throw e;
 			}
 		}

@@ -218,16 +218,12 @@ public class Server extends Thread {
 					c.processMessages();
 				}
 				catch(SSLException e) {
-					System.err.println("SONAR: SSL error " +
-						e.getMessage() + " on " +
-						c.getName());
-					c.disconnect();
+					c.disconnect("SSL error " +
+						e.getMessage());
 				}
 				catch(FlushError e) {
-					System.err.println("SONAR: error " +
-						e.getMessage() + " on " +
-						c.getName());
-					c.disconnect();
+					c.disconnect("Flush error " +
+						e.getMessage());
 				}
 			}
 		});
@@ -303,12 +299,10 @@ public class Server extends Thread {
 			}
 		}
 		catch(CancelledKeyException e) {
-			disconnect(key);
+			c.disconnect("Key cancelled");
 		}
 		catch(IOException e) {
-			System.err.println("SONAR: I/O error " +
-				 e.getMessage() + " on " + c.getName());
-			c.disconnect();
+			c.disconnect("I/O error " + e.getMessage());
 		}
 	}
 

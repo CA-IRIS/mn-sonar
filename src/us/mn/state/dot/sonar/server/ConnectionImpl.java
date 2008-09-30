@@ -163,8 +163,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			flush();
 		}
 		catch(SonarException e) {
-			System.err.println("SONAR: notify: " + e.getMessage());
-			disconnect();
+			disconnect("Notify error: " + e.getMessage());
 		}
 	}
 
@@ -189,9 +188,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			flush();
 		}
 		catch(FlushError e) {
-			System.err.println("SONAR: notify attr: " +
-				e.getMessage());
-			disconnect();
+			disconnect("Notify attr error: " + e.getMessage());
 		}
 	}
 
@@ -208,9 +205,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			flush();
 		}
 		catch(FlushError e) {
-			System.err.println("SONAR: notify remove: " +
-				e.getMessage());
-			disconnect();
+			disconnect("Notify remove error: " + e.getMessage());
 		}
 	}
 
@@ -240,8 +235,9 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Disconnect the client connection */
-	public void disconnect() {
-		super.disconnect();
+	public void disconnect(String msg) {
+		super.disconnect(msg);
+		System.err.println("SONAR: " + msg + " on " + getName());
 		synchronized(watching) {
 			watching.clear();
 		}
@@ -250,18 +246,14 @@ public class ConnectionImpl extends Conduit implements Connection {
 			channel.close();
 		}
 		catch(IOException e) {
-			e.printStackTrace();
+			System.err.println("SONAR: Close error: " +
+				e.getMessage() + " on " + getName());
 		}
-	}
-
-	/** Cancel the connection task */
-	public void cancel() {
-		disconnect();
 	}
 
 	/** Destroy the connection */
 	public void destroy() {
-		disconnect();
+		disconnect("Connection destroyed");
 	}
 
 	/** Process any incoming messages */
@@ -366,12 +358,10 @@ public class ConnectionImpl extends Conduit implements Connection {
 				startWrite();
 		}
 		catch(BufferOverflowException e) {
-			System.err.println("SONAR: buffer overflow");
-			disconnect();
+			disconnect("Buffer overflow error");
 		}
 		catch(IOException e) {
-			System.err.println("SONAR: error " + e.getMessage());
-			disconnect();
+			disconnect("I/O error: " + e.getMessage());
 		}
 	}
 
@@ -409,7 +399,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Respond to a QUIT message */
 	public void doQuit(List<String> params) {
-		disconnect();
+		disconnect("Client QUIT");
 	}
 
 	/** Respond to an ENUMERATE message */

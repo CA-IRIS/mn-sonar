@@ -35,7 +35,7 @@ abstract public class Conduit {
 	}
 
 	/** Disconnect the conduit */
-	public void disconnect() {
+	public void disconnect(String msg) {
 		connected = false;
 	}
 

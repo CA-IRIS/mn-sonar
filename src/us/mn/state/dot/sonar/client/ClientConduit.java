@@ -196,13 +196,21 @@ class ClientConduit extends Conduit {
 		}
 		catch(IOException e) {
 			handler.handle(e);
-			disconnect();
+			disconnect("I/O error: " + e.getMessage());
 		}
 	}
 
 	/** Disconnect the conduit */
-	public void disconnect() {
-		super.disconnect();
+	public void disconnect(String msg) {
+		super.disconnect(msg);
+		System.err.println("SONAR: " + msg);
+		try {
+			channel.close();
+		}
+		catch(IOException e) {
+			System.err.println("SONAR: Close error: " +
+				e.getMessage());
+		}
 		loggedIn = false;
 		handler.handle(new SonarException("Disconnected from server"));
 	}
@@ -229,7 +237,7 @@ class ClientConduit extends Conduit {
 		}
 		catch(SonarException e) {
 			handler.handle(e);
-			disconnect();
+			disconnect("error: " + e.getMessage());
 		}
 	}
 
@@ -259,7 +267,7 @@ class ClientConduit extends Conduit {
 	public void doQuit(List<String> p) throws SonarException {
 		if(p.size() != 1)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
-		disconnect();
+		disconnect("Received QUIT");
 	}
 
 	/** Process an OBJECT message from the server */
