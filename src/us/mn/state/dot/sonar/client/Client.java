@@ -101,12 +101,6 @@ public class Client extends Thread {
 		}
 	}
 
-	/** Quit the client connection */
-	public void quit() throws FlushError {
-		quitting = true;
-		conduit.quit();
-	}
-
 	/** Select and perform I/O on ready channels */
 	protected void doSelect() throws IOException {
 		selector.select();
@@ -123,13 +117,16 @@ public class Client extends Thread {
 	}
 
 	/** Populate the specified type cache */
-	public void populate(TypeCache tc) throws FlushError {
-		tc.setConduit(conduit);
-		conduit.queryAll(tc);
+	public void populate(final TypeCache tc) {
+		processor.addJob(new Job() {
+			public void perform() throws FlushError {
+				conduit.queryAll(tc);
+			}
+		});
 	}
 
 	/** Populate the specified type cache */
-	public void populate(TypeCache tc, boolean wait) throws FlushError {
+	public void populate(TypeCache tc, boolean wait) {
 		if(wait) {
 			EnumerationWaiter ew = new EnumerationWaiter();
 			tc.addProxyListener(ew);
@@ -182,7 +179,7 @@ public class Client extends Thread {
 	}
 
 	/** Process messages on the conduit */
-	public void processMessages() {
+	void processMessages() {
 		processor.addJob(m_proc);
 	}
 
@@ -200,10 +197,47 @@ public class Client extends Thread {
 	}
 
 	/** Message processor for handling incoming messages */
-	public void flush() {
+	void flush() {
 		processor.addJob(new Job() {
 			public void perform() {
 				conduit.flush();
+			}
+		});
+	}
+
+	/** Quit the client connection */
+	public void quit() {
+		quitting = true;
+		processor.addJob(new Job() {
+			public void perform() throws FlushError {
+				conduit.quit();
+			}
+		});
+	}
+
+	/** Request an attribute change */
+	void setAttribute(final String name, final String[] params) {
+		processor.addJob(new Job() {
+			public void perform() throws FlushError {
+				conduit.setAttribute(name, params);
+			}
+		});
+	}
+
+	/** Create the specified object name */
+	void createObject(final String name) {
+		processor.addJob(new Job() {
+			public void perform() throws FlushError {
+				conduit.createObject(name);
+			}
+		});
+	}
+
+	/** Remove the specified object name */
+	void removeObject(final String name) {
+		processor.addJob(new Job() {
+			public void perform() throws FlushError {
+				conduit.removeObject(name);
 			}
 		});
 	}

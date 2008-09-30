@@ -101,7 +101,7 @@ public class Main {
 			}
 		);
 		c.login("rtmcdatasync", "datasync");
-		TypeCache<Role> rc = new TypeCache<Role>(Role.class);
+		TypeCache<Role> rc = new TypeCache<Role>(Role.class, c);
 		rc.addProxyListener(new ProxyListener<Role>() {
 			public void proxyAdded(Role proxy) {
 				System.err.println("ROLE " + proxy.getName() +
@@ -119,11 +119,11 @@ System.err.println("role proxy removed: " + proxy.getName());
 		});
 		Map<String, Role> roles = rc.getAll();
 		c.populate(rc);
-		TypeCache<User> uc = new TypeCache<User>(User.class);
+		TypeCache<User> uc = new TypeCache<User>(User.class, c);
 		Map<String, User> users = uc.getAll();
 		c.populate(uc);
 		TypeCache<Connection> cc = new TypeCache<Connection>(
-			Connection.class);
+			Connection.class, c);
 		Map<String, Connection> conn = cc.getAll();
 		c.populate(cc);
 		Thread.sleep(2000);

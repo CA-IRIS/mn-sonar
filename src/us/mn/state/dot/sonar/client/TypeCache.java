@@ -43,9 +43,6 @@ public class TypeCache<T extends SonarObject> {
 		return System.identityHashCode(o);
 	}
 
-	/** Conduit (to send attribute update messages) */
-	protected ClientConduit conduit;
-
 	/** Type name */
 	public final String tname;
 
@@ -54,6 +51,9 @@ public class TypeCache<T extends SonarObject> {
 
 	/** Sonar object proxy method invoker */
 	protected final SonarInvoker invoker;
+
+	/** Client (to send attribute update messages) */
+	protected final Client client;
 
 	/** All SONAR objects of this type are put here.
 	 * All access must be synchronized on the "children" lock. */
@@ -77,18 +77,14 @@ public class TypeCache<T extends SonarObject> {
 	 * addition to the &lt;T&gt; qualifier. These types must be identical!
 	 * For example, to create a cache of Users, do this:
 	 * <code>new TypeCache&lt;User&gt;(User.class)</code> */
-	public TypeCache(Class iface) throws NoSuchFieldException,
+	public TypeCache(Class iface, Client c) throws NoSuchFieldException,
 		IllegalAccessException
 	{
 		assert SonarObject.class.isAssignableFrom(iface);
 		tname = Marshaller.typeName(iface);
 		ifaces = new Class[] { iface };
 		invoker = new SonarInvoker(this, iface);
-	}
-
-	/** Set the conduit to send messages */
-	void setConduit(ClientConduit c) {
-		conduit = c;
+		client = c;
 	}
 
 	/** Notify proxy listeners that a proxy has been added */
@@ -228,7 +224,7 @@ public class TypeCache<T extends SonarObject> {
 			return;
 		String[] values = attr.marshall(args);
 		String name = Names.makePath(o, a);
-		conduit.setAttribute(name, values);
+		client.setAttribute(name, values);
 	}
 
 	/** Unmarshall an attribute value into the given proxy */
@@ -244,39 +240,32 @@ public class TypeCache<T extends SonarObject> {
 	}
 
 	/** Remove the specified object */
-	void removeObject(T o) throws FlushError {
+	void removeObject(T o) {
 		String name = Names.makePath(o);
-		conduit.removeObject(name);
+		client.removeObject(name);
 	}
 
 	/** Create the specified object name */
 	public void createObject(String oname) {
-		try {
-			String name = Names.makePath(tname, oname);
-			conduit.createObject(name);
-		}
-		catch(FlushError e) {
-			e.printStackTrace();
-		}
+		String name = Names.makePath(tname, oname);
+		client.createObject(name);
 	}
 
 	/** Create an object with the specified attributes */
 	public void createObject(String oname, Map<String, Object> amap) {
-		try {
-			for(Map.Entry<String, Object> entry: amap.entrySet()) {
-				Object v = entry.getValue();
-				String[] values = Marshaller.marshall(
-					v.getClass(), new Object[] { v });
-				String name = Names.makePath(tname, oname,
-					entry.getKey());
-				conduit.setAttribute(name, values);
-			}
-			String name = Names.makePath(tname, oname);
-			conduit.createObject(name);
+		for(Map.Entry<String, Object> entry: amap.entrySet()) {
+			Object v = entry.getValue();
+			String[] values = Marshaller.marshall(
+				v.getClass(), new Object[] { v });
+			String name = Names.makePath(tname, oname,
+				entry.getKey());
+			client.setAttribute(name, values);
 		}
-		catch(FlushError e) {
-			e.printStackTrace();
-		}
+		// FIXME: there is a race between the setAttribute calls and
+		// the createObject call. Another thread could get in between
+		// and mess up the "phantom" object creation.
+		String name = Names.makePath(tname, oname);
+		client.createObject(name);
 	}
 
 	/** Get the map of names to SonarObjects of the specified type. All

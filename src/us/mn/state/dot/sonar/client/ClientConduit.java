@@ -148,47 +148,8 @@ class ClientConduit extends Conduit {
 		connected = false;
 	}
 
-	/** Attempt to log in to the SONAR server */
-	public void login(String name, String pwd) throws FlushError {
-		state.encoder.encode(Message.LOGIN, name, new String[] {pwd});
-		flush();
-	}
-
-	/** Quit the SONAR session */
-	public void quit() throws FlushError {
-		state.encoder.encode(Message.QUIT);
-		flush();
-	}
-
-	/** Query all SONAR objects of the given type */
-	public void queryAll(TypeCache tcache) throws FlushError {
-		cache.addType(tcache);
-		state.encoder.encode(Message.ENUMERATE, tcache.tname);
-		flush();
-	}
-
-	/** Create the specified object name */
-	public void createObject(String name) throws FlushError {
-		state.encoder.encode(Message.OBJECT, name);
-		flush();
-	}
-
-	/** Request an attribute change */
-	public void setAttribute(String name, String[] params)
-		throws FlushError
-	{
-		state.encoder.encode(Message.ATTRIBUTE, name, params);
-		flush();
-	}
-
-	/** Remove the specified object name */
-	public void removeObject(String name) throws FlushError {
-		state.encoder.encode(Message.REMOVE, name);
-		flush();
-	}
-
 	/** Complete the connection on the socket channel */
-	public void doConnect() throws IOException {
+	void doConnect() throws IOException {
 		if(channel.finishConnect()) {
 			connected = true;
 			disableWrite();
@@ -197,7 +158,7 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Read messages from the socket channel */
-	public void doRead() throws IOException {
+	void doRead() throws IOException {
 		int nbytes;
 		ByteBuffer net_in = state.getNetInBuffer();
 		synchronized(net_in) {
@@ -247,7 +208,7 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Process any incoming messages */
-	public void processMessages() throws IOException {
+	void processMessages() throws IOException {
 		if(!isConnected())
 			return;
 		while(state.doRead()) {
@@ -350,5 +311,42 @@ class ClientConduit extends Conduit {
 			handler.handle(new PermissionException(m));
 		else
 			handler.handle(new SonarShowException(m));
+	}
+
+	/** Attempt to log in to the SONAR server */
+	void login(String name, String pwd) throws FlushError {
+		state.encoder.encode(Message.LOGIN, name, new String[] {pwd});
+		flush();
+	}
+
+	/** Quit the SONAR session */
+	void quit() throws FlushError {
+		state.encoder.encode(Message.QUIT);
+		flush();
+	}
+
+	/** Query all SONAR objects of the given type */
+	void queryAll(TypeCache tcache) throws FlushError {
+		cache.addType(tcache);
+		state.encoder.encode(Message.ENUMERATE, tcache.tname);
+		flush();
+	}
+
+	/** Create the specified object name */
+	void createObject(String name) throws FlushError {
+		state.encoder.encode(Message.OBJECT, name);
+		flush();
+	}
+
+	/** Request an attribute change */
+	void setAttribute(String name, String[] params) throws FlushError {
+		state.encoder.encode(Message.ATTRIBUTE, name, params);
+		flush();
+	}
+
+	/** Remove the specified object name */
+	void removeObject(String name) throws FlushError {
+		state.encoder.encode(Message.REMOVE, name);
+		flush();
 	}
 }
