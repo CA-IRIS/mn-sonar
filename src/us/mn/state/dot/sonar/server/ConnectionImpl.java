@@ -253,7 +253,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Destroy the connection */
 	public void destroy() {
-		disconnect("Connection destroyed");
+		if(isConnected())
+			disconnect("Connection destroyed");
 	}
 
 	/** Process any incoming messages */
