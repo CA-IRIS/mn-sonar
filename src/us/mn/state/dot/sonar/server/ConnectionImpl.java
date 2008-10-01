@@ -188,7 +188,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			flush();
 		}
 		catch(FlushError e) {
-			disconnect("Notify attr error: " + e.getMessage());
+			disconnect("Flush error: notifyAttribute");
 		}
 	}
 
@@ -205,7 +205,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			flush();
 		}
 		catch(FlushError e) {
-			disconnect("Notify remove error: " + e.getMessage());
+			disconnect("Flush error: notifyRemove");
 		}
 	}
 
@@ -258,9 +258,22 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Process any incoming messages */
-	public void processMessages() throws SSLException, FlushError {
+	public void processMessages() {
 		if(!isConnected())
 			return;
+		try {
+			_processMessages();
+		}
+		catch(SSLException e) {
+			disconnect("SSL error " + e.getMessage());
+		}
+		catch(FlushError e) {
+			disconnect("Flush error: processMessages");
+		}
+	}
+
+	/** Process any incoming messages */
+	protected void _processMessages() throws SSLException, FlushError {
 		while(state.doRead()) {
 			List<String> params = state.decoder.decode();
 			while(params != null) {

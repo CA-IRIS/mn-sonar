@@ -109,7 +109,7 @@ public class MessageEncoder {
 			} else
 				return;
 		}
-		throw new FlushError(conduit.getName());
+		throw new FlushError();
 	}
 
 	/** Fill the output buffer with encoded message data */

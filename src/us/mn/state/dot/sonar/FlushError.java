@@ -22,7 +22,7 @@ package us.mn.state.dot.sonar;
 public class FlushError extends SonarException {
 
 	/** Create a new flush error */
-	public FlushError(String c) {
-		super("Flush error: " + c);
+	public FlushError() {
+		super("Flush error");
 	}
 }

@@ -37,7 +37,6 @@ import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.ConfigurationError;
-import us.mn.state.dot.sonar.FlushError;
 import us.mn.state.dot.sonar.Names;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.PropertyLoader;
@@ -214,17 +213,7 @@ public class Server extends Thread {
 			public void perform() {
 				DEBUG_TASK.log("Processing messages for " +
 					c.getName());
-				try {
-					c.processMessages();
-				}
-				catch(SSLException e) {
-					c.disconnect("SSL error " +
-						e.getMessage());
-				}
-				catch(FlushError e) {
-					c.disconnect("Flush error " +
-						e.getMessage());
-				}
+				c.processMessages();
 			}
 		});
 	}

@@ -19,7 +19,6 @@ import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.FlushError;
 import us.mn.state.dot.sonar.Marshaller;
 import us.mn.state.dot.sonar.Names;
 import us.mn.state.dot.sonar.NamespaceError;
