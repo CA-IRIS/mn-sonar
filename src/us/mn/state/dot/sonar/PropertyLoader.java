@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import java.util.Properties;
 
 /**
  * PropertyLoader is a utility class to load property files.
+ * FIXME: this class should be moved to some utility module.
  *
  * @author Douglas Lau
  */

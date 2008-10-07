@@ -39,7 +39,6 @@ import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
-import us.mn.state.dot.sonar.PropertyLoader;
 import us.mn.state.dot.sonar.Security;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
@@ -56,9 +55,6 @@ public class Server extends Thread {
 
 	/** SONAR task debug log */
 	static protected final DebugLog DEBUG_TASK = new DebugLog("sonar_task");
-
-	/** SONAR server configuration file */
-	static protected final String PROP_FILE = "/etc/sonar/sonar.properties";
 
 	/** SONAR namespace being served */
 	protected final ServerNamespace namespace;
@@ -129,12 +125,6 @@ public class Server extends Thread {
 		session_file = props.getProperty("sonar.session.file");
 		setDaemon(true);
 		start();
-	}
-
-	/** Create a new SONAR server */
-	public Server(ServerNamespace n) throws IOException, ConfigurationError
-	{
-		this(n, PropertyLoader.load(PROP_FILE));
 	}
 
 	/** Create and configure a server socket channel */

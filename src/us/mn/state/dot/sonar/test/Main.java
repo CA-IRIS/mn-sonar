@@ -31,6 +31,8 @@ import us.mn.state.dot.sonar.server.UserImpl;
 
 public class Main {
 
+	static protected final String PROP_FILE = "/etc/sonar/sonar.properties";
+
 	static protected final String PROP_LOC = "/sonar-client.properties";
 
 	static protected void printRoles(TypeCache<Role> roles) {
@@ -134,7 +136,7 @@ System.err.println("role proxy removed: " + proxy.getName());
 
 	static protected void testServer() throws Exception {
 		ServerNamespace n = createNamespace();
-		Server s = new Server(n);
+		Server s = new Server(n, PropertyLoader.load(PROP_FILE));
 		s.join();
 	}
 
