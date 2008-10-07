@@ -19,7 +19,7 @@ package us.mn.state.dot.sonar;
  *
  * @author Douglas Lau
  */
-abstract public class Names {
+abstract public class Namespace {
 
 	/** Name separator */
 	static public final String SEP = "/";
@@ -61,7 +61,7 @@ abstract public class Names {
 	}
 
 	/** FIXME: Hack to allow static name lookups */
-	static protected Names _namespace;
+	static protected Namespace _namespace;
 
 	/** FIXME: Lookup the specified object */
 	static public SonarObject lookup(String tname, String oname)

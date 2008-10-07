@@ -37,7 +37,7 @@ import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.ConfigurationError;
-import us.mn.state.dot.sonar.Names;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.PropertyLoader;
 import us.mn.state.dot.sonar.Security;
@@ -389,7 +389,7 @@ public class Server extends Thread {
 
 	/** Perform a remove object task */
 	protected void doRemoveObject(SonarObject o) throws SonarException {
-		notifyRemove(o.getTypeName(), Names.makePath(o));
+		notifyRemove(o.getTypeName(), Namespace.makePath(o));
 		namespace.removeObject(o);
 	}
 
@@ -408,8 +408,8 @@ public class Server extends Thread {
 
 	/** Perform a "set attribute" task */
 	protected void doSetAttribute(SonarObject o, String a, String[] v) {
-		String oname = Names.makePath(o);
-		String aname = Names.makePath(o, a);
+		String oname = Namespace.makePath(o);
+		String aname = Namespace.makePath(o, a);
 		notifyAttribute(o.getTypeName(), oname, aname, v);
 	}
 }

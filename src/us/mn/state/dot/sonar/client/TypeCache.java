@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Marshaller;
-import us.mn.state.dot.sonar.Names;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
@@ -222,7 +222,7 @@ public class TypeCache<T extends SonarObject> {
 		if(attr.valueEquals(args))
 			return;
 		String[] values = attr.marshall(args);
-		String name = Names.makePath(o, a);
+		String name = Namespace.makePath(o, a);
 		client.setAttribute(name, values);
 	}
 
@@ -240,13 +240,13 @@ public class TypeCache<T extends SonarObject> {
 
 	/** Remove the specified object */
 	void removeObject(T o) {
-		String name = Names.makePath(o);
+		String name = Namespace.makePath(o);
 		client.removeObject(name);
 	}
 
 	/** Create the specified object name */
 	public void createObject(String oname) {
-		String name = Names.makePath(tname, oname);
+		String name = Namespace.makePath(tname, oname);
 		client.createObject(name);
 	}
 
@@ -256,14 +256,14 @@ public class TypeCache<T extends SonarObject> {
 			Object v = entry.getValue();
 			String[] values = Marshaller.marshall(
 				v.getClass(), new Object[] { v });
-			String name = Names.makePath(tname, oname,
+			String name = Namespace.makePath(tname, oname,
 				entry.getKey());
 			client.setAttribute(name, values);
 		}
 		// FIXME: there is a race between the setAttribute calls and
 		// the createObject call. Another thread could get in between
 		// and mess up the "phantom" object creation.
-		String name = Names.makePath(tname, oname);
+		String name = Namespace.makePath(tname, oname);
 		client.createObject(name);
 	}
 

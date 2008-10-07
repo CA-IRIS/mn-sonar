@@ -29,7 +29,7 @@ import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.FlushError;
 import us.mn.state.dot.sonar.Message;
-import us.mn.state.dot.sonar.Names;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.ProtocolError;
 import us.mn.state.dot.sonar.SonarException;
@@ -354,7 +354,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		phantom = namespace.setAttribute(names[0], names[1], names[2],
 			p, phantom);
 		if(phantom == null) {
-			String oname = Names.makePath(names[0], names[1]);
+			String oname = Namespace.makePath(names[0], names[1]);
 			server.notifyAttribute(names[0], oname, name, p);
 		}
 	}
@@ -447,7 +447,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		if(params.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		String name = params.get(1);
-		String[] names = Names.parse(name);
+		String[] names = Namespace.parse(name);
 		if(names.length == 2) {
 			if(!user.canAdd(name))
 				throw PermissionDenied.INSUFFICIENT_PRIVILEGES;
@@ -474,7 +474,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		if(params.size() < 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		String name = params.get(1);
-		String[] names = Names.parse(name);
+		String[] names = Namespace.parse(name);
 		if(names.length == 3) {
 			if(!user.canUpdate(name))
 				throw PermissionDenied.INSUFFICIENT_PRIVILEGES;

@@ -144,6 +144,6 @@ public class Marshaller {
 		throws NoSuchFieldException, IllegalAccessException,
 		NamespaceError
 	{
-		return Names.lookup(typeName(t), p);
+		return Namespace.lookup(typeName(t), p);
 	}
 }

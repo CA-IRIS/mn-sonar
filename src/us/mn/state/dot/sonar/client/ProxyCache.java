@@ -15,7 +15,7 @@
 package us.mn.state.dot.sonar.client;
 
 import java.util.HashMap;
-import us.mn.state.dot.sonar.Names;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.ProtocolError;
 import us.mn.state.dot.sonar.SonarException;
@@ -26,7 +26,7 @@ import us.mn.state.dot.sonar.SonarObject;
  *
  * @author Douglas Lau
  */
-class ProxyCache extends Names {
+class ProxyCache extends Namespace {
 
 	/** Create a new proxy cache */
 	public ProxyCache() {
