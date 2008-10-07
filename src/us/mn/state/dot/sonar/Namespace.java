@@ -18,7 +18,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 
 /**
- * This helper class provides static methods to manipulate SONAR names.
+ * A namespace is a mapping of names to objects.
  *
  * @author Douglas Lau
  */
