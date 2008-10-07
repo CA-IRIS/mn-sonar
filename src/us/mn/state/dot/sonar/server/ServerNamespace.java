@@ -216,11 +216,15 @@ public class ServerNamespace extends Namespace {
 		throw NamespaceError.NAME_INVALID;
 	}
 
-	/** Find an object with the specified type name and checker callback */
-	public SonarObject findObject(String tname, Checker c)
-		throws NamespaceError
-	{
-		TypeNode t = getTypeNode(tname);
-		return t.find(c);
+	/** Find an object by calling a checker for each object of a type.
+	 * @param tname Sonar type name
+	 * @param c Checker callback
+	 * @return First object which Checker returns true */
+	public SonarObject findObject(String tname, Checker c) {
+		TypeNode t = _getTypeNode(tname);
+		if(t != null)
+			return t.findObject(c);
+		else
+			return null;
 	}
 }

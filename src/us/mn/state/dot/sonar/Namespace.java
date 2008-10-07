@@ -176,4 +176,10 @@ abstract public class Namespace {
 	 * @param oname Sonar object name
 	 * @return Object from namespace or null if name does not exist */
 	abstract public SonarObject lookupObject(String tname, String oname);
+
+	/** Find an object by calling a checker for each object of a type.
+	 * @param tname Sonar type name
+	 * @param c Checker callback
+	 * @return First object which Checker returns true */
+	abstract public SonarObject findObject(String tname, Checker c);
 }

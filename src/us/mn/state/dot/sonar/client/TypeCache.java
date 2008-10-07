@@ -289,7 +289,7 @@ public class TypeCache<T extends SonarObject> {
 	}
 
 	/** Find an object using the supplied checker callback */
-	public T find(Checker c) {
+	public T findObject(Checker<T> c) {
 		synchronized(children) {
 			for(T proxy: children.values()) {
 				if(c.check(proxy))

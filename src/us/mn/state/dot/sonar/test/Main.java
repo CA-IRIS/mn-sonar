@@ -34,7 +34,7 @@ public class Main {
 	static protected final String PROP_LOC = "/sonar-client.properties";
 
 	static protected void printRoles(TypeCache<Role> roles) {
-		roles.find(new Checker<Role>() {
+		roles.findObject(new Checker<Role>() {
 			public boolean check(Role r) {
 				System.err.println("ROLE " + r.getName() +
 					": " + r.getPattern());
@@ -44,7 +44,7 @@ public class Main {
 	}
 
 	static protected void printUsers(TypeCache<User> users) {
-		users.find(new Checker<User>() {
+		users.findObject(new Checker<User>() {
 			public boolean check(User u) {
 				System.err.println(u.getName() + ": " +
 					u.getDn());
@@ -58,7 +58,7 @@ public class Main {
 	}
 
 	static protected void printConnections(TypeCache<Connection> conn) {
-		conn.find(new Checker<Connection>() {
+		conn.findObject(new Checker<Connection>() {
 			public boolean check(Connection cx) {
 				User u = cx.getUser();
 				System.err.println(cx.getName() + ": " +

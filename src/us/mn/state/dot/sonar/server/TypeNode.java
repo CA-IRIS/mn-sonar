@@ -169,7 +169,7 @@ public class TypeNode {
 	}
 
 	/** Find an object using the supplied checker callback */
-	public SonarObject find(Checker c) {
+	public SonarObject findObject(Checker c) {
 		synchronized(children) {
 			for(SonarObject o: children.values()) {
 				if(c.check(o))

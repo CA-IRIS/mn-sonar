@@ -15,6 +15,7 @@
 package us.mn.state.dot.sonar.client;
 
 import java.util.HashMap;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.ProtocolError;
@@ -125,6 +126,18 @@ public class ClientNamespace extends Namespace {
 		TypeCache t = types.get(tname);
 		if(t != null)
 			return t.lookupObject(oname);
+		else
+			return null;
+	}
+
+	/** Find an object by calling a checker for each object of a type.
+	 * @param tname Sonar type name
+	 * @param c Checker callback
+	 * @return First object which Checker returns true */
+	public SonarObject findObject(String tname, Checker c) {
+		TypeCache t = types.get(tname);
+		if(t != null)
+			return t.findObject(c);
 		else
 			return null;
 	}
