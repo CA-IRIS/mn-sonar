@@ -61,7 +61,7 @@ public class ClientNamespace extends Namespace {
 	}
 
 	/** Put a new object in the cache */
-	public void putObject(String name) throws NamespaceError {
+	void putObject(String name) throws NamespaceError {
 		if(isAbsolute(name)) {
 			String[] names = parse(name);
 			if(names.length != 2)
@@ -72,7 +72,7 @@ public class ClientNamespace extends Namespace {
 	}
 
 	/** Remove an object from the cache */
-	public void removeObject(String name) throws NamespaceError {
+	void removeObject(String name) throws NamespaceError {
 		if(isAbsolute(name)) {
 			String[] names = parse(name);
 			if(names.length != 2)
@@ -83,9 +83,7 @@ public class ClientNamespace extends Namespace {
 	}
 
 	/** Unmarshall an object attribute */
-	public void unmarshallAttribute(String name, String[] v)
-		throws SonarException
-	{
+	void unmarshallAttribute(String name, String[] v) throws SonarException{
 		TypeCache t;
 		SonarObject o;
 		String a;
@@ -108,7 +106,7 @@ public class ClientNamespace extends Namespace {
 	}
 
 	/** Process a TYPE message from the server */
-	public void setCurrentType(String t) throws NamespaceError {
+	void setCurrentType(String t) throws NamespaceError {
 		if(t.equals("") || types.containsKey(t)) {
 			if(t.equals("") && cur_type != null)
 				cur_type.enumerationComplete();

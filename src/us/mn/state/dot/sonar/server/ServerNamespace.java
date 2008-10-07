@@ -95,9 +95,8 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Set the value of an attribute */
-	public SonarObject setAttribute(String tname, String oname,
-		String aname, String[] params, SonarObject phantom)
-		throws SonarException
+	SonarObject setAttribute(String tname, String oname, String aname,
+		String[] params, SonarObject phantom) throws SonarException
 	{
 		TypeNode t = getTypeNode(tname);
 		if(phantom != null && phantom.getTypeName().equals(tname) &&
@@ -110,7 +109,7 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Remove an object from the namespace */
-	public void removeObject(SonarObject o) throws SonarException {
+	void removeObject(SonarObject o) throws SonarException {
 		TypeNode n = getTypeNode(o);
 		n.removeObject(o);
 	}
@@ -128,7 +127,7 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Get the specified object */
-	public SonarObject getObject(String tname, String oname)
+	SonarObject getObject(String tname, String oname)
 		throws NamespaceError
 	{
 		TypeNode t = getTypeNode(tname);
@@ -136,7 +135,7 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Get the specified object */
-	public SonarObject getObject(String name) throws NamespaceError {
+	SonarObject getObject(String name) throws NamespaceError {
 		String[] names = parse(name);
 		if(names.length == 2)
 			return getObject(names[0], names[1]);
@@ -198,9 +197,7 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Enumerate everything contained by a name in the namespace */
-	public void enumerate(String name, MessageEncoder enc)
-		throws SonarException
-	{
+	void enumerate(String name, MessageEncoder enc) throws SonarException {
 		String[] names = parse(name);
 		switch(names.length) {
 			case 0:
