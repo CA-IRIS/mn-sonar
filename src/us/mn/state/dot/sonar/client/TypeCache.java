@@ -271,13 +271,6 @@ public class TypeCache<T extends SonarObject> {
 		client.createObject(name);
 	}
 
-	/** Get the map of names to SonarObjects of the specified type. All
-	 * access to this map must be synchronized. Any attempt to write to
-	 * the Map will invalidate the cache. */
-	public Map<String, T> getAll() {
-		return children;
-	}
-
 	/** Add a ProxyListener */
 	public void addProxyListener(ProxyListener<T> l) {
 		synchronized(children) {

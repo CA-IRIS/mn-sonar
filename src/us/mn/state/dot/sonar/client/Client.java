@@ -67,7 +67,7 @@ public class Client extends Thread {
 	}
 
 	/** Get the namespace */
-	Namespace getNamespace() {
+	public Namespace getNamespace() {
 		return conduit.getNamespace();
 	}
 

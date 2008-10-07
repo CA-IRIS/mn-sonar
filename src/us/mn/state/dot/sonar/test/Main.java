@@ -14,8 +14,8 @@
  */
 package us.mn.state.dot.sonar.test;
 
-import java.util.Map;
 import us.mn.state.dot.sched.ExceptionHandler;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.PropertyLoader;
 import us.mn.state.dot.sonar.Role;
@@ -33,61 +33,40 @@ public class Main {
 
 	static protected final String PROP_LOC = "/sonar-client.properties";
 
-	static protected void printRoles(Map<String, Role> roles) {
-		synchronized(roles) {
-			for(Role r: roles.values()) {
+	static protected void printRoles(TypeCache<Role> roles) {
+		roles.find(new Checker<Role>() {
+			public boolean check(Role r) {
 				System.err.println("ROLE " + r.getName() +
 					": " + r.getPattern());
+				return false;
 			}
-			System.err.println("role count: " + roles.size());
-		}
+		});
 	}
 
-	static protected void printUsers(Map<String, User> users) {
-		synchronized(users) {
-			for(User u: users.values()) {
+	static protected void printUsers(TypeCache<User> users) {
+		users.find(new Checker<User>() {
+			public boolean check(User u) {
 				System.err.println(u.getName() + ": " +
 					u.getDn());
 				for(Role r: u.getRoles()) {
 					System.err.println("\trole: " +
 						r.getName());
 				}
+				return false;
 			}
-			System.err.println("user count: " + users.size());
-		}
+		});
 	}
 
-	static protected void printConnections(Map<String, Connection> conn) {
-		synchronized(conn) {
-			for(Connection cx: conn.values()) {
+	static protected void printConnections(TypeCache<Connection> conn) {
+		conn.find(new Checker<Connection>() {
+			public boolean check(Connection cx) {
 				User u = cx.getUser();
 				System.err.println(cx.getName() + ": " +
 					u.getName() + " (" + u.getFullName() +
 					")");
+				return false;
 			}
-			System.err.println("connection count: " + conn.size());
-		}
-	}
-
-	static protected User lookupUser(Map<String, User> users, String u) {
-		synchronized(users) {
-			return users.get(u);
-		}
-	}
-
-	static protected Role lookupRole(Map<String, Role> roles, String r) {
-		synchronized(roles) {
-			return roles.get(r);
-		}
-	}
-
-	static protected void destroyRole(Map<String, Role> roles, String n) {
-		synchronized(roles) {
-			for(Role r: roles.values()) {
-				if(r.getName().equals(n))
-					r.destroy();
-			}
-		}
+		});
 	}
 
 	static protected void testClient() throws Exception {
@@ -100,7 +79,7 @@ public class Main {
 				}
 			}
 		);
-		c.login("rtmcdatasync", "datasync");
+		c.login("username", "password");
 		TypeCache<Role> rc = new TypeCache<Role>(Role.class, c);
 		rc.addProxyListener(new ProxyListener<Role>() {
 			public void proxyAdded(Role proxy) {
@@ -117,27 +96,16 @@ System.err.println("role proxy removed: " + proxy.getName());
 //System.err.println("role proxy changed: " + proxy.getName() + ", " + a);
 			}
 		});
-		Map<String, Role> roles = rc.getAll();
 		c.populate(rc);
 		TypeCache<User> uc = new TypeCache<User>(User.class, c);
-		Map<String, User> users = uc.getAll();
 		c.populate(uc);
 		TypeCache<Connection> cc = new TypeCache<Connection>(
 			Connection.class, c);
-		Map<String, Connection> conn = cc.getAll();
 		c.populate(cc);
 		Thread.sleep(2000);
-//		rc.createObject("tiger");
-//		User u = lookupUser(users, "lau1dou");
-//		u.setDn("lau1dou@ad.dot.state.mn.us");
-/*		u.setRoles(new Role[] {
-			lookupRole(roles, "admin"),
-			lookupRole(roles, "view"),
-		});
-		Thread.sleep(1000); */
-		printRoles(roles);
-		printUsers(users);
-		printConnections(conn);
+		printRoles(rc);
+		printUsers(uc);
+		printConnections(cc);
 		c.join();
 	}
 
