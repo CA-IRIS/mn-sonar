@@ -105,11 +105,6 @@ public class TypeNode {
 		}
 	}
 
-	/** Get an object with the given name (or null if it does not exist) */
-	public SonarObject getObject(String n) {
-		return lookupObject(n);
-	}
-
 	/** Get the value of an attribute */
 	public String[] getValue(SonarObject o, String a)
 		throws SonarException

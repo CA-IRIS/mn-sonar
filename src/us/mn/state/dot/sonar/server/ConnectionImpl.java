@@ -463,11 +463,12 @@ public class ConnectionImpl extends Conduit implements Connection {
 		String name = params.get(1);
 		if(!user.canRemove(name))
 			throw PermissionDenied.INSUFFICIENT_PRIVILEGES;
-		SonarObject o = namespace.getObject(name);
-		if(o == null)
+		SonarObject obj = namespace.lookupObject(name);
+		if(obj != null) {
+			namespace.removeObject(obj);
+			server.notifyRemove(obj.getTypeName(), name);
+		} else
 			throw NamespaceError.NAME_INVALID;
-		namespace.removeObject(o);
-		server.notifyRemove(o.getTypeName(), name);
 	}
 
 	/** Respond to an ATTRIBUTE message */

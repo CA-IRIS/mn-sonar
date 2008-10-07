@@ -127,20 +127,12 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Get the specified object */
-	SonarObject getObject(String tname, String oname)
-		throws NamespaceError
-	{
-		TypeNode t = getTypeNode(tname);
-		return t.getObject(oname);
-	}
-
-	/** Get the specified object */
-	SonarObject getObject(String name) throws NamespaceError {
+	SonarObject lookupObject(String name) {
 		String[] names = parse(name);
 		if(names.length == 2)
-			return getObject(names[0], names[1]);
+			return lookupObject(names[0], names[1]);
 		else
-			throw NamespaceError.NAME_INVALID;
+			return null;
 	}
 
 	/** Enumerate the root of the namespace */

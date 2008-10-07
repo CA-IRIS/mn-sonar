@@ -174,13 +174,6 @@ public class TypeCache<T extends SonarObject> {
 		}
 	}
 
-	/** Get a proxy with the given name (or null if none exists) */
-	public T getObject(String n) {
-		synchronized(children) {
-			return children.get(n);
-		}
-	}
-
 	/** Lookup the attribute map for the given object id */
 	protected HashMap<String, Attribute> lookupAttributeMap(int i) {
 		synchronized(children) {
