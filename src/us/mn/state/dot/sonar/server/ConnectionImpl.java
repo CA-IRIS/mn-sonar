@@ -188,7 +188,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			flush();
 		}
 		catch(FlushError e) {
-			disconnect("Flush error: notifyAttribute");
+			disconnect("Flush error: notifyAttribute " + name);
 		}
 	}
 

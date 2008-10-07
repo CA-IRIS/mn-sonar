@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.sonar;
 
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -64,11 +65,35 @@ public class MessageEncoder {
 		conduit = c;
 	}
 
+	/** Encode one message with the given code */
+	public void encode(Message m) throws FlushError {
+		encode(m, null, null);
+	}
+
+	/** Encode one message with the given code and name */
+	public void encode(Message m, String name) throws FlushError {
+		encode(m, name, null);
+	}
+
 	/** Encode one message with the given code, name and parameters */
 	public void encode(Message m, String name, String[] params)
 		throws FlushError
 	{
-		m_buf.clear();
+		try {
+			m_buf.clear();
+			_encode(m, name, params);
+			m_buf.flip();
+		}
+		catch(BufferOverflowException e) {
+			throw new FlushError();
+		}
+		fillBuffer(UTF8.encode(m_buf));
+	}
+
+	/** Encode one message with the given code, name and parameters */
+	protected void _encode(Message m, String name, String[] params)
+		throws FlushError
+	{
 		m_buf.put(m.code);
 		if(name != null) {
 			m_buf.put(Message.DELIMITER.code);
@@ -81,18 +106,6 @@ public class MessageEncoder {
 			}
 		}
 		m_buf.put(Message.TERMINATOR.code);
-		m_buf.flip();
-		fillBuffer(UTF8.encode(m_buf));
-	}
-
-	/** Encode one message with the given code and name */
-	public void encode(Message m, String name) throws FlushError {
-		encode(m, name, null);
-	}
-
-	/** Encode one message with the given code */
-	public void encode(Message m) throws FlushError {
-		encode(m, null, null);
 	}
 
 	/** Check if we must flush the write buffer */
@@ -115,6 +128,11 @@ public class MessageEncoder {
 	/** Fill the output buffer with encoded message data */
 	protected void fillBuffer(ByteBuffer b) throws FlushError {
 		ensureCapacity(b.remaining());
-		app_out.put(b);
+		try {
+			app_out.put(b);
+		}
+		catch(BufferOverflowException e) {
+			throw new FlushError();
+		}
 	}
 }
