@@ -26,6 +26,9 @@ import us.mn.state.dot.sonar.SonarObject;
  */
 public class Marshaller {
 
+	/** Don't allow instances */
+	private Marshaller() { }
+
 	/** Marshall a java object into a parameter value string */
 	static public String marshall(Object v) {
 		if(v instanceof SonarObject) {
