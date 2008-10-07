@@ -77,10 +77,6 @@ abstract public class Namespace {
 		return (Object [])Array.newInstance(t, size);
 	}
 
-	/** Lookup an object in the namespace */
-	abstract protected SonarObject lookupObject(String tname, String oname)
-		throws NamespaceError;
-
 	/** Marshall a java object into a parameter value string */
 	public String marshall(Object v) {
 		if(v instanceof SonarObject) {
@@ -174,4 +170,10 @@ abstract public class Namespace {
 			params[i] = unmarshall(pt[i], v[i]);
 		return params;
 	}
+
+	/** Lookup an object in the SONAR namespace.
+	 * @param tname Sonar type name
+	 * @param oname Sonar object name
+	 * @return Object from namespace or null if name does not exist */
+	abstract public SonarObject lookupObject(String tname, String oname);
 }

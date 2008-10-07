@@ -119,13 +119,15 @@ public class ClientNamespace extends Namespace {
 			throw NamespaceError.NAME_INVALID;
 	}
 
-	/** Lookup an object in the cache */
-	protected SonarObject lookupObject(String tname, String oname)
-		throws NamespaceError
-	{
+	/** Lookup an object in the SONAR namespace.
+	 * @param tname Sonar type name
+	 * @param oname Sonar object name
+	 * @return Object from namespace or null if name does not exist */
+	public SonarObject lookupObject(String tname, String oname) {
 		TypeCache t = types.get(tname);
-		if(t == null)
-			throw NamespaceError.NAME_INVALID;
-		return t.lookupObject(oname);
+		if(t != null)
+			return t.lookupObject(oname);
+		else
+			return null;
 	}
 }

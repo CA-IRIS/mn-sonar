@@ -168,12 +168,9 @@ public class TypeCache<T extends SonarObject> {
 	}
 
 	/** Lookup a proxy from the given name */
-	public T lookupObject(String n) throws NamespaceError {
+	public T lookupObject(String n) {
 		synchronized(children) {
-			if(children.containsKey(n))
-				return children.get(n);
-			else
-				throw NamespaceError.NAME_UNKNOWN;
+			return children.get(n);
 		}
 	}
 
@@ -209,15 +206,19 @@ public class TypeCache<T extends SonarObject> {
 			return attr;
 	}
 
+	/** Get the value of an attribute from the named proxy */
+	Object getAttribute(String n, String a) throws NamespaceError {
+		T obj = lookupObject(n);
+		if(obj != null)
+			return getAttribute(obj, a);
+		else
+			throw NamespaceError.NAME_UNKNOWN;
+	}
+
 	/** Get the value of an attribute from the given proxy */
 	Object getAttribute(T o, String a) throws NamespaceError {
 		Attribute attr = lookupAttribute(o, a);
 		return attr.getValue();
-	}
-
-	/** Get the value of an attribute from the named proxy */
-	Object getAttribute(String n, String a) throws NamespaceError {
-		return getAttribute(lookupObject(n), a);
 	}
 
 	/** Set the value of an attribute on the given proxy */

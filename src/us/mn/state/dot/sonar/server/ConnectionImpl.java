@@ -316,13 +316,12 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Lookup a user by name */
 	protected UserImpl lookupUser(String n) throws PermissionDenied {
-		try {
-			return (UserImpl)namespace.lookupObject(
-				User.SONAR_TYPE, n);
-		}
-		catch(NamespaceError e) {
+		UserImpl u = (UserImpl)namespace.lookupObject(User.SONAR_TYPE,
+			n);
+		if(u != null)
+			return u;
+		else
 			throw PermissionDenied.AUTHENTICATION_FAILED;
-		}
 	}
 
 	/** Get the specified object (either phantom or new object) */
@@ -464,7 +463,10 @@ public class ConnectionImpl extends Conduit implements Connection {
 		String name = params.get(1);
 		if(!user.canRemove(name))
 			throw PermissionDenied.INSUFFICIENT_PRIVILEGES;
-		SonarObject o = namespace.removeObject(name);
+		SonarObject o = namespace.getObject(name);
+		if(o == null)
+			throw NamespaceError.NAME_INVALID;
+		namespace.removeObject(o);
 		server.notifyRemove(o.getTypeName(), name);
 	}
 

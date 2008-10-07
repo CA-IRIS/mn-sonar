@@ -110,26 +110,21 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Remove an object from the namespace */
-	public SonarObject removeObject(SonarObject o) throws SonarException {
+	public void removeObject(SonarObject o) throws SonarException {
 		TypeNode n = getTypeNode(o);
-		return n.removeObject(o);
+		n.removeObject(o);
 	}
 
-	/** Lookup the specified object */
-	public SonarObject lookupObject(String tname, String oname)
-		throws NamespaceError
-	{
-		TypeNode t = getTypeNode(tname);
-		return t.lookupObject(oname);
-	}
-
-	/** Lookup the specified object by name */
-	public SonarObject lookupObject(String name) throws NamespaceError {
-		String[] names = parse(name);
-		if(names.length != 2)
-			throw NamespaceError.NAME_INVALID;
+	/** Lookup an object in the SONAR namespace.
+	 * @param tname Sonar type name
+	 * @param oname Sonar object name
+	 * @return Object from namespace or null if name does not exist */
+	public SonarObject lookupObject(String tname, String oname) {
+		TypeNode t = _getTypeNode(tname);
+		if(t != null)
+			return t.lookupObject(oname);
 		else
-			return lookupObject(names[0], names[1]);
+			return null;
 	}
 
 	/** Get the specified object */
@@ -143,16 +138,10 @@ public class ServerNamespace extends Namespace {
 	/** Get the specified object */
 	public SonarObject getObject(String name) throws NamespaceError {
 		String[] names = parse(name);
-		if(names.length != 2)
-			throw NamespaceError.NAME_INVALID;
-		else
+		if(names.length == 2)
 			return getObject(names[0], names[1]);
-	}
-
-	/** Remove an object from the namespace */
-	public SonarObject removeObject(String name) throws SonarException {
-		SonarObject o = lookupObject(name);
-		return removeObject(o);
+		else
+			throw NamespaceError.NAME_INVALID;
 	}
 
 	/** Enumerate the root of the namespace */
@@ -189,7 +178,10 @@ public class ServerNamespace extends Namespace {
 		throws SonarException
 	{
 		SonarObject o = lookupObject(names[0], names[1]);
-		enumerateObject(enc, o);
+		if(o != null)
+			enumerateObject(enc, o);
+		else
+			throw NamespaceError.NAME_INVALID;
 	}
 
 	/** Enumerate a named attribute */
@@ -198,8 +190,11 @@ public class ServerNamespace extends Namespace {
 	{
 		TypeNode t = getTypeNode(names[0]);
 		SonarObject o = t.lookupObject(names[1]);
-		String[] v = t.getValue(o, names[2]);
-		enc.encode(Message.ATTRIBUTE, name, v);
+		if(o != null) {
+			String[] v = t.getValue(o, names[2]);
+			enc.encode(Message.ATTRIBUTE, name, v);
+		} else
+			throw NamespaceError.NAME_INVALID;
 	}
 
 	/** Enumerate everything contained by a name in the namespace */

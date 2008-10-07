@@ -80,14 +80,13 @@ public class TypeNode {
 	}
 
 	/** Remove an object from the type node */
-	public SonarObject removeObject(SonarObject o) throws SonarException {
+	public void removeObject(SonarObject o) throws SonarException {
 		String n = o.getName();
-		SonarObject object;
 		synchronized(children) {
-			object = children.remove(n);
-			if(object == null)
+			SonarObject obj = children.remove(n);
+			if(obj == null)
 				throw NamespaceError.NAME_UNKNOWN;
-			if(object != o)
+			if(obj != o)
 				throw NamespaceError.NAME_EXISTS;
 			try {
 				dispatcher.destroyObject(o);
@@ -97,11 +96,10 @@ public class TypeNode {
 				throw e;
 			}
 		}
-		return object;
 	}
 
 	/** Lookup an object from the given name */
-	protected SonarObject _lookupObject(String n) {
+	public SonarObject lookupObject(String n) {
 		synchronized(children) {
 			return children.get(n);
 		}
@@ -109,16 +107,7 @@ public class TypeNode {
 
 	/** Get an object with the given name (or null if it does not exist) */
 	public SonarObject getObject(String n) {
-		return _lookupObject(n);
-	}
-
-	/** Lookup an object from the given name */
-	public SonarObject lookupObject(String n) throws NamespaceError {
-		SonarObject o = _lookupObject(n);
-		if(o == null)
-			throw NamespaceError.NAME_UNKNOWN;
-		else
-			return o;
+		return lookupObject(n);
 	}
 
 	/** Get the value of an attribute */
