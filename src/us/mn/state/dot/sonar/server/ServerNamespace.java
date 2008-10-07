@@ -30,14 +30,14 @@ import us.mn.state.dot.sonar.SonarObject;
  *
  * @author Douglas Lau
  */
-public class Namespace extends Names {
+public class ServerNamespace extends Names {
 
 	/** All SONAR types are stored in the root of the namespace */
 	protected final HashMap<String, TypeNode> root =
 		new HashMap<String, TypeNode>();
 
 	/** Create a new SONAR namespace */
-	public Namespace() {
+	public ServerNamespace() {
 		_namespace = this;
 	}
 

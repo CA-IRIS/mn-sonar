@@ -24,7 +24,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.sonar.server.Namespace;
+import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.RoleImpl;
 import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.sonar.server.UserImpl;
@@ -141,8 +141,10 @@ System.err.println("role proxy removed: " + proxy.getName());
 		c.join();
 	}
 
-	static protected Namespace createNamespace() throws SonarException {
-		Namespace n = new Namespace();
+	static protected ServerNamespace createNamespace()
+		throws SonarException
+	{
+		ServerNamespace n = new ServerNamespace();
 		RoleImpl r = new RoleImpl("admin");
 		r.setPattern(".*");
 		r.setPrivR(true);
@@ -163,7 +165,7 @@ System.err.println("role proxy removed: " + proxy.getName());
 	}
 
 	static protected void testServer() throws Exception {
-		Namespace n = createNamespace();
+		ServerNamespace n = createNamespace();
 		Server s = new Server(n);
 		s.join();
 	}

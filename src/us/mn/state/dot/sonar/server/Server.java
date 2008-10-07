@@ -61,7 +61,7 @@ public class Server extends Thread {
 	static protected final String PROP_FILE = "/etc/sonar/sonar.properties";
 
 	/** SONAR namespace being served */
-	protected final Namespace namespace;
+	protected final ServerNamespace namespace;
 
 	/** Selector for non-blocking I/O */
 	protected final Selector selector;
@@ -113,7 +113,7 @@ public class Server extends Thread {
 	}
 
 	/** Create a new SONAR server */
-	public Server(Namespace n, Properties props) throws IOException,
+	public Server(ServerNamespace n, Properties props) throws IOException,
 		ConfigurationError
 	{
 		namespace = n;
@@ -132,7 +132,8 @@ public class Server extends Thread {
 	}
 
 	/** Create a new SONAR server */
-	public Server(Namespace n) throws IOException, ConfigurationError {
+	public Server(ServerNamespace n) throws IOException, ConfigurationError
+	{
 		this(n, PropertyLoader.load(PROP_FILE));
 	}
 
@@ -154,7 +155,7 @@ public class Server extends Thread {
 	}
 
 	/** Get the SONAR namespace */
-	public Namespace getNamespace() {
+	public ServerNamespace getNamespace() {
 		return namespace;
 	}
 

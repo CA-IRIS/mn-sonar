@@ -98,7 +98,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	protected final Server server;
 
 	/** SONAR namepsace */
-	protected final Namespace namespace;
+	protected final ServerNamespace namespace;
 
 	/** Selection key for the socket channel */
 	protected final SelectionKey key;
