@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,10 +60,10 @@ abstract public class Names {
 		return path.contains(SEP);
 	}
 
-	/** Hack to allow static name lookups */
+	/** FIXME: Hack to allow static name lookups */
 	static protected Names _namespace;
 
-	/** Lookup the specified object */
+	/** FIXME: Lookup the specified object */
 	static public SonarObject lookup(String tname, String oname)
 		throws NamespaceError
 	{
