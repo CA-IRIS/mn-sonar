@@ -112,7 +112,7 @@ class ClientConduit extends Conduit {
 	protected final SSLState state;
 
 	/** Cache of all proxy objects */
-	protected final ProxyCache cache;
+	protected final ClientNamespace namespace;
 
 	/** Exception handler */
 	protected final ExceptionHandler handler;
@@ -143,7 +143,7 @@ class ClientConduit extends Conduit {
 		key = channel.register(selector, SelectionKey.OP_CONNECT);
 		engine.setUseClientMode(true);
 		state = new SSLState(this, engine, false);
-		cache = new ProxyCache();
+		namespace = new ClientNamespace();
 		handler = h;
 		connected = false;
 	}
@@ -274,14 +274,14 @@ class ClientConduit extends Conduit {
 	public void doObject(List<String> p) throws SonarException {
 		if(p.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
-		cache.putObject(p.get(1));
+		namespace.putObject(p.get(1));
 	}
 
 	/** Process a REMOVE message from the server */
 	public void doRemove(List<String> p) throws SonarException {
 		if(p.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
-		cache.removeObject(p.get(1));
+		namespace.removeObject(p.get(1));
 	}
 
 	/** Process an ATTRIBUTE message from the server */
@@ -290,7 +290,7 @@ class ClientConduit extends Conduit {
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		p.remove(0);
 		String name = p.remove(0);
-		cache.unmarshallAttribute(name, p.toArray(new String[0]));
+		namespace.unmarshallAttribute(name, p.toArray(new String[0]));
 	}
 
 	/** Process a TYPE message from the server */
@@ -298,9 +298,9 @@ class ClientConduit extends Conduit {
 		if(p.size() > 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		if(p.size() > 1)
-			cache.setCurrentType(p.get(1));
+			namespace.setCurrentType(p.get(1));
 		else
-			cache.setCurrentType("");
+			namespace.setCurrentType("");
 		loggedIn = true;
 	}
 
@@ -335,7 +335,7 @@ class ClientConduit extends Conduit {
 
 	/** Query all SONAR objects of the given type */
 	void queryAll(TypeCache tcache) throws FlushError {
-		cache.addType(tcache);
+		namespace.addType(tcache);
 		state.encoder.encode(Message.ENUMERATE, tcache.tname);
 		flush();
 	}

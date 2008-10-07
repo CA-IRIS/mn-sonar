@@ -22,14 +22,14 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * The proxy cache contains all client SonarObject proxies.
+ * The client namespace is a cache which contains SonarObject proxies.
  *
  * @author Douglas Lau
  */
-class ProxyCache extends Namespace {
+public class ClientNamespace extends Namespace {
 
-	/** Create a new proxy cache */
-	public ProxyCache() {
+	/** Create a new client namespace (proxy cache) */
+	public ClientNamespace() {
 		_namespace = this;
 	}
 
