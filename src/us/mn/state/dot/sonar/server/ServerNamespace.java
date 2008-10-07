@@ -36,14 +36,9 @@ public class ServerNamespace extends Namespace {
 	protected final HashMap<String, TypeNode> root =
 		new HashMap<String, TypeNode>();
 
-	/** Create a new SONAR namespace */
-	public ServerNamespace() {
-		_namespace = this;
-	}
-
 	/** Register a new type in the namespace */
 	public TypeNode registerType(String n, Class c) {
-		TypeNode node = new TypeNode(n, c);
+		TypeNode node = new TypeNode(this, n, c);
 		synchronized(root) {
 			root.put(n, node);
 		}

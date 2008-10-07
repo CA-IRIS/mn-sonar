@@ -28,11 +28,6 @@ import us.mn.state.dot.sonar.SonarObject;
  */
 public class ClientNamespace extends Namespace {
 
-	/** Create a new client namespace (proxy cache) */
-	public ClientNamespace() {
-		_namespace = this;
-	}
-
 	/** Map of all types in the cache */
 	protected final HashMap<String, TypeCache> types =
 		new HashMap<String, TypeCache>();

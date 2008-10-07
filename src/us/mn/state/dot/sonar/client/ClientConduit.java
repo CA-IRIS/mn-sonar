@@ -32,6 +32,7 @@ import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.FlushError;
 import us.mn.state.dot.sonar.Message;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.ProtocolError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
@@ -113,6 +114,11 @@ class ClientConduit extends Conduit {
 
 	/** Cache of all proxy objects */
 	protected final ClientNamespace namespace;
+
+	/** Get the namespace */
+	Namespace getNamespace() {
+		return namespace;
+	}
 
 	/** Exception handler */
 	protected final ExceptionHandler handler;

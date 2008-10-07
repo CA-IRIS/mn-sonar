@@ -19,7 +19,6 @@ import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.Marshaller;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarException;
@@ -54,6 +53,9 @@ public class TypeCache<T extends SonarObject> {
 	/** Client (to send attribute update messages) */
 	protected final Client client;
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
 	/** All SONAR objects of this type are put here.
 	 * All access must be synchronized on the "children" lock. */
 	private final HashMap<String, T> children = new HashMap<String, T>();
@@ -80,10 +82,11 @@ public class TypeCache<T extends SonarObject> {
 		IllegalAccessException
 	{
 		assert SonarObject.class.isAssignableFrom(iface);
-		tname = Marshaller.typeName(iface);
+		tname = Namespace.typeName(iface);
 		ifaces = new Class[] { iface };
 		invoker = new SonarInvoker(this, iface);
 		client = c;
+		namespace = client.getNamespace();
 	}
 
 	/** Notify proxy listeners that a proxy has been added */
@@ -113,9 +116,10 @@ public class TypeCache<T extends SonarObject> {
 	/** Create a proxy in the type cache */
 	T createProxy(String name) {
 		T o = (T)Proxy.newProxyInstance(LOADER, ifaces, invoker);
-		HashMap<String, Attribute> amap = invoker.createAttributes();
-		amap.put("typeName", new Attribute(tname));
-		amap.put("name", new Attribute(name));
+		HashMap<String, Attribute> amap =
+			invoker.createAttributes(namespace);
+		amap.put("typeName", new Attribute(tname, namespace));
+		amap.put("name", new Attribute(name, namespace));
 		synchronized(children) {
 			children.put(name, o);
 			attributes.put(hashCode(o), amap);
@@ -196,7 +200,7 @@ public class TypeCache<T extends SonarObject> {
 		if(amap == null) {
 			// This happens if a proxy has been removed, but
 			// references still exist in other data structures.
-			return new Attribute(Object.class);
+			return new Attribute(Object.class, namespace);
 		}
 		Attribute attr = amap.get(a);
 		if(attr == null)
@@ -254,7 +258,7 @@ public class TypeCache<T extends SonarObject> {
 	public void createObject(String oname, Map<String, Object> amap) {
 		for(Map.Entry<String, Object> entry: amap.entrySet()) {
 			Object v = entry.getValue();
-			String[] values = Marshaller.marshall(
+			String[] values = namespace.marshall(
 				v.getClass(), new Object[] { v });
 			String name = Namespace.makePath(tname, oname,
 				entry.getKey());

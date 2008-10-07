@@ -14,6 +14,9 @@
  */
 package us.mn.state.dot.sonar;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+
 /**
  * This helper class provides static methods to manipulate SONAR names.
  *
@@ -60,17 +63,115 @@ abstract public class Namespace {
 		return path.contains(SEP);
 	}
 
-	/** FIXME: Hack to allow static name lookups */
-	static protected Namespace _namespace;
-
-	/** FIXME: Lookup the specified object */
-	static public SonarObject lookup(String tname, String oname)
-		throws NamespaceError
+	/** Get the name of a SONAR type */
+	static public String typeName(Class t)
+		throws NoSuchFieldException, IllegalAccessException
 	{
-		return _namespace.lookupObject(tname, oname);
+		assert SonarObject.class.isAssignableFrom(t);
+		Field f = (Field)t.getField("SONAR_TYPE");
+		return (String)f.get(t);
+	}
+
+	/** Make an array of the given class and size */
+	static protected Object[] makeArray(Class t, int size) {
+		return (Object [])Array.newInstance(t, size);
 	}
 
 	/** Lookup an object in the namespace */
 	abstract protected SonarObject lookupObject(String tname, String oname)
 		throws NamespaceError;
+
+	/** Marshall a java object into a parameter value string */
+	public String marshall(Object v) {
+		if(v instanceof SonarObject) {
+			SonarObject o = (SonarObject)v;
+			return o.getName();
+		} else if(v != null)
+			return v.toString();
+		else
+			return "";
+	}
+
+	/** Marshall java parameters into a parameter value string */
+	public String[] marshall(Class t, Object[] v) {
+		if(t.isArray())
+			v = (Object [])v[0];
+		String[] values = new String[v.length];
+		for(int i = 0; i < v.length; i++)
+			values[i] = marshall(v[i]);
+		return values;
+	}
+
+	/** Unmarshall a parameter value string into a java object */
+	public Object unmarshall(Class t, String p) throws ProtocolError {
+		if(t == String.class)
+			return p;
+		if("".equals(p))
+			return null;
+		try {
+			if(t == Integer.TYPE || t == Integer.class)
+				return Integer.valueOf(p);
+			else if(t == Short.TYPE || t == Short.class)
+				return Short.valueOf(p);
+			else if(t == Boolean.TYPE || t == Boolean.class)
+				return Boolean.valueOf(p);
+			else if(t == Float.TYPE || t == Float.class)
+				return Float.valueOf(p);
+			else if(t == Long.TYPE || t == Long.class)
+				return Long.valueOf(p);
+			else if(t == Double.TYPE || t == Double.class)
+				return Double.valueOf(p);
+		}
+		catch(NumberFormatException e) {
+			throw ProtocolError.INVALID_PARAMETER;
+		}
+		if(SonarObject.class.isAssignableFrom(t)) {
+			try {
+				return lookupObject(typeName(t), p);
+			}
+			catch(Exception e) {
+				System.err.println("SONAR: unmarshall \"" + p +
+					"\": " + e.getMessage());
+				throw ProtocolError.INVALID_PARAMETER;
+			}
+		}
+		throw ProtocolError.INVALID_PARAMETER;
+	}
+
+	/** Unmarshall parameter strings into one java parameter */
+	public Object unmarshall(Class t, String[] v) throws ProtocolError {
+		if(t.isArray())
+			return unmarshallArray(t.getComponentType(), v);
+		else {
+			if(v.length != 1)
+				throw ProtocolError.WRONG_PARAMETER_COUNT;
+			return unmarshall(t, v[0]);
+		}
+	}
+
+	/** Unmarshall parameter strings into a java array parameter */
+	protected Object[] unmarshallArray(Class t, String[] v)
+		throws ProtocolError
+	{
+		Object[] values = makeArray(t, v.length);
+		for(int i = 0; i < v.length; i++)
+			values[i] = unmarshall(t, v[i]);
+		return values;
+	}
+
+	/** Unmarshall multiple parameters */
+	public Object[] unmarshall(Class[] pt, String[] v) throws ProtocolError
+	{
+		if(pt.length == 1 && pt[0].isArray()) {
+			return new Object[] {
+				unmarshall(pt[0], v)
+			};
+		}
+		if(pt.length != v.length)
+			throw ProtocolError.WRONG_PARAMETER_COUNT;
+		Object[] params = new Object[pt.length];
+		for(int i = 0; i < params.length; i++)
+			params[i] = unmarshall(pt[i], v[i]);
+		return params;
+	}
 }

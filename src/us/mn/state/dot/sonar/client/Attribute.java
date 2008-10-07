@@ -16,7 +16,7 @@ package us.mn.state.dot.sonar.client;
 
 import java.lang.reflect.Method;
 import java.util.TreeSet;
-import us.mn.state.dot.sonar.Marshaller;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.ProtocolError;
 
 /**
@@ -32,16 +32,21 @@ class Attribute {
 	/** The value of the attribute */
 	protected Object value;
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
 	/** Create a new attribute of the specified class */
-	public Attribute(Class t) {
+	public Attribute(Class t, Namespace ns) {
 		type = t;
 		value = null;
+		namespace = ns;
 	}
 
 	/** Create a new attribute with the specified value */
-	public Attribute(Object v) {
+	public Attribute(Object v, Namespace ns) {
 		type = v.getClass();
 		value = v;
+		namespace = ns;
 	}
 
 	/** Get the value of the attribute */
@@ -51,12 +56,12 @@ class Attribute {
 
 	/** Unmarshall a value and store it in the attribute */
 	public void unmarshall(String[] v) throws ProtocolError {
-		value = Marshaller.unmarshall(type, v);
+		value = namespace.unmarshall(type, v);
 	}
 
 	/** Marshall the given attribute value */
 	public String[] marshall(Object[] args) {
-		return Marshaller.marshall(type, args);
+		return namespace.marshall(type, args);
 	}
 
 	/** Check if the attribute value equals the given value */

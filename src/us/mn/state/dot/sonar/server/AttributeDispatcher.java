@@ -21,7 +21,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.TreeSet;
-import us.mn.state.dot.sonar.Marshaller;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.ProtocolError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
@@ -110,6 +110,9 @@ public class AttributeDispatcher {
 		return map;
 	}
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
 	/** Attributes which can be dispatched */
 	protected final TreeSet<String> attributes = new TreeSet<String>();
 
@@ -159,7 +162,8 @@ public class AttributeDispatcher {
 	}
 
 	/** Create a new attribute dispatcher for the given object's type */
-	public AttributeDispatcher(Class c) {
+	public AttributeDispatcher(Class c, Namespace ns) {
+		namespace = ns;
 		lookup_attributes(c);
 		constructor = lookup_constructor(c);
 		storer = lookup_storer(c);
@@ -203,7 +207,7 @@ public class AttributeDispatcher {
 		throws SonarException
 	{
 		Class[] p_types = method.getParameterTypes();
-		Object[] params = Marshaller.unmarshall(p_types, v);
+		Object[] params = namespace.unmarshall(p_types, v);
 		return _invoke(o, method, params);
 	}
 
@@ -250,7 +254,7 @@ public class AttributeDispatcher {
 		throws SonarException
 	{
 		Field f = lookupField(o.getClass(), a);
-		Object param = Marshaller.unmarshall(f.getType(), v);
+		Object param = namespace.unmarshall(f.getType(), v);
 		try {
 			f.set(o, param);
 		}
@@ -271,9 +275,9 @@ public class AttributeDispatcher {
 			Object[] r = (Object [])result;
 			String[] res = new String[r.length];
 			for(int i = 0; i < r.length; i++)
-				res[i] = Marshaller.marshall(r[i]);
+				res[i] = namespace.marshall(r[i]);
 			return res;
 		} else
-			return new String[] { Marshaller.marshall(result) };
+			return new String[] { namespace.marshall(result) };
 	}
 }

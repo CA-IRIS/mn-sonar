@@ -28,6 +28,7 @@ import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.FlushError;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.Security;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
@@ -63,6 +64,11 @@ public class Client extends Thread {
 	/** Get the connection name */
 	public String getConnection() {
 		return conduit.getConnection();
+	}
+
+	/** Get the namespace */
+	Namespace getNamespace() {
+		return conduit.getNamespace();
 	}
 
 	/** Create a new SONAR client */

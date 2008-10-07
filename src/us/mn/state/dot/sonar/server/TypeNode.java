@@ -42,9 +42,9 @@ public class TypeNode {
 	private final AttributeDispatcher dispatcher;
 
 	/** Create a namespace type node */
-	public TypeNode(String n, Class c) {
+	public TypeNode(Namespace ns, String n, Class c) {
 		name = n;
-		dispatcher = new AttributeDispatcher(c);
+		dispatcher = new AttributeDispatcher(c, ns);
 	}
 
 	/** Add an object to the type node */
