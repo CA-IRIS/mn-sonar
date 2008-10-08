@@ -27,6 +27,9 @@ import java.nio.charset.Charset;
  */
 public class MessageEncoder {
 
+	/** Maximum size (characters) of a single message */
+	static protected final int MAX_MESSAGE_SIZE = 512;
+
 	/** Threshold of bytes to start flushing write buffer */
 	static protected final int FLUSH_THRESHOLD = 1024;
 
@@ -60,7 +63,7 @@ public class MessageEncoder {
 
 	/** Create a new SONAR message encoder */
 	public MessageEncoder(ByteBuffer out, Conduit c) {
-		m_buf = CharBuffer.allocate(256);
+		m_buf = CharBuffer.allocate(MAX_MESSAGE_SIZE);
 		app_out = out;
 		conduit = c;
 	}
