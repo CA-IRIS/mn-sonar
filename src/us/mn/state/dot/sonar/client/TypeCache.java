@@ -174,6 +174,13 @@ public class TypeCache<T extends SonarObject> {
 		}
 	}
 
+	/** Get the size of the cache */
+	public int size() {
+		synchronized(children) {
+			return children.size();
+		}
+	}
+
 	/** Lookup the attribute map for the given object id */
 	protected HashMap<String, Attribute> lookupAttributeMap(int i) {
 		synchronized(children) {
