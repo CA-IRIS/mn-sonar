@@ -242,8 +242,13 @@ class ClientConduit extends Conduit {
 				_processMessage(params);
 		}
 		catch(SonarException e) {
+			StringBuilder b = new StringBuilder();
+			for(String p: params) {
+				b.append(' ');
+				b.append(p);
+			}
+			disconnect("Message error:" + b.toString());
 			handler.handle(e);
-			disconnect("error: " + e.getMessage());
 		}
 	}
 
