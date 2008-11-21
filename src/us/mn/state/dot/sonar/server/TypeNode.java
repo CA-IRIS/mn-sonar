@@ -122,7 +122,7 @@ public class TypeNode {
 		for(String a: dispatcher.getReadableAttributes()) {
 			String[] v = getValue(o, a);
 			if(first) {
-				a = Namespace.makePath(o, a);
+				a = new Name(o, a).toString();
 				first = false;
 			}
 			enc.encode(Message.ATTRIBUTE, a, v);
