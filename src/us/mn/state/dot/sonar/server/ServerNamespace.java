@@ -124,25 +124,14 @@ public class ServerNamespace extends Namespace {
 		n.removeObject(o);
 	}
 
-	/** Lookup an object in the SONAR namespace.
-	 * @param tname Sonar type name
-	 * @param oname Sonar object name
-	 * @return Object from namespace or null if name does not exist */
-	public SonarObject lookupObject(String tname, String oname) {
-		TypeNode t = _getTypeNode(tname);
-		if(t != null)
-			return t.lookupObject(oname);
-		else
-			return null;
-	}
-
-	/** Get the specified object */
+	/** Lookup the object with the specified name */
 	SonarObject lookupObject(Name name) {
 		if(name.isObject()) {
-			return lookupObject(name.getTypePart(),
-				name.getObjectPart());
-		} else
-			return null;
+			TypeNode t = _getTypeNode(name.getTypePart());
+			if(t != null)
+				return t.lookupObject(name.getObjectPart());
+		}
+		return null;
 	}
 
 	/** Enumerate the root of the namespace */
@@ -205,6 +194,14 @@ public class ServerNamespace extends Namespace {
 			enumerateAttribute(enc, name);
 		else
 			throw NamespaceError.NAME_INVALID;
+	}
+
+	/** Lookup an object in the SONAR namespace.
+	 * @param tname Sonar type name
+	 * @param oname Sonar object name
+	 * @return Object from namespace or null if name does not exist */
+	public SonarObject lookupObject(String tname, String oname) {
+		return lookupObject(new Name(tname, oname));
 	}
 
 	/** Find an object by calling a checker for each object of a type.
