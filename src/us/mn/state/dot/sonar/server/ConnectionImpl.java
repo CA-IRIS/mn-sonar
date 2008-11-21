@@ -346,20 +346,19 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Get the specified object (either phantom or new object) */
-	protected SonarObject getObject(String tname, String oname)
-		throws SonarException
-	{
-		if(phantom != null && tname.equals(phantom.getTypeName()) &&
-			oname.equals(phantom.getName()))
+	protected SonarObject getObject(Name name) throws SonarException {
+		if(phantom != null &&
+		   name.getTypePart().equals(phantom.getTypeName()) &&
+		   name.getObjectPart().equals(phantom.getName()))
 		{
 			return phantom;
 		} else
-			return namespace.createObject(tname, oname);
+			return namespace.createObject(name);
 	}
 
 	/** Create a new object in the server namespace */
-	protected void createObject(String[] names) throws SonarException {
-		SonarObject o = getObject(names[0], names[1]);
+	protected void createObject(Name name) throws SonarException {
+		SonarObject o = getObject(name);
 		server.createObject(o);
 		phantom = null;
 	}
@@ -464,12 +463,11 @@ public class ConnectionImpl extends Conduit implements Connection {
 		checkLoggedIn();
 		if(params.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
-		String name = params.get(1);
-		String[] names = Namespace.parse(name);
-		if(names.length == 2) {
-			if(!user.canAdd(name))
+		Name name = new Name(params.get(1));
+		if(name.isObject()) {
+			if(!user.canAdd(name.toString()))
 				throw PermissionDenied.INSUFFICIENT_PRIVILEGES;
-			createObject(names);
+			createObject(name);
 		} else
 			throw NamespaceError.NAME_INVALID;
 	}

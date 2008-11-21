@@ -19,6 +19,7 @@ import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.FlushError;
 import us.mn.state.dot.sonar.Message;
 import us.mn.state.dot.sonar.MessageEncoder;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarException;
@@ -82,11 +83,9 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Create a new object */
-	public SonarObject createObject(String tname, String oname)
-		throws SonarException
-	{
-		TypeNode n = getTypeNode(tname);
-		return n.createObject(oname);
+	public SonarObject createObject(Name name) throws SonarException {
+		TypeNode n = getTypeNode(name.getTypePart());
+		return n.createObject(name.getObjectPart());
 	}
 
 	/** Store an object in the namespace */
