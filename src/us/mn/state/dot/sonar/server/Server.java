@@ -37,6 +37,7 @@ import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.ConfigurationError;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.Security;
@@ -309,10 +310,11 @@ public class Server extends Thread {
 	}
 
 	/** Notify all connections watching a name of an object add */
-	public void notifyObject(String[] names, SonarObject o) {
+	public void notifyObject(SonarObject o) {
+		Name name = new Name(o);
 		List<ConnectionImpl> clist = getConnectionList();
 		for(ConnectionImpl c: clist)
-			c.notifyObject(names, o);
+			c.notifyObject(name, o);
 	}
 
 	/** Notify all connections watching a name of an attribute change */
@@ -325,12 +327,10 @@ public class Server extends Thread {
 	}
 
 	/** Notify all connections watching a name of an object remove */
-	public void notifyRemove(String name, String value) {
+	public void notifyRemove(Name name) {
 		List<ConnectionImpl> clist = getConnectionList();
-		for(ConnectionImpl c: clist) {
-			c.notifyRemove(name, value);
-			c.stopWatching(value);
-		}
+		for(ConnectionImpl c: clist)
+			c.notifyRemove(name);
 	}
 
 	/** Server loop to perfrom socket I/O */
@@ -352,19 +352,13 @@ public class Server extends Thread {
 	/** Perform an add object task */
 	protected void doAddObject(SonarObject o) throws NamespaceError {
 		namespace.add(o);
-		String[] names = new String[] {
-			o.getTypeName(), o.getName()
-		};
-		notifyObject(names, o);
+		notifyObject(o);
 	}
 
 	/** Create (synchronously) an object in the server's namespace */
 	public void createObject(SonarObject o) throws SonarException {
 		namespace.storeObject(o);
-		String[] names = new String[] {
-			o.getTypeName(), o.getName()
-		};
-		notifyObject(names, o);
+		notifyObject(o);
 	}
 
 	/** Remove the specified object from the server's namespace */
@@ -379,7 +373,7 @@ public class Server extends Thread {
 
 	/** Perform a remove object task */
 	protected void doRemoveObject(SonarObject o) throws SonarException {
-		notifyRemove(o.getTypeName(), Namespace.makePath(o));
+		notifyRemove(new Name(o));
 		namespace.removeObject(o);
 	}
 

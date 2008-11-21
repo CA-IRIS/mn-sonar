@@ -29,6 +29,7 @@ import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.FlushError;
 import us.mn.state.dot.sonar.Message;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.ProtocolError;
@@ -143,9 +144,9 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Stop watching the specified name */
-	public boolean stopWatching(String name) {
+	protected boolean stopWatching(Name name) {
 		synchronized(watching) {
-			return watching.remove(name);
+			return watching.remove(name.toString());
 		}
 	}
 
@@ -164,6 +165,14 @@ public class ConnectionImpl extends Conduit implements Connection {
 		}
 	}
 
+	/** Check if the connection is watching a name */
+	protected boolean isWatching(Name name) {
+		synchronized(watching) {
+			return watching.contains(name.getObjectName()) ||
+			       watching.contains(name.getTypePart());
+		}
+	}
+
 	/** Notify the client of a new object being added */
 	protected void notifyObject(SonarObject o) {
 		try {
@@ -176,8 +185,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Notify the client of a new object being added */
-	public void notifyObject(String[] names, SonarObject o) {
-		if(isWatching(names[0]))
+	public void notifyObject(Name name, SonarObject o) {
+		if(isWatching(name))
 			notifyObject(o);
 	}
 
@@ -203,15 +212,17 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Notify the client of a name being removed */
-	public void notifyRemove(String name, String value) {
-		if(isWatching(name) || isWatching(value))
-			notifyRemove(value);
+	public void notifyRemove(Name name) {
+		if(isWatching(name)) {
+			doNotifyRemove(name);
+			stopWatching(name);
+		}
 	}
 
 	/** Notify the client of a name being removed */
-	protected void notifyRemove(String value) {
+	protected void doNotifyRemove(Name name) {
 		try {
-			state.encoder.encode(Message.REMOVE, value);
+			state.encoder.encode(Message.REMOVE, name.toString());
 			flush();
 		}
 		catch(FlushError e) {
@@ -443,7 +454,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		checkLoggedIn();
 		if(params.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
-		String name = params.get(1);
+		Name name = new Name(params.get(1));
 		if(!stopWatching(name))
 			throw ProtocolError.NOT_WATCHING;
 	}
@@ -474,7 +485,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		SonarObject obj = namespace.lookupObject(name);
 		if(obj != null) {
 			namespace.removeObject(obj);
-			server.notifyRemove(obj.getTypeName(), name);
+			server.notifyRemove(new Name(obj));
 		} else
 			throw NamespaceError.NAME_INVALID;
 	}
