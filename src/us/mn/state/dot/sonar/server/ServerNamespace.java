@@ -108,6 +108,18 @@ public class ServerNamespace extends Namespace {
 		return t.setValue(oname, aname, params);
 	}
 
+	/** Get the value of an attribute */
+	String[] getAttribute(String tname, String oname, String aname)
+		throws SonarException
+	{
+		TypeNode t = getTypeNode(tname);
+		SonarObject o = t.lookupObject(oname);
+		if(o != null)
+			return t.getValue(o, aname);
+		else
+			throw NamespaceError.NAME_INVALID;
+	}
+
 	/** Remove an object from the namespace */
 	void removeObject(SonarObject o) throws SonarException {
 		TypeNode n = getTypeNode(o);
@@ -179,13 +191,8 @@ public class ServerNamespace extends Namespace {
 	protected void enumerateAttribute(MessageEncoder enc, String name,
 		String[] names) throws SonarException
 	{
-		TypeNode t = getTypeNode(names[0]);
-		SonarObject o = t.lookupObject(names[1]);
-		if(o != null) {
-			String[] v = t.getValue(o, names[2]);
-			enc.encode(Message.ATTRIBUTE, name, v);
-		} else
-			throw NamespaceError.NAME_INVALID;
+		String[] v = getAttribute(names[0], names[1], names[2]);
+		enc.encode(Message.ATTRIBUTE, name, v);
 	}
 
 	/** Enumerate everything contained by a name in the namespace */

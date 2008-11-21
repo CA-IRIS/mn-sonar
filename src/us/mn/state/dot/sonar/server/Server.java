@@ -384,22 +384,24 @@ public class Server extends Thread {
 	}
 
 	/** Set the specified attribute in the server's namespace */
-	public void setAttribute(final SonarObject o, final String a,
-		final String[] v)
-	{
+	public void setAttribute(final SonarObject o, final String a) {
 		processor.addJob(new Job() {
-			public void perform() throws NamespaceError {
+			public void perform() throws SonarException {
 				DEBUG_TASK.log("Setting attribute " + a +
 					" on " + o.getName());
-				doSetAttribute(o, a, v);
+				doSetAttribute(o, a);
 			}
 		});
 	}
 
 	/** Perform a "set attribute" task */
-	protected void doSetAttribute(SonarObject o, String a, String[] v) {
+	protected void doSetAttribute(SonarObject o, String a)
+		throws SonarException
+	{
+		String tname = o.getTypeName();
 		String oname = Namespace.makePath(o);
 		String aname = Namespace.makePath(o, a);
-		notifyAttribute(o.getTypeName(), oname, aname, v);
+		String[] v = namespace.getAttribute(tname, oname, aname);
+		notifyAttribute(tname, oname, aname, v);
 	}
 }

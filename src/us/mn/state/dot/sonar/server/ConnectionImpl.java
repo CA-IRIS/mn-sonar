@@ -407,7 +407,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		state.encoder.encode(Message.TYPE);
 		// Send the connection name to the client first
 		state.encoder.encode(Message.SHOW, hostport);
-		server.setAttribute(this, "user", new String[] { name });
+		server.setAttribute(this, "user");
 	}
 
 	/** Respond to a QUIT message */
