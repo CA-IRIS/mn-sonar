@@ -22,7 +22,7 @@ package us.mn.state.dot.sonar;
 public class Name {
 
 	/** Name separator */
-	static protected final String SEP = "/";
+	static public final String SEP = "/";
 
 	/** Name path */
 	protected final String path;

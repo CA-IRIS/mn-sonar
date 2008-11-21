@@ -30,6 +30,11 @@ import us.mn.state.dot.sonar.SonarObject;
  */
 public class ClientNamespace extends Namespace {
 
+	/** Test if a SONAR path is absolute (versus relative) */
+	static protected boolean isAbsolute(String path) {
+		return path.contains(Name.SEP);
+	}
+
 	/** Map of all types in the cache */
 	protected final HashMap<String, TypeCache> types =
 		new HashMap<String, TypeCache>();

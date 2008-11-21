@@ -24,45 +24,6 @@ import java.lang.reflect.Field;
  */
 abstract public class Namespace {
 
-	/** Name separator */
-	static public final String SEP = "/";
-
-	/** Empty namespace path */
-	static protected final String[] NULL_PATH = {};
-
-	/** Parse a SONAR path */
-	static public String[] parse(String path) {
-		if(path.length() == 0)
-			return NULL_PATH;
-		else
-			return path.split(SEP);
-	}
-
-	/** Make a SONAR path from an object */
-	static public String makePath(SonarObject o) {
-		return o.getTypeName() + SEP + o.getName();
-	}
-
-	/** Make a SONAR path from an object/attribute pair */
-	static public String makePath(SonarObject o, String a) {
-		return o.getTypeName() + SEP + o.getName() + SEP + a;
-	}
-
-	/** Make a SONAR path from a type/object pair */
-	static public String makePath(String tname, String oname) {
-		return tname + SEP + oname;
-	}
-
-	/** Make a SONAR path from a type/object/attribute tuple */
-	static public String makePath(String tnm, String onm, String anm) {
-		return tnm + SEP + onm + SEP + anm;
-	}
-
-	/** Test if a SONAR path is absolute (versus relative) */
-	static public boolean isAbsolute(String path) {
-		return path.contains(SEP);
-	}
-
 	/** Get the name of a SONAR type */
 	static public String typeName(Class t)
 		throws NoSuchFieldException, IllegalAccessException
