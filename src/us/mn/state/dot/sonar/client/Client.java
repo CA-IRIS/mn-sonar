@@ -28,6 +28,7 @@ import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.FlushError;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.Security;
 import us.mn.state.dot.sonar.SonarException;
@@ -223,7 +224,7 @@ public class Client extends Thread {
 	}
 
 	/** Request an attribute change */
-	void setAttribute(final String name, final String[] params) {
+	void setAttribute(final Name name, final String[] params) {
 		processor.addJob(new Job() {
 			public void perform() throws FlushError {
 				conduit.setAttribute(name, params);
@@ -232,7 +233,7 @@ public class Client extends Thread {
 	}
 
 	/** Create the specified object name */
-	void createObject(final String name) {
+	void createObject(final Name name) {
 		processor.addJob(new Job() {
 			public void perform() throws FlushError {
 				conduit.createObject(name);
@@ -241,7 +242,7 @@ public class Client extends Thread {
 	}
 
 	/** Remove the specified object name */
-	void removeObject(final String name) {
+	void removeObject(final Name name) {
 		processor.addJob(new Job() {
 			public void perform() throws FlushError {
 				conduit.removeObject(name);

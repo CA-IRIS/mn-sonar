@@ -32,6 +32,7 @@ import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.FlushError;
 import us.mn.state.dot.sonar.Message;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.ProtocolError;
 import us.mn.state.dot.sonar.SonarException;
@@ -352,20 +353,21 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Create the specified object name */
-	void createObject(String name) throws FlushError {
-		state.encoder.encode(Message.OBJECT, name);
+	void createObject(Name name) throws FlushError {
+		state.encoder.encode(Message.OBJECT, name.toString());
 		flush();
 	}
 
 	/** Request an attribute change */
-	void setAttribute(String name, String[] params) throws FlushError {
-		state.encoder.encode(Message.ATTRIBUTE, name, params);
+	void setAttribute(Name name, String[] params) throws FlushError {
+		state.encoder.encode(Message.ATTRIBUTE, name.toString(),
+			params);
 		flush();
 	}
 
 	/** Remove the specified object name */
-	void removeObject(String name) throws FlushError {
-		state.encoder.encode(Message.REMOVE, name);
+	void removeObject(Name name) throws FlushError {
+		state.encoder.encode(Message.REMOVE, name.toString());
 		flush();
 	}
 }

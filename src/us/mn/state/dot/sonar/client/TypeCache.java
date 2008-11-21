@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarException;
@@ -227,8 +228,7 @@ public class TypeCache<T extends SonarObject> {
 		if(attr.valueEquals(args))
 			return;
 		String[] values = attr.marshall(args);
-		String name = Namespace.makePath(o, a);
-		client.setAttribute(name, values);
+		client.setAttribute(new Name(o, a), values);
 	}
 
 	/** Unmarshall an attribute value into the given proxy */
@@ -245,14 +245,12 @@ public class TypeCache<T extends SonarObject> {
 
 	/** Remove the specified object */
 	void removeObject(T o) {
-		String name = Namespace.makePath(o);
-		client.removeObject(name);
+		client.removeObject(new Name(o));
 	}
 
 	/** Create the specified object name */
 	public void createObject(String oname) {
-		String name = Namespace.makePath(tname, oname);
-		client.createObject(name);
+		client.createObject(new Name(tname, oname));
 	}
 
 	/** Create an object with the specified attributes */
@@ -261,15 +259,13 @@ public class TypeCache<T extends SonarObject> {
 			Object v = entry.getValue();
 			String[] values = namespace.marshall(
 				v.getClass(), new Object[] { v });
-			String name = Namespace.makePath(tname, oname,
-				entry.getKey());
+			Name name = new Name(tname, oname, entry.getKey());
 			client.setAttribute(name, values);
 		}
 		// FIXME: there is a race between the setAttribute calls and
 		// the createObject call. Another thread could get in between
 		// and mess up the "phantom" object creation.
-		String name = Namespace.makePath(tname, oname);
-		client.createObject(name);
+		client.createObject(new Name(tname, oname));
 	}
 
 	/** Add a ProxyListener */
