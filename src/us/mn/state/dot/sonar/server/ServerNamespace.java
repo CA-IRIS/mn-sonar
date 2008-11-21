@@ -93,19 +93,24 @@ public class ServerNamespace extends Namespace {
 		getTypeNode(o).storeObject(o);
 	}
 
-	/** Set the value of an attribute */
-	SonarObject setAttribute(Name name, String[] params,
-		SonarObject phantom) throws SonarException
+	/** Set the value of an attribute.
+	 * @param name Attribute name in SONAR namespace.
+	 * @param v New attribute value.
+	 * @return phantom object if one was created; null otherwise */
+	SonarObject setAttribute(Name name, String[] v) throws SonarException {
+		TypeNode t = getTypeNode(name);
+		return t.setValue(name, v);
+	}
+
+	/** Set the value of an attribute on a phantom object.
+	 * @param name Attribute name in SONAR namespace.
+	 * @param v New attribute value.
+	 * @param phantom Phantom object to set attribute on. */
+	void setAttribute(Name name, String[] v, SonarObject phantom)
+		throws SonarException
 	{
 		TypeNode t = getTypeNode(name);
-		if(phantom != null &&
-		   phantom.getTypeName().equals(name.getTypePart()) &&
-		   phantom.getName().equals(name.getObjectPart()))
-		{
-			t.setField(phantom, name.getAttributePart(), params);
-			return phantom;
-		} else
-			return t.setValue(name, params);
+		t.setField(phantom, name.getAttributePart(), v);
 	}
 
 	/** Get the value of an attribute */

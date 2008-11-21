@@ -140,7 +140,10 @@ public class TypeNode {
 		}
 	}
 
-	/** Set the value of an attribute */
+	/** Set the value of an attribute.
+	 * @param name Attribute name in SONAR namespace.
+	 * @param v New attribute value.
+	 * @return phantom object if one was created; null otherwise */
 	public SonarObject setValue(Name name, String[] v)
 		throws SonarException
 	{

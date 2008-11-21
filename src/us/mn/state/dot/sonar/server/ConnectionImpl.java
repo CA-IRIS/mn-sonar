@@ -328,14 +328,18 @@ public class ConnectionImpl extends Conduit implements Connection {
 			throw PermissionDenied.AUTHENTICATION_FAILED;
 	}
 
+	/** Check if the specified name refers to the phantom object */
+	protected boolean isPhantom(Name name) {
+		return phantom != null &&
+		       phantom.getTypeName().equals(name.getTypePart()) &&
+		       phantom.getName().equals(name.getObjectPart());
+	}
+
 	/** Get the specified object (either phantom or new object) */
 	protected SonarObject getObject(Name name) throws SonarException {
-		if(phantom != null &&
-		   name.getTypePart().equals(phantom.getTypeName()) &&
-		   name.getObjectPart().equals(phantom.getName()))
-		{
+		if(isPhantom(name))
 			return phantom;
-		} else
+		else
 			return namespace.createObject(name);
 	}
 
@@ -350,12 +354,16 @@ public class ConnectionImpl extends Conduit implements Connection {
 	protected void setAttribute(Name name, List<String> params)
 		throws SonarException
 	{
-		String[] p = new String[params.size() - 2];
-		for(int i = 0; i < p.length; i++)
-			p[i] =  params.get(i + 2);
-		phantom = namespace.setAttribute(name, p, phantom);
-		if(phantom == null)
-			server.notifyAttribute(name, p);
+		String[] v = new String[params.size() - 2];
+		for(int i = 0; i < v.length; i++)
+			v[i] =  params.get(i + 2);
+		if(isPhantom(name))
+			namespace.setAttribute(name, v, phantom);
+		else {
+			phantom = namespace.setAttribute(name, v);
+			if(phantom == null)
+				server.notifyAttribute(name, v);
+		}
 	}
 
 	/** Start writing data to client */
