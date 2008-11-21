@@ -156,6 +156,14 @@ public class ConnectionImpl extends Conduit implements Connection {
 		}
 	}
 
+	/** Check if the connection is watching a name */
+	protected boolean isWatching(String tname, String oname) {
+		synchronized(watching) {
+			String name = Namespace.makePath(tname, oname);
+			return watching.contains(name);
+		}
+	}
+
 	/** Notify the client of a new object being added */
 	protected void notifyObject(SonarObject o) {
 		try {
@@ -174,11 +182,13 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Notify the client of an attribute change */
-	public void notifyAttribute(String tname, String oname, String name,
+	public void notifyAttribute(String tname, String oname, String aname,
 		String[] params)
 	{
-		if(isWatching(tname) || isWatching(oname))
+		if(isWatching(tname) || isWatching(tname, oname)) {
+			String name = Namespace.makePath(tname, oname, aname);
 			notifyAttribute(name, params);
+		}
 	}
 
 	/** Notify the client of an attribute change */
@@ -344,18 +354,16 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Set the value of an attribute */
-	protected void setAttribute(String name, String[] names,
-		List<String> params) throws SonarException
+	protected void setAttribute(String[] names, List<String> params)
+		throws SonarException
 	{
 		String[] p = new String[params.size() - 2];
 		for(int i = 0; i < p.length; i++)
 			p[i] =  params.get(i + 2);
 		phantom = namespace.setAttribute(names[0], names[1], names[2],
 			p, phantom);
-		if(phantom == null) {
-			String oname = Namespace.makePath(names[0], names[1]);
-			server.notifyAttribute(names[0], oname, name, p);
-		}
+		if(phantom == null)
+			server.notifyAttribute(names[0], names[1], names[2], p);
 	}
 
 	/** Start writing data to client */
@@ -481,7 +489,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		if(names.length == 3) {
 			if(!user.canUpdate(name))
 				throw PermissionDenied.INSUFFICIENT_PRIVILEGES;
-			setAttribute(name, names, params);
+			setAttribute(names, params);
 		} else
 			throw NamespaceError.NAME_INVALID;
 	}
