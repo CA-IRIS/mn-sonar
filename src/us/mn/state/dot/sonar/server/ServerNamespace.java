@@ -68,8 +68,8 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Get a type node from the namespace by name */
-	protected TypeNode getTypeNode(String name) throws NamespaceError {
-		TypeNode t = _getTypeNode(name);
+	protected TypeNode getTypeNode(Name name) throws NamespaceError {
+		TypeNode t = _getTypeNode(name.getTypePart());
 		if(t == null)
 			throw NamespaceError.NAME_UNKNOWN;
 		else
@@ -84,7 +84,7 @@ public class ServerNamespace extends Namespace {
 
 	/** Create a new object */
 	public SonarObject createObject(Name name) throws SonarException {
-		TypeNode n = getTypeNode(name.getTypePart());
+		TypeNode n = getTypeNode(name);
 		return n.createObject(name.getObjectPart());
 	}
 
@@ -94,27 +94,26 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Set the value of an attribute */
-	SonarObject setAttribute(String tname, String oname, String aname,
-		String[] params, SonarObject phantom) throws SonarException
+	SonarObject setAttribute(Name name, String[] params,
+		SonarObject phantom) throws SonarException
 	{
-		TypeNode t = getTypeNode(tname);
-		if(phantom != null && phantom.getTypeName().equals(tname) &&
-			phantom.getName().equals(oname))
+		TypeNode t = getTypeNode(name);
+		if(phantom != null &&
+		   phantom.getTypeName().equals(name.getTypePart()) &&
+		   phantom.getName().equals(name.getObjectPart()))
 		{
-			t.setField(phantom, aname, params);
+			t.setField(phantom, name.getAttributePart(), params);
 			return phantom;
-		}
-		return t.setValue(oname, aname, params);
+		} else
+			return t.setValue(name, params);
 	}
 
 	/** Get the value of an attribute */
-	String[] getAttribute(String tname, String oname, String aname)
-		throws SonarException
-	{
-		TypeNode t = getTypeNode(tname);
-		SonarObject o = t.lookupObject(oname);
+	String[] getAttribute(Name name) throws SonarException {
+		TypeNode t = getTypeNode(name);
+		SonarObject o = t.lookupObject(name.getObjectPart());
 		if(o != null)
-			return t.getValue(o, aname);
+			return t.getValue(o, name.getAttributePart());
 		else
 			throw NamespaceError.NAME_INVALID;
 	}
@@ -138,11 +137,11 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Get the specified object */
-	SonarObject lookupObject(String name) {
-		String[] names = parse(name);
-		if(names.length == 2)
-			return lookupObject(names[0], names[1]);
-		else
+	SonarObject lookupObject(Name name) {
+		if(name.isObject()) {
+			return lookupObject(name.getTypePart(),
+				name.getObjectPart());
+		} else
 			return null;
 	}
 
@@ -158,11 +157,11 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Enumerate all objects of the named type */
-	protected void enumerateType(MessageEncoder enc, String name)
+	protected void enumerateType(MessageEncoder enc, Name name)
 		throws NamespaceError, SonarException
 	{
 		TypeNode t = getTypeNode(name);
-		enc.encode(Message.TYPE, name);
+		enc.encode(Message.TYPE, name.getTypePart());
 		t.enumerateObjects(enc);
 		enc.encode(Message.TYPE);
 	}
@@ -171,15 +170,15 @@ public class ServerNamespace extends Namespace {
 	protected void enumerateObject(MessageEncoder enc, SonarObject o)
 		throws SonarException
 	{
-		TypeNode t = getTypeNode(o.getTypeName());
+		TypeNode t = getTypeNode(o);
 		t.enumerateObject(enc, o);
 	}
 
 	/** Enumerate all attributes of the named object */
-	protected void enumerateObject(MessageEncoder enc, String[] names)
+	protected void enumerateObject(MessageEncoder enc, Name name)
 		throws SonarException
 	{
-		SonarObject o = lookupObject(names[0], names[1]);
+		SonarObject o = lookupObject(name);
 		if(o != null)
 			enumerateObject(enc, o);
 		else
@@ -187,31 +186,25 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Enumerate a named attribute */
-	protected void enumerateAttribute(MessageEncoder enc, String name,
-		String[] names) throws SonarException
+	protected void enumerateAttribute(MessageEncoder enc, Name name)
+		throws SonarException
 	{
-		String[] v = getAttribute(names[0], names[1], names[2]);
-		enc.encode(Message.ATTRIBUTE, name, v);
+		String[] v = getAttribute(name);
+		enc.encode(Message.ATTRIBUTE, name.toString(), v);
 	}
 
 	/** Enumerate everything contained by a name in the namespace */
-	void enumerate(String name, MessageEncoder enc) throws SonarException {
-		String[] names = parse(name);
-		switch(names.length) {
-			case 0:
-				enumerateRoot(enc);
-				return;
-			case 1:
-				enumerateType(enc, name);
-				return;
-			case 2:
-				enumerateObject(enc, names);
-				return;
-			case 3:
-				enumerateAttribute(enc, name, names);
-				return;
-		}
-		throw NamespaceError.NAME_INVALID;
+	void enumerate(Name name, MessageEncoder enc) throws SonarException {
+		if(name.isRoot())
+			enumerateRoot(enc);
+		else if(name.isType())
+			enumerateType(enc, name);
+		else if(name.isObject())
+			enumerateObject(enc, name);
+		else if(name.isAttribute())
+			enumerateAttribute(enc, name);
+		else
+			throw NamespaceError.NAME_INVALID;
 	}
 
 	/** Find an object by calling a checker for each object of a type.

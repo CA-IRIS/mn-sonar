@@ -33,7 +33,15 @@ public class Name {
 	/** Create a new name */
 	public Name(String n) {
 		path = n;
-		parts = path.split(SEP);
+		parts = getParts();
+	}
+
+	/** Get the parts of a name */
+	protected String[] getParts() {
+		if(path.length() < 1)
+			return new String[0];
+		else
+			return path.split(SEP);
 	}
 
 	/** Create a name with a type and object */
@@ -54,6 +62,11 @@ public class Name {
 	/** Create a name for an attribute of a SONAR object */
 	public Name(SonarObject o, String aname) {
 		this(o.getTypeName(), o.getName(), aname);
+	}
+
+	/** Check if the name is a root name */
+	public boolean isRoot() {
+		return parts.length == 0;
 	}
 
 	/** Check if the name is a type name */

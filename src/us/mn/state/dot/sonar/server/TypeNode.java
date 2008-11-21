@@ -18,6 +18,7 @@ import java.util.HashMap;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Message;
 import us.mn.state.dot.sonar.MessageEncoder;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarException;
@@ -140,17 +141,19 @@ public class TypeNode {
 	}
 
 	/** Set the value of an attribute */
-	public SonarObject setValue(String oname, String a, String[] v)
+	public SonarObject setValue(Name name, String[] v)
 		throws SonarException
 	{
+		String oname = name.getObjectPart();
+		String aname = name.getAttributePart();
 		synchronized(children) {
 			SonarObject o = children.get(oname);
 			if(o != null) {
-				dispatcher.setValue(o, a, v);
+				dispatcher.setValue(o, aname, v);
 				return null;
 			} else {
 				o = dispatcher.createObject(oname);
-				setField(o, a, v);
+				setField(o, aname, v);
 				return o;
 			}
 		}

@@ -137,9 +137,11 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Start watching the specified name */
-	public void startWatching(String name) {
-		synchronized(watching) {
-			watching.add(name);
+	public void startWatching(Name name) {
+		if(name.isType() || name.isObject()) {
+			synchronized(watching) {
+				watching.add(name.toString());
+			}
 		}
 	}
 
@@ -153,14 +155,6 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Check if the connection is watching a name */
 	protected boolean isWatching(String name) {
 		synchronized(watching) {
-			return watching.contains(name);
-		}
-	}
-
-	/** Check if the connection is watching a name */
-	protected boolean isWatching(String tname, String oname) {
-		synchronized(watching) {
-			String name = Namespace.makePath(tname, oname);
 			return watching.contains(name);
 		}
 	}
@@ -191,13 +185,9 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Notify the client of an attribute change */
-	public void notifyAttribute(String tname, String oname, String aname,
-		String[] params)
-	{
-		if(isWatching(tname) || isWatching(tname, oname)) {
-			String name = Namespace.makePath(tname, oname, aname);
-			notifyAttribute(name, params);
-		}
+	public void notifyAttribute(Name name, String[] params) {
+		if(isWatching(name))
+			notifyAttribute(name.toString(), params);
 	}
 
 	/** Notify the client of an attribute change */
@@ -364,16 +354,15 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Set the value of an attribute */
-	protected void setAttribute(String[] names, List<String> params)
+	protected void setAttribute(Name name, List<String> params)
 		throws SonarException
 	{
 		String[] p = new String[params.size() - 2];
 		for(int i = 0; i < p.length; i++)
 			p[i] =  params.get(i + 2);
-		phantom = namespace.setAttribute(names[0], names[1], names[2],
-			p, phantom);
+		phantom = namespace.setAttribute(name, p, phantom);
 		if(phantom == null)
-			server.notifyAttribute(names[0], names[1], names[2], p);
+			server.notifyAttribute(name, p);
 	}
 
 	/** Start writing data to client */
@@ -438,13 +427,14 @@ public class ConnectionImpl extends Conduit implements Connection {
 		checkLoggedIn();
 		if(params.size() > 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
-		String name = "";
+		Name name;
 		if(params.size() > 1)
-			name = params.get(1);
-		if(!user.canRead(name))
+			name = new Name(params.get(1));
+		else
+			name = new Name("");
+		if(!user.canRead(name.toString()))
 			throw PermissionDenied.INSUFFICIENT_PRIVILEGES;
-		if(name.length() > 0)
-			startWatching(name);
+		startWatching(name);
 		namespace.enumerate(name, state.encoder);
 	}
 
@@ -477,13 +467,13 @@ public class ConnectionImpl extends Conduit implements Connection {
 		checkLoggedIn();
 		if(params.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
-		String name = params.get(1);
-		if(!user.canRemove(name))
+		Name name = new Name(params.get(1));
+		if(!user.canRemove(name.toString()))
 			throw PermissionDenied.INSUFFICIENT_PRIVILEGES;
 		SonarObject obj = namespace.lookupObject(name);
 		if(obj != null) {
 			namespace.removeObject(obj);
-			server.notifyRemove(new Name(obj));
+			server.notifyRemove(name);
 		} else
 			throw NamespaceError.NAME_INVALID;
 	}
@@ -493,12 +483,11 @@ public class ConnectionImpl extends Conduit implements Connection {
 		checkLoggedIn();
 		if(params.size() < 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
-		String name = params.get(1);
-		String[] names = Namespace.parse(name);
-		if(names.length == 3) {
-			if(!user.canUpdate(name))
+		Name name = new Name(params.get(1));
+		if(name.isAttribute()) {
+			if(!user.canUpdate(name.toString()))
 				throw PermissionDenied.INSUFFICIENT_PRIVILEGES;
-			setAttribute(names, params);
+			setAttribute(name, params);
 		} else
 			throw NamespaceError.NAME_INVALID;
 	}

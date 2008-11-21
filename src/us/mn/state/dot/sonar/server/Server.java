@@ -318,12 +318,10 @@ public class Server extends Thread {
 	}
 
 	/** Notify all connections watching a name of an attribute change */
-	void notifyAttribute(String tname, String oname, String aname,
-		String[] params)
-	{
+	void notifyAttribute(Name name, String[] params) {
 		List<ConnectionImpl> clist = getConnectionList();
 		for(ConnectionImpl c: clist)
-			c.notifyAttribute(tname, oname, aname, params);
+			c.notifyAttribute(name, params);
 	}
 
 	/** Notify all connections watching a name of an object remove */
@@ -392,9 +390,8 @@ public class Server extends Thread {
 	protected void doSetAttribute(SonarObject o, String aname)
 		throws SonarException
 	{
-		String tname = o.getTypeName();
-		String oname = o.getName();
-		String[] v = namespace.getAttribute(tname, oname, aname);
-		notifyAttribute(tname, oname, aname, v);
+		Name name = new Name(o, aname);
+		String[] v = namespace.getAttribute(name);
+		notifyAttribute(name, v);
 	}
 }
