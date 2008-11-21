@@ -153,17 +153,10 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Check if the connection is watching a name */
-	protected boolean isWatching(String name) {
-		synchronized(watching) {
-			return watching.contains(name);
-		}
-	}
-
-	/** Check if the connection is watching a name */
 	protected boolean isWatching(Name name) {
 		synchronized(watching) {
-			return watching.contains(name.getObjectName()) ||
-			       watching.contains(name.getTypePart());
+			return watching.contains(name.getTypePart()) ||
+			       watching.contains(name.getObjectName());
 		}
 	}
 
@@ -204,19 +197,19 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Notify the client of a name being removed */
 	public void notifyRemove(Name name) {
 		if(isWatching(name)) {
-			doNotifyRemove(name);
+			notifyRemove(name.toString());
 			stopWatching(name);
 		}
 	}
 
 	/** Notify the client of a name being removed */
-	protected void doNotifyRemove(Name name) {
+	protected void notifyRemove(String name) {
 		try {
-			state.encoder.encode(Message.REMOVE, name.toString());
+			state.encoder.encode(Message.REMOVE, name);
 			flush();
 		}
 		catch(FlushError e) {
-			disconnect("Flush error: notifyRemove");
+			disconnect("Flush error: notifyRemove " + name);
 		}
 	}
 
