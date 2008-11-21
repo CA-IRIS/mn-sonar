@@ -16,6 +16,7 @@ package us.mn.state.dot.sonar.client;
 
 import java.util.HashMap;
 import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.ProtocolError;
@@ -53,55 +54,56 @@ public class ClientNamespace extends Namespace {
 	}
 
 	/** Get the TypeCache for the specified name */
-	protected TypeCache getTypeCache(String[] names) throws NamespaceError {
-		if(types.containsKey(names[0])) {
-			cur_type = types.get(names[0]);
+	protected TypeCache getTypeCache(Name name) throws NamespaceError {
+		String tname = name.getTypePart();
+		if(types.containsKey(tname)) {
+			cur_type = types.get(tname);
 			return cur_type;
 		} else
 			throw NamespaceError.NAME_INVALID;
 	}
 
 	/** Put a new object in the cache */
-	void putObject(String name) throws NamespaceError {
-		if(isAbsolute(name)) {
-			String[] names = parse(name);
-			if(names.length != 2)
+	void putObject(String n) throws NamespaceError {
+		if(isAbsolute(n)) {
+			Name name = new Name(n);
+			if(!name.isObject())
 				throw NamespaceError.NAME_INVALID;
-			cur_obj = getTypeCache(names).add(names[1]);
+			cur_obj = getTypeCache(name).add(name.getObjectPart());
 		} else
-			cur_obj = getTypeCache().add(name);
+			cur_obj = getTypeCache().add(n);
 	}
 
 	/** Remove an object from the cache */
-	void removeObject(String name) throws NamespaceError {
-		if(isAbsolute(name)) {
-			String[] names = parse(name);
-			if(names.length != 2)
+	void removeObject(String n) throws NamespaceError {
+		if(isAbsolute(n)) {
+			Name name = new Name(n);
+			if(!name.isObject())
 				throw NamespaceError.NAME_INVALID;
-			getTypeCache(names).remove(names[1]);
+			getTypeCache(name).remove(name.getObjectPart());
 		} else
-			getTypeCache().remove(name);
+			getTypeCache().remove(n);
 	}
 
 	/** Unmarshall an object attribute */
-	void unmarshallAttribute(String name, String[] v) throws SonarException{
+	void unmarshallAttribute(String n, String[] v) throws SonarException{
 		TypeCache t;
 		SonarObject o;
 		String a;
-		if(isAbsolute(name)) {
-			String[] names = parse(name);
-			if(names.length != 3)
+		if(isAbsolute(n)) {
+			Name name = new Name(n);
+			if(!name.isAttribute())
 				throw ProtocolError.WRONG_PARAMETER_COUNT;
-			t = getTypeCache(names);
-			o = t.getProxy(names[1]);
+			t = getTypeCache(name);
+			o = t.getProxy(name.getObjectPart());
 			cur_obj = o;
-			a = names[2];
+			a = name.getAttributePart();
 		} else {
 			t = getTypeCache();
 			o = cur_obj;
 			if(o == null)
 				throw NamespaceError.NAME_INVALID;
-			a = name;
+			a = n;
 		}
 		t.unmarshallAttribute(o, a, v);
 	}
