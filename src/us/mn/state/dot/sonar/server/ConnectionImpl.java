@@ -45,6 +45,18 @@ import us.mn.state.dot.sonar.User;
  */
 public class ConnectionImpl extends Conduit implements Connection {
 
+	/** Check if a name is watch positive. This means that the name can be
+	 * used as a positive entry in the watching set. */
+	static protected boolean isWatchPositive(Name name) {
+		return name.isType() || name.isObject();
+	}
+
+	/** Check if a name is watch negative. This means that the name can
+	 * be used as a negative entry in the watching set. */
+	static protected boolean isWatchNegative(Name name) {
+		return name.isAttribute() && name.getObjectPart().equals("");
+	}
+
 	/** Define the set of valid messages from a client connection */
 	static protected final EnumSet<Message> MESSAGES = EnumSet.of(
 		Message.LOGIN, Message.QUIT, Message.ENUMERATE, Message.IGNORE,
@@ -137,26 +149,34 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Start watching the specified name */
-	public void startWatching(Name name) {
-		if(name.isType() || name.isObject()) {
-			synchronized(watching) {
+	protected void startWatching(Name name) {
+		synchronized(watching) {
+			watching.remove(name.toString());
+			if(isWatchPositive(name))
 				watching.add(name.toString());
-			}
 		}
 	}
 
 	/** Stop watching the specified name */
-	protected boolean stopWatching(Name name) {
+	protected void stopWatching(Name name) {
 		synchronized(watching) {
-			return watching.remove(name.toString());
+			watching.remove(name.toString());
+			if(isWatchNegative(name))
+				watching.add(name.toString());
 		}
 	}
 
 	/** Check if the connection is watching a name */
 	protected boolean isWatching(Name name) {
 		synchronized(watching) {
-			return watching.contains(name.getTypePart()) ||
-			       watching.contains(name.getObjectName());
+			// Object watch is highest priority (positive)
+			if(watching.contains(name.getObjectName()))
+				return true;
+			// Attribute watch is middle priority (negative)
+			if(watching.contains(name.getAttributeName()))
+				return false;
+			// Type watch is lowest priority (positive)
+			return watching.contains(name.getTypePart());
 		}
 	}
 
@@ -445,8 +465,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		if(params.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		Name name = new Name(params.get(1));
-		if(!stopWatching(name))
-			throw ProtocolError.NOT_WATCHING;
+		stopWatching(name);
 	}
 
 	/** Respond to an OBJECT message */

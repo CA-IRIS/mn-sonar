@@ -117,4 +117,9 @@ public class Name {
 	public String getObjectName() {
 		return getTypePart() + SEP + getObjectPart();
 	}
+
+	/** Get the attribute name with no object specified */
+	public String getAttributeName() {
+		return getTypePart() + SEP + SEP + getAttributePart();
+	}
 }

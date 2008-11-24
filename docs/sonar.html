@@ -219,16 +219,20 @@
 		<code>o</code> messages, one for each object within the
 		container. Also, for each object, a series of <code>a</code>
 		messages will be sent, one for each attribute. The client will
-		also be put on a watchlist for the container, so that any time
-		changes are made, the client will be notified. If a name is not
-		provided, all types will be enumerated. After all objects have
-		been enumerated, a final empty <code>t</code> message will be
-		sent by the server.
+		also update its watch set with the name. The watch set is
+		checked any time changes are made, and the client is notified
+		if necessary. If a name is not provided, all types will be
+		enumerated. After all objects have been enumerated, a final
+		empty <code>t</code> message will be sent by the server.
 	</dd>
 	<dt>i [name]</dt>
 	<dd>
-		Ignore any changes to the specified name. This will remove the
-		client from the watchlist of the specified name.
+		Ignore any changes to the specified name. This will update the
+		client's watch set for the specified name. A watch set can
+		contain positive or negative entries, depending on the name.
+		A name with only the type, or the type and object name is
+		always a positive entry. A name with a type and attribute is
+		always a negative entry.
 	</dd>
 </dl>
 </li>

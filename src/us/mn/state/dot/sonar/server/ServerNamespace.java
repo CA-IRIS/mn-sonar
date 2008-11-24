@@ -183,6 +183,8 @@ public class ServerNamespace extends Namespace {
 	protected void enumerateAttribute(MessageEncoder enc, Name name)
 		throws SonarException
 	{
+		// FIXME: if object name is blank, enumerate this attribute
+		// for all objects of this type
 		String[] v = getAttribute(name);
 		enc.encode(Message.ATTRIBUTE, name.toString(), v);
 	}
