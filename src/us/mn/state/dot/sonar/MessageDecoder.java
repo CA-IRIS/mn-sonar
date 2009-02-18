@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,9 @@ import java.util.List;
  */
 public class MessageDecoder {
 
+	/** Maximum size (characters) of a single message */
+	static protected final int MAX_MESSAGE_SIZE = 512;
+
 	/** Everything on the wire is encoded to UTF-8 */
 	static protected final Charset UTF8 = Charset.forName("UTF-8");
 
@@ -46,9 +49,9 @@ public class MessageDecoder {
 	/** Create a new SONAR message decoder */
 	public MessageDecoder(ByteBuffer in) {
 		app_in = in;
-		m_buf = CharBuffer.allocate(256);
+		m_buf = CharBuffer.allocate(MAX_MESSAGE_SIZE);
 		m_buf.clear();
-		c_buf = CharBuffer.allocate(256);
+		c_buf = CharBuffer.allocate(MAX_MESSAGE_SIZE);
 		c_buf.flip();
 	}
 
