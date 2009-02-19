@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import java.nio.charset.Charset;
 public class MessageEncoder {
 
 	/** Maximum size (characters) of a single message */
-	static protected final int MAX_MESSAGE_SIZE = 512;
+	static protected final int MAX_MESSAGE_SIZE = 1024;
 
 	/** Threshold of bytes to start flushing write buffer */
 	static protected final int FLUSH_THRESHOLD = 1024;
