@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -222,10 +222,16 @@ public class TypeCache<T extends SonarObject> {
 		return attr.getValue();
 	}
 
-	/** Set the value of an attribute on the given proxy */
-	void setAttribute(T o, String a, Object[] args) throws SonarException {
+	/** Set the value of an attribute on the given proxy.
+	 * @param o Proxy object
+	 * @param a Attribute name
+	 * @param args New attribute value
+	 * @param check Flag to check cache before sending message to server */
+	void setAttribute(T o, String a, Object[] args, boolean check)
+		throws SonarException
+	{
 		Attribute attr = lookupAttribute(o, a);
-		if(attr.valueEquals(args))
+		if(check && attr.valueEquals(args))
 			return;
 		String[] values = attr.marshall(args);
 		client.setAttribute(new Name(o, a), values);

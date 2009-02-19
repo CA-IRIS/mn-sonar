@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,7 +92,9 @@ class SonarInvoker implements InvocationHandler {
 		if(getters.containsKey(method))
 			return cache.getAttribute(o, getters.get(method));
 		else if(setters.containsKey(method)) {
-			cache.setAttribute(o, setters.get(method), args);
+			String aname = setters.get(method);
+			boolean check = getters.containsValue(aname);
+			cache.setAttribute(o, aname, args, check);
 			return null;
 		} else {
 			String m = method.getName();
