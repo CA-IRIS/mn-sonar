@@ -33,6 +33,15 @@ abstract public class Namespace {
 		return (String)f.get(t);
 	}
 
+	/** Get names of possible SONAR types */
+	static public String[] typeNames(Class t)
+		throws NoSuchFieldException, IllegalAccessException
+	{
+		assert SonarObject.class.isAssignableFrom(t);
+		Field f = (Field)t.getField("SONAR_TYPES");
+		return (String [])f.get(t);
+	}
+
 	/** Make an array of the given class and size */
 	static protected Object[] makeArray(Class t, int size) {
 		return (Object [])Array.newInstance(t, size);
@@ -82,22 +91,47 @@ abstract public class Namespace {
 		catch(NumberFormatException e) {
 			throw ProtocolError.INVALID_PARAMETER;
 		}
-		if(SonarObject.class.isAssignableFrom(t)) {
-			try {
-				return lookupObject(typeName(t), p);
-			}
-			catch(NoSuchFieldException e) {
-				System.err.println("SONAR: unmarshall \"" + p +
-					"\": No such field: " + e.getMessage());
-				throw ProtocolError.INVALID_PARAMETER;
-			}
-			catch(Exception e) {
-				System.err.println("SONAR: unmarshall \"" + p +
-					"\": " + e.getMessage());
-				throw ProtocolError.INVALID_PARAMETER;
-			}
+		if(SonarObject.class.isAssignableFrom(t))
+			return unmarshallObject(t, p);
+		else
+System.err.println(t);
+			throw ProtocolError.INVALID_PARAMETER;
+	}
+
+	/** Unmarshall a SONAR object reference */
+	protected Object unmarshallObject(Class t, String p)
+		throws ProtocolError
+	{
+		try {
+			return unmarshallObjectB(t, p);
 		}
-		throw ProtocolError.INVALID_PARAMETER;
+		catch(NoSuchFieldException e) {
+			System.err.println("SONAR: SONAR_TYPE and " +
+				"SONAR_TYPES not defined for " + t);
+			throw ProtocolError.INVALID_PARAMETER;
+		}
+		catch(Exception e) {
+			System.err.println("SONAR: unmarshall \"" + p +
+				"\": " + e.getMessage());
+			throw ProtocolError.INVALID_PARAMETER;
+		}
+	}
+
+	/** Unmarshall a SONAR object reference */
+	protected Object unmarshallObjectB(Class t, String p)
+		throws NoSuchFieldException, IllegalAccessException
+	{
+		try {
+			return lookupObject(typeName(t), p);
+		}
+		catch(NoSuchFieldException e) {
+			for(String typ: typeNames(t)) {
+				Object o = lookupObject(typ, p);
+				if(o != null)
+					return o;
+			}
+			return null;
+		}
 	}
 
 	/** Unmarshall parameter strings into one java parameter */
