@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -85,6 +85,11 @@ abstract public class Namespace {
 		if(SonarObject.class.isAssignableFrom(t)) {
 			try {
 				return lookupObject(typeName(t), p);
+			}
+			catch(NoSuchFieldException e) {
+				System.err.println("SONAR: unmarshall \"" + p +
+					"\": No such field: " + e.getMessage());
+				throw ProtocolError.INVALID_PARAMETER;
 			}
 			catch(Exception e) {
 				System.err.println("SONAR: unmarshall \"" + p +
