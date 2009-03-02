@@ -94,7 +94,6 @@ abstract public class Namespace {
 		if(SonarObject.class.isAssignableFrom(t))
 			return unmarshallObject(t, p);
 		else
-System.err.println(t);
 			throw ProtocolError.INVALID_PARAMETER;
 	}
 
