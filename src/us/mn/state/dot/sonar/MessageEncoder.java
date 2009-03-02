@@ -28,10 +28,7 @@ import java.nio.charset.Charset;
 public class MessageEncoder {
 
 	/** Maximum size (characters) of a single message */
-	static protected final int MAX_MESSAGE_SIZE = 1024;
-
-	/** Threshold of bytes to start flushing write buffer */
-	static protected final int FLUSH_THRESHOLD = 1024;
+	static protected final int MAX_MESSAGE_SIZE = 2048;
 
 	/** Number of tries to flush write buffer */
 	static protected final int FLUSH_TRIES = 40;
@@ -113,7 +110,7 @@ public class MessageEncoder {
 
 	/** Check if we must flush the write buffer */
 	protected boolean mustFlush(int n_bytes) {
-		return app_out.remaining() < n_bytes + FLUSH_THRESHOLD;
+		return app_out.remaining() < n_bytes + MAX_MESSAGE_SIZE;
 	}
 
 	/** Ensure there is capacity in the write buffer */
