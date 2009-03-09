@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.sonar.test;
 
-import us.mn.state.dot.sonar.PropertyLoader;
+import java.util.Properties;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.RoleImpl;
@@ -23,7 +23,14 @@ import us.mn.state.dot.sonar.server.UserImpl;
 
 public class TestServer extends Server {
 
-	static protected final String PROP_FILE = "/etc/sonar/sonar.properties";
+	static protected Properties createProperties() {
+		Properties p = new Properties();
+		p.setProperty("keystore.file", "/sonar-test.keystore");
+		p.setProperty("keystore.password", "sonar-test");
+		p.setProperty("sonar.ldap.urls", "ldaps://localhost:636");
+		p.setProperty("sonar.port", "1037");
+		return p;
+	}
 
 	static protected ServerNamespace createNamespace()
 		throws SonarException
@@ -49,6 +56,6 @@ public class TestServer extends Server {
 	}
 
 	public TestServer() throws Exception {
-		super(createNamespace(), PropertyLoader.load(PROP_FILE));
+		super(createNamespace(), createProperties());
 	}
 }
