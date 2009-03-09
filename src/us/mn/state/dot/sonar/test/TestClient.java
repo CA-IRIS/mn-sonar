@@ -14,10 +14,10 @@
  */
 package us.mn.state.dot.sonar.test;
 
+import java.util.Properties;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Connection;
-import us.mn.state.dot.sonar.PropertyLoader;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.Client;
@@ -25,8 +25,6 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 
 public class TestClient extends Client {
-
-	static protected final String PROP_LOC = "/sonar-client.properties";
 
 	static protected final ExceptionHandler HANDLER =
 		new ExceptionHandler()
@@ -37,6 +35,15 @@ public class TestClient extends Client {
 		}
 	};
 
+	static protected Properties createProperties() {
+		Properties p = new Properties();
+		p.setProperty("keystore.file", "/sonar-test.keystore");
+		p.setProperty("keystore.password", "sonar-test");
+		p.setProperty("sonar.host", "localhost");
+		p.setProperty("sonar.port", "1037");
+		return p;
+	}
+
 	protected final TypeCache<Role> roles;
 
 	protected final TypeCache<User> users;
@@ -44,7 +51,7 @@ public class TestClient extends Client {
 	protected final TypeCache<Connection> connections;
 
 	public TestClient() throws Exception {
-		super(PropertyLoader.load(PROP_LOC), HANDLER);
+		super(createProperties(), HANDLER);
 		roles = new TypeCache<Role>(Role.class, this);
 		users = new TypeCache<User>(User.class, this);
 		connections = new TypeCache<Connection>(Connection.class, this);
