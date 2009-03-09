@@ -63,9 +63,6 @@
 				<filter token="VERSION" value="${version}"/>
 				<filter token="SCHEDULER.VERSION"
 				        value="${scheduler.version}"/>
-				<filter token="KEYSTORE.PASSWORD" value="${keystore.password}"/>
-				<filter token="SONAR.HOST" value="${sonar.host}"/>
-				<filter token="SONAR.PORT" value="${sonar.port}"/>
 			</filterset>
 		</copy>
 
@@ -140,8 +137,7 @@
 		<jar jarfile="${build.lib}/${test.jar}"
 		     manifest="${build.etc}/${manifest.test}">
 			<fileset dir="${etc.dir}">
-				<include name="sonar-client.keystore"/>
-				<include name="sonar-client.properties"/>
+				<include name="sonar-test.keystore"/>
 			</fileset>
 			<fileset dir="${build.classes}"
 				 includes="us/mn/state/dot/sonar/test/*.class"/>
