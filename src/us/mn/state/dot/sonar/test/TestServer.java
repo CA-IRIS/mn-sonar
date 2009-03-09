@@ -27,7 +27,7 @@ public class TestServer extends Server {
 		Properties p = new Properties();
 		p.setProperty("keystore.file", "/sonar-test.keystore");
 		p.setProperty("keystore.password", "sonar-test");
-		p.setProperty("sonar.ldap.urls", "ldaps://localhost:636");
+		p.setProperty("sonar.ldap.urls", "ldap://localhost:389");
 		p.setProperty("sonar.port", "1037");
 		return p;
 	}
@@ -44,7 +44,7 @@ public class TestServer extends Server {
 		r.setPrivD(true);
 		n.add(r);
 		UserImpl u = new UserImpl("username");
-		u.setDn("Test user");
+		u.setDn("cn=username,dc=sonar");
 		u.setRoles(new RoleImpl[] { r });
 		u.setFullName("Test user");
 		n.add(u);
