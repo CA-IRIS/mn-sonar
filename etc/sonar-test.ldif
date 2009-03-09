@@ -1,0 +1,12 @@
+dn: dc=sonar
+objectclass: dcObject
+objectclass: organization
+dc: sonar
+o: MnDOT
+
+dn: cn=username,dc=sonar
+objectclass: person
+cn: username
+sn: username
+userPassword: password
+
