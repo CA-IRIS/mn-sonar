@@ -1,5 +1,5 @@
 (^|/)lib($|/)
 (^|/)build($|/)
-(^|/)sonar-client-*
-(^|/)sonar-server-*
-(^|/)sonar-test-*
+sonar-client-*
+sonar-server-*
+sonar-test-*
