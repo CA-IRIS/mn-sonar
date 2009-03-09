@@ -43,10 +43,10 @@ public class TestServer extends Server {
 		r.setPrivC(true);
 		r.setPrivD(true);
 		n.add(r);
-		UserImpl u = new UserImpl("rtmcdatasync");
-		u.setDn("RTMC DataSync");
+		UserImpl u = new UserImpl("username");
+		u.setDn("Test user");
 		u.setRoles(new RoleImpl[] { r });
-		u.setFullName("RTMC DataSync");
+		u.setFullName("Test user");
 		n.add(u);
 		n.add(new TestImpl("name_A", 10));
 		n.add(new TestImpl("name_B", 20));
