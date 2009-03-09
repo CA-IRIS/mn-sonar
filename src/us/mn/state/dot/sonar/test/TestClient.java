@@ -50,11 +50,14 @@ public class TestClient extends Client {
 
 	protected final TypeCache<Connection> connections;
 
+	protected final TypeCache<Test> tests;
+
 	public TestClient() throws Exception {
 		super(createProperties(), HANDLER);
 		roles = new TypeCache<Role>(Role.class, this);
 		users = new TypeCache<User>(User.class, this);
 		connections = new TypeCache<Connection>(Connection.class, this);
+		tests = new TypeCache<Test>(Test.class, this);
 		login("username", "password");
 		roles.addProxyListener(new ProxyListener<Role>() {
 			public void proxyAdded(Role proxy) {
@@ -75,7 +78,8 @@ public class TestClient extends Client {
 		});
 		populate(roles);
 		populate(users);
-		populate(connections, true);
+		populate(connections);
+		populate(tests, true);
 	}
 
 	void printRoles() {
