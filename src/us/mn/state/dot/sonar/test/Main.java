@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,8 +103,7 @@ System.err.println("role proxy removed: " + proxy.getName());
 		c.populate(uc);
 		TypeCache<Connection> cc = new TypeCache<Connection>(
 			Connection.class, c);
-		c.populate(cc);
-		Thread.sleep(2000);
+		c.populate(cc, true);
 		printRoles(rc);
 		printUsers(uc);
 		printConnections(cc);
