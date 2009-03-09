@@ -61,6 +61,8 @@
 			<fileset dir="${etc.dir}" />
 			<filterset begintoken="@@" endtoken="@@">
 				<filter token="VERSION" value="${version}"/>
+				<filter token="SCHEDULER.VERSION"
+				        value="${scheduler.version}"/>
 				<filter token="KEYSTORE.PASSWORD" value="${keystore.password}"/>
 				<filter token="SONAR.HOST" value="${sonar.host}"/>
 				<filter token="SONAR.PORT" value="${sonar.port}"/>
@@ -151,6 +153,9 @@
 		depends="server-jar, client-jar, test-jar"
 		description="Create the test distribution">
 		<copy todir="${dist.test}">
+			<fileset dir="${lib.dir}">
+				<include name="${scheduler.jar}"/>
+			</fileset>
 			<fileset dir="${build.lib}">
 				<include name="${client.jar}"/>
 				<include name="${server.jar}"/>
