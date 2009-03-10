@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -128,7 +128,9 @@ public class SSLState {
 	/** Write data to the network output buffer */
 	public boolean doWrite() throws SSLException {
 		doWrap();
-		return app_out.position() > 0;
+		synchronized(app_out) {
+			return app_out.position() > 0;
+		}
 	}
 
 	/** Perform a delegated SSL engine task */
@@ -141,12 +143,14 @@ public class SSLState {
 	/** Wrap application data into SSL buffer */
 	protected void doWrap() throws SSLException {
 		ssl_out.clear();
-		app_out.flip();
-		try {
-			engine.wrap(app_out, ssl_out);
-		}
-		finally {
-			app_out.compact();
+		synchronized(app_out) {
+			app_out.flip();
+			try {
+				engine.wrap(app_out, ssl_out);
+			}
+			finally {
+				app_out.compact();
+			}
 		}
 		ssl_out.flip();
 		int n_bytes;
