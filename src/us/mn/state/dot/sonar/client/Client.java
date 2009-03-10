@@ -206,7 +206,11 @@ public class Client extends Thread {
 
 	/** Message processor for handling incoming messages */
 	void flush() {
-		processor.addJob(new Job() {
+		// NOTE: this was added as a workaround for a login problem
+		//       on Windows using a slow link.  The connection would
+		//       get "stuck" during SSL handshaking, and the login
+		//       request would never get sent to the server.
+		processor.addJob(new Job(500) {
 			public void perform() {
 				conduit.flush();
 			}
