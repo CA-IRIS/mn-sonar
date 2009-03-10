@@ -40,7 +40,7 @@ public class TestClient extends Client {
 		Properties p = new Properties();
 		p.setProperty("keystore.file", "/sonar-test.keystore");
 		p.setProperty("keystore.password", "sonar-test");
-		p.setProperty("sonar.host", "localhost");
+		p.setProperty("sonar.host", "151.111.8.101");
 		p.setProperty("sonar.port", "1037");
 		return p;
 	}
@@ -60,6 +60,13 @@ public class TestClient extends Client {
 		connections = new TypeCache<Connection>(Connection.class, this);
 		tests = new TypeCache<Test>(Test.class, this);
 		login("username", "password");
+		populate(roles);
+		populate(users);
+		populate(connections);
+		populate(tests, true);
+	}
+
+	void createProxyListener() {
 		roles.addProxyListener(new ProxyListener<Role>() {
 			public void proxyAdded(Role proxy) {
 				System.err.println("ROLE " + proxy.getName() +
@@ -77,10 +84,6 @@ public class TestClient extends Client {
 					proxy.getName() + ", " + a);
 			}
 		});
-		populate(roles);
-		populate(users);
-		populate(connections);
-		populate(tests, true);
 	}
 
 	void printRoles() {
