@@ -57,6 +57,9 @@ public class TypeCache<T extends SonarObject> {
 	/** SONAR namespace */
 	protected final Namespace namespace;
 
+	/** Type name attribute (shared by all proxies of a type) */
+	protected final Attribute typeName;
+
 	/** All SONAR objects of this type are put here.
 	 * All access must be synchronized on the "children" lock. */
 	private final HashMap<String, T> children = new HashMap<String, T>();
@@ -88,6 +91,7 @@ public class TypeCache<T extends SonarObject> {
 		invoker = new SonarInvoker(this, iface);
 		client = c;
 		namespace = client.getNamespace();
+		typeName = new Attribute(tname, namespace);
 	}
 
 	/** Notify proxy listeners that a proxy has been added */
@@ -119,7 +123,7 @@ public class TypeCache<T extends SonarObject> {
 		T o = (T)Proxy.newProxyInstance(LOADER, ifaces, invoker);
 		HashMap<String, Attribute> amap =
 			invoker.createAttributes(namespace);
-		amap.put("typeName", new Attribute(tname, namespace));
+		amap.put("typeName", typeName);
 		amap.put("name", new Attribute(name, namespace));
 		synchronized(children) {
 			children.put(name, o);
