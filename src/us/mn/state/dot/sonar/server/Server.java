@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -134,7 +134,7 @@ public class Server extends Thread {
 	{
 		ServerSocketChannel c = ServerSocketChannel.open();
 		c.configureBlocking(false);
-		InetAddress host = InetAddress.getLocalHost();
+		InetAddress host = InetAddress.getByAddress(new byte[4]);
 		InetSocketAddress address = new InetSocketAddress(host, port);
 		c.socket().bind(address);
 		return c;
