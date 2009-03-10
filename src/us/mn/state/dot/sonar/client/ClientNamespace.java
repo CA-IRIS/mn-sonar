@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,27 +90,27 @@ public class ClientNamespace extends Namespace {
 			getTypeCache().remove(n);
 	}
 
-	/** Unmarshall an object attribute */
-	void unmarshallAttribute(String n, String[] v) throws SonarException{
-		TypeCache t;
-		SonarObject o;
-		String a;
+	/** Update an object attribute */
+	void updateAttribute(String n, String[] v) throws SonarException {
 		if(isAbsolute(n)) {
 			Name name = new Name(n);
 			if(!name.isAttribute())
 				throw ProtocolError.WRONG_PARAMETER_COUNT;
-			t = getTypeCache(name);
-			o = t.getProxy(name.getObjectPart());
-			cur_obj = o;
-			a = name.getAttributePart();
-		} else {
-			t = getTypeCache();
-			o = cur_obj;
-			if(o == null)
-				throw NamespaceError.NAME_INVALID;
-			a = n;
-		}
-		t.unmarshallAttribute(o, a, v);
+			TypeCache t = getTypeCache(name);
+			cur_obj = t.getProxy(name.getObjectPart());
+			String a = name.getAttributePart();
+			updateAttribute(t, cur_obj, a, v);
+		} else
+			updateAttribute(getTypeCache(), cur_obj, n, v);
+	}
+
+	/** Update an object attribute */
+	protected void updateAttribute(TypeCache t, SonarObject o, String a,
+		String[] v) throws SonarException
+	{
+		if(o == null)
+			throw NamespaceError.NAME_INVALID;
+		t.updateAttribute(o, a, v);
 	}
 
 	/** Process a TYPE message from the server */

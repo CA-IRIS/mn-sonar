@@ -237,8 +237,8 @@ public class TypeCache<T extends SonarObject> {
 		client.setAttribute(new Name(o, a), values);
 	}
 
-	/** Unmarshall an attribute value into the given proxy */
-	void unmarshallAttribute(T o, String a, String[] v)
+	/** Update an attribute value into the given proxy */
+	void updateAttribute(T o, String a, String[] v)
 		throws SonarException
 	{
 		synchronized(children) {

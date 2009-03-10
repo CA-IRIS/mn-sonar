@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -302,7 +302,7 @@ class ClientConduit extends Conduit {
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		p.remove(0);
 		String name = p.remove(0);
-		namespace.unmarshallAttribute(name, p.toArray(new String[0]));
+		namespace.updateAttribute(name, p.toArray(new String[0]));
 	}
 
 	/** Process a TYPE message from the server */
