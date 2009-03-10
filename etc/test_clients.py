@@ -1,18 +1,21 @@
 #!/usr/bin/env python
 
+# This script is for stress-testing a SONAR server.  It starts a number of
+# subprocesses, which each connect to the SONAR test server.
+
 import subprocess
 import time
-import os
 
-def run_client():
-	rc = subprocess.call(['java', '-jar', 'sonar-test-@@VERSION@@.jar', '-c'])
-	if rc:
-		print 'client returned %d' % rc
+args = ['java', '-jar', 'sonar-test-@@VERSION@@.jar', '-c']
+processes = []
 
 for i in range(15):
-	pid = os.fork()
-	if pid == 0:
-		run_client()
-		break
-	else:
-		time.sleep(0.2)
+	processes.append(subprocess.Popen(args))
+	time.sleep(0.2)
+
+success = 0
+for p in processes:
+	rc = p.wait()
+	if rc == 0:
+		success = success + 1
+print 'SONAR client success %d of %d' % (success, len(processes))
