@@ -149,10 +149,11 @@
 		depends="server-jar, client-jar, test-jar"
 		description="Create the test distribution">
 		<copy todir="${dist.test}">
-			<fileset dir="${etc.dir}">
+			<fileset dir="${build.etc}">
 				<include name="slapd-test.conf"/>
 				<include name="sonar-test.ldif"/>
 				<include name="setup_openldap.sh"/>
+				<include name="test_clients.py"/>
 			</fileset>
 			<fileset dir="${lib.dir}">
 				<include name="${scheduler.jar}"/>
