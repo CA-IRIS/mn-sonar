@@ -31,6 +31,7 @@ public class TestClient extends Client {
 	{
 		public boolean handle(Exception e) {
 			System.err.println("SHOW: " + e.getMessage());
+			System.exit(1);
 			return true;
 		}
 	};

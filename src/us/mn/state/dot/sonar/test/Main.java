@@ -30,9 +30,7 @@ public class Main {
 		try {
 			if(checkClient(args)) {
 				TestClient c = new TestClient();
-				c.printRoles();
-				c.printUsers();
-				c.printConnections();
+				c.quit();
 				c.join();
 			} else {
 				TestServer s = new TestServer();
