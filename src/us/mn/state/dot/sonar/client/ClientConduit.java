@@ -208,7 +208,7 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Disconnect the conduit */
-	public void disconnect(String msg) {
+	protected void disconnect(String msg) {
 		super.disconnect(msg);
 		System.err.println("SONAR: " + msg);
 		try {
@@ -265,13 +265,13 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Enable writing data back to the client */
-	public void enableWrite() {
+	protected void enableWrite() {
 		key.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
 		key.selector().wakeup();
 	}
 
 	/** Disable writing data back to the client */
-	public void disableWrite() {
+	protected void disableWrite() {
 		key.interestOps(SelectionKey.OP_READ);
 	}
 

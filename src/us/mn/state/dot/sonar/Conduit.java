@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ abstract public class Conduit {
 	}
 
 	/** Disconnect the conduit */
-	public void disconnect(String msg) {
+	protected void disconnect(String msg) {
 		connected = false;
 	}
 
@@ -43,10 +43,10 @@ abstract public class Conduit {
 	abstract public void flush();
 
 	/** Enable writing data to the conduit */
-	abstract public void enableWrite();
+	abstract protected void enableWrite();
 
 	/** Disable writing data to the conduit */
-	abstract public void disableWrite();
+	abstract protected void disableWrite();
 
 	/** Handle a LOGIN message */
 	public void doLogin(List<String> p) throws SonarException {

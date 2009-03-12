@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -192,13 +192,13 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Notify the client of a new object being added */
-	public void notifyObject(Name name, SonarObject o) {
+	void notifyObject(Name name, SonarObject o) {
 		if(isWatching(name))
 			notifyObject(o);
 	}
 
 	/** Notify the client of an attribute change */
-	public void notifyAttribute(Name name, String[] params) {
+	void notifyAttribute(Name name, String[] params) {
 		if(isWatching(name))
 			notifyAttribute(name.toString(), params);
 	}
@@ -215,7 +215,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Notify the client of a name being removed */
-	public void notifyRemove(Name name) {
+	void notifyRemove(Name name) {
 		if(isWatching(name)) {
 			notifyRemove(name.toString());
 			stopWatching(name);
@@ -234,7 +234,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Read messages from the socket channel */
-	public void doRead() throws IOException {
+	void doRead() throws IOException {
 		int nbytes;
 		ByteBuffer net_in = state.getNetInBuffer();
 		synchronized(net_in) {
@@ -247,7 +247,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Write pending data to the socket channel */
-	public void doWrite() throws IOException {
+	void doWrite() throws IOException {
 		ByteBuffer net_out = state.getNetOutBuffer();
 		synchronized(net_out) {
 			net_out.flip();
@@ -259,7 +259,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Disconnect the client connection */
-	public void disconnect(String msg) {
+	protected void disconnect(String msg) {
 		super.disconnect(msg);
 		System.err.println("SONAR: " + msg + " on " + getName());
 		synchronized(watching) {
@@ -282,7 +282,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Process any incoming messages */
-	public void processMessages() {
+	void processMessages() {
 		if(!isConnected())
 			return;
 		try {
