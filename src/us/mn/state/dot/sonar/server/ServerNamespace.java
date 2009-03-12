@@ -38,15 +38,6 @@ public class ServerNamespace extends Namespace {
 		new HashMap<String, TypeNode>();
 
 	/** Register a new type in the namespace */
-	public TypeNode registerType(String n, Class c) {
-		TypeNode node = new TypeNode(this, n, c);
-		synchronized(root) {
-			root.put(n, node);
-		}
-		return node;
-	}
-
-	/** Register a new type in the namespace */
 	protected TypeNode registerType(SonarObject o) {
 		return registerType(o.getTypeName(), o.getClass());
 	}
@@ -74,22 +65,6 @@ public class ServerNamespace extends Namespace {
 			throw NamespaceError.NAME_UNKNOWN;
 		else
 			return t;
-	}
-
-	/** Create a new object */
-	public SonarObject createObject(Name name) throws SonarException {
-		TypeNode n = getTypeNode(name);
-		return n.createObject(name.getObjectPart());
-	}
-
-	/** Store an object in the namespace */
-	public void storeObject(SonarObject o) throws SonarException {
-		getTypeNode(o).storeObject(o);
-	}
-
-	/** Add an object into the namespace without storing */
-	public void addObject(SonarObject o) throws NamespaceError {
-		getTypeNode(o).addObject(o);
 	}
 
 	/** Set the value of an attribute.
@@ -203,6 +178,31 @@ public class ServerNamespace extends Namespace {
 			enumerateAttribute(enc, name);
 		else
 			throw NamespaceError.NAME_INVALID;
+	}
+
+	/** Register a new type in the namespace */
+	public TypeNode registerType(String n, Class c) {
+		TypeNode node = new TypeNode(this, n, c);
+		synchronized(root) {
+			root.put(n, node);
+		}
+		return node;
+	}
+
+	/** Add an object into the namespace without storing */
+	public void addObject(SonarObject o) throws NamespaceError {
+		getTypeNode(o).addObject(o);
+	}
+
+	/** Store an object in the namespace */
+	public void storeObject(SonarObject o) throws SonarException {
+		getTypeNode(o).storeObject(o);
+	}
+
+	/** Create a new object */
+	public SonarObject createObject(Name name) throws SonarException {
+		TypeNode n = getTypeNode(name);
+		return n.createObject(name.getObjectPart());
 	}
 
 	/** Lookup an object in the SONAR namespace.
