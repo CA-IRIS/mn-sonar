@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,18 +48,6 @@ public class TypeNode {
 		dispatcher = new AttributeDispatcher(c, ns);
 	}
 
-	/** Add an object to the type node */
-	public void add(SonarObject o) throws NamespaceError {
-		// FIXME: all callers should just use storeObject instead
-		String name = o.getName();
-		synchronized(children) {
-			if(children.containsKey(name))
-				throw NamespaceError.NAME_EXISTS;
-			else
-				children.put(name, o);
-		}
-	}
-
 	/** Create a new object in the type node */
 	public SonarObject createObject(String name) throws SonarException {
 		synchronized(children) {
@@ -77,6 +65,17 @@ public class TypeNode {
 				throw NamespaceError.NAME_EXISTS;
 			dispatcher.storeObject(o);
 			children.put(name, o);
+		}
+	}
+
+	/** Add an object to the type node without storing */
+	public void addObject(SonarObject o) throws NamespaceError {
+		String name = o.getName();
+		synchronized(children) {
+			if(children.containsKey(name))
+				throw NamespaceError.NAME_EXISTS;
+			else
+				children.put(name, o);
 		}
 	}
 

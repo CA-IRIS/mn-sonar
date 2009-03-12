@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,12 +76,6 @@ public class ServerNamespace extends Namespace {
 			return t;
 	}
 
-	/** Add an object into the namespace */
-	public void add(SonarObject o) throws NamespaceError {
-		TypeNode n = getTypeNode(o);
-		n.add(o);
-	}
-
 	/** Create a new object */
 	public SonarObject createObject(Name name) throws SonarException {
 		TypeNode n = getTypeNode(name);
@@ -91,6 +85,11 @@ public class ServerNamespace extends Namespace {
 	/** Store an object in the namespace */
 	public void storeObject(SonarObject o) throws SonarException {
 		getTypeNode(o).storeObject(o);
+	}
+
+	/** Add an object into the namespace without storing */
+	public void addObject(SonarObject o) throws NamespaceError {
+		getTypeNode(o).addObject(o);
 	}
 
 	/** Set the value of an attribute.

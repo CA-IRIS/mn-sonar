@@ -349,7 +349,7 @@ public class Server extends Thread {
 
 	/** Perform an add object task */
 	protected void doAddObject(SonarObject o) throws NamespaceError {
-		namespace.add(o);
+		namespace.addObject(o);
 		notifyObject(o);
 	}
 

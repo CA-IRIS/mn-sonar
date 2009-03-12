@@ -42,16 +42,16 @@ public class TestServer extends Server {
 		r.setPrivW(true);
 		r.setPrivC(true);
 		r.setPrivD(true);
-		n.add(r);
+		n.addObject(r);
 		UserImpl u = new UserImpl("username");
 		u.setDn("cn=username,dc=sonar");
 		u.setRoles(new RoleImpl[] { r });
 		u.setFullName("Test user");
-		n.add(u);
-		n.add(new TestImpl("name_A", 10));
-		n.add(new TestImpl("name_B", 20));
+		n.addObject(u);
+		n.addObject(new TestImpl("name_A", 10));
+		n.addObject(new TestImpl("name_B", 20));
 		for(int i = 0; i < 5000; i++)
-			n.add(new TestImpl("name_" + i, i));
+			n.addObject(new TestImpl("name_" + i, i));
 		return n;
 	}
 
