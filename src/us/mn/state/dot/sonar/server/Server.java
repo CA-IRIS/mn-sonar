@@ -141,12 +141,12 @@ public class Server extends Thread {
 	}
 
 	/** Get the user authenticator */
-	public LDAPAuthenticator getAuthenticator() {
+	LDAPAuthenticator getAuthenticator() {
 		return authenticator;
 	}
 
 	/** Get the SONAR namespace */
-	public ServerNamespace getNamespace() {
+	ServerNamespace getNamespace() {
 		return namespace;
 	}
 
@@ -161,7 +161,7 @@ public class Server extends Thread {
 	}
 
 	/** Disconnect the client associated with the selection key */
-	public void disconnect(SelectionKey key) {
+	void disconnect(SelectionKey key) {
 		key.cancel();
 		ConnectionImpl c;
 		synchronized(clients) {
@@ -200,7 +200,7 @@ public class Server extends Thread {
 	}
 
 	/** Process messages on one connection */
-	public void processMessages(final ConnectionImpl c) {
+	void processMessages(final ConnectionImpl c) {
 		processor.addJob(new Job() {
 			public void perform() {
 				DEBUG_TASK.log("Processing messages for " +
@@ -211,7 +211,7 @@ public class Server extends Thread {
 	}
 
 	/** Flush outgoing data for one connection */
-	public void flush(final ConnectionImpl c) {
+	void flush(final ConnectionImpl c) {
 		processor.addJob(new Job() {
 			public void perform() {
 				DEBUG_TASK.log("Flushing for " + c.getName());
@@ -253,7 +253,7 @@ public class Server extends Thread {
 	}
 
 	/** Create an SSL engine in the server context */
-	public SSLEngine createSSLEngine() {
+	SSLEngine createSSLEngine() {
 		SSLEngine engine = context.createSSLEngine();
 		engine.setUseClientMode(false);
 		return engine;
@@ -310,7 +310,7 @@ public class Server extends Thread {
 	}
 
 	/** Notify all connections watching a name of an object add */
-	public void notifyObject(SonarObject o) {
+	void notifyObject(SonarObject o) {
 		Name name = new Name(o);
 		List<ConnectionImpl> clist = getConnectionList();
 		for(ConnectionImpl c: clist)
@@ -325,7 +325,7 @@ public class Server extends Thread {
 	}
 
 	/** Notify all connections watching a name of an object remove */
-	public void notifyRemove(Name name) {
+	void notifyRemove(Name name) {
 		List<ConnectionImpl> clist = getConnectionList();
 		for(ConnectionImpl c: clist)
 			c.notifyRemove(name);
