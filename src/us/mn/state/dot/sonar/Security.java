@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,10 @@
  */
 package us.mn.state.dot.sonar;
 
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.Properties;
@@ -31,8 +32,54 @@ import javax.net.ssl.TrustManagerFactory;
  */
 public class Security {
 
+	/** Load a KeyStore in the jks format */
+	static protected KeyStore loadKeyStore(String keystore)
+		throws GeneralSecurityException, ConfigurationError
+	{
+		try {
+			return loadKeyStoreURL(keystore);
+		}
+		catch(IOException e) {
+			try {
+				return loadKeyStoreResource(keystore);
+			}
+			catch(IOException ee) {
+				throw new ConfigurationError("Cannot read " +
+					keystore);
+			}
+		}
+	}
+
+	/** Load a KeyStore from a URL in the jks format */
+	static protected KeyStore loadKeyStoreURL(String keystore)
+		throws IOException, GeneralSecurityException
+	{
+		return loadKeyStore(createURL(keystore).openStream());
+	}
+
+	/** Create a URL for the specified keystore */
+	static protected URL createURL(String keystore) throws IOException {
+		String cwd = System.getProperty("user.dir");
+		File file = new File(cwd, keystore);
+		if(file.exists())
+			return file.toURI().toURL();
+		else
+			return new URL(keystore);
+	}
+
+	/** Load a KeyStore from a resource in the jks format */
+	static protected KeyStore loadKeyStoreResource(String keystore)
+		throws IOException, GeneralSecurityException
+	{
+		InputStream is = Security.class.getResourceAsStream(keystore);
+		if(is != null)
+			return loadKeyStore(is);
+		else
+			throw new IOException();
+	}
+
 	/** Load a KeyStore from an InputStream in the jks format */
-	static protected KeyStore _loadKeyStore(InputStream is)
+	static protected KeyStore loadKeyStore(InputStream is)
 		throws IOException, GeneralSecurityException
 	{
 		try {
@@ -42,42 +89,6 @@ public class Security {
 		}
 		finally {
 			is.close();
-		}
-	}
-
-	/** Load a KeyStore from a file in the jks format */
-	static protected KeyStore _loadKeyStore(String keystore)
-		throws IOException, GeneralSecurityException
-	{
-		return _loadKeyStore(new FileInputStream(keystore));
-	}
-
-	/** Load a KeyStore from a resource in the jks format */
-	static protected KeyStore _loadKeyStoreResource(String keystore)
-		throws IOException, GeneralSecurityException
-	{
-		InputStream is = Security.class.getResourceAsStream(keystore);
-		if(is != null)
-			return _loadKeyStore(is);
-		else
-			throw new IOException();
-	}
-
-	/** Load a KeyStore in the jks format */
-	static protected KeyStore loadKeyStore(String keystore)
-		throws GeneralSecurityException, ConfigurationError
-	{
-		try {
-			return _loadKeyStore(keystore);
-		}
-		catch(IOException e) {
-			try {
-				return _loadKeyStoreResource(keystore);
-			}
-			catch(IOException ee) {
-				throw new ConfigurationError("Cannot read " +
-					keystore);
-			}
 		}
 	}
 
