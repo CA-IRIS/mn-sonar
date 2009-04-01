@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,16 @@ import javax.naming.directory.InitialDirContext;
  * @author Douglas Lau
  */
 public class LDAPAuthenticator {
+
+	/** Check that a DN is sane */
+	static protected boolean isDnSane(String dn) {
+		return dn != null && dn.length() > 0;
+	}
+
+	/** Check that a password is sane */
+	static protected boolean isPasswordSane(char[] pwd) {
+		return pwd != null && pwd.length > 0;
+	}
 
 	/** LDAP provider */
 	protected class Provider {
@@ -88,7 +98,7 @@ public class LDAPAuthenticator {
 	/** Authenticate a user's credentials */
 	public void authenticate(String dn, char[] pwd) throws PermissionDenied
 	{
-		if(pwd != null && pwd.length > 0) {
+		if(isDnSane(dn) && isPasswordSane(pwd)) {
 			for(Provider p: providers) {
 				try {
 					p.authenticate(dn, pwd);
