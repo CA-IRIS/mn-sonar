@@ -301,6 +301,18 @@ public class TypeCache<T extends SonarObject> {
 		client.ignoreName(new Name(tname, "", a));
 	}
 
+	/** Watch for all attributes of the specified object */
+	public void watchObject(T proxy) {
+		client.enumerateName(new Name(tname, proxy.getName()));
+	}
+
+	/** Ignore attributes of the specified object.  This just removes an
+	 * object watch -- it does not prevent the type watch from causing
+	 * the object to be watched.  */
+	public void ignoreObject(T proxy) {
+		client.ignoreName(new Name(tname, proxy.getName()));
+	}
+
 	/** Find an object using the supplied checker callback */
 	public T findObject(Checker<T> c) {
 		synchronized(children) {

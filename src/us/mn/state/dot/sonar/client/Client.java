@@ -254,6 +254,15 @@ public class Client extends Thread {
 		});
 	}
 
+	/** Enumerate the specified name */
+	void enumerateName(final Name name) {
+		processor.addJob(new Job() {
+			public void perform() throws FlushError {
+				conduit.enumerateName(name);
+			}
+		});
+	}
+
 	/** Ignore the specified name */
 	void ignoreName(final Name name) {
 		processor.addJob(new Job() {

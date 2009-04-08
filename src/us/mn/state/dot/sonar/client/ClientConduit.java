@@ -348,8 +348,7 @@ class ClientConduit extends Conduit {
 	/** Query all SONAR objects of the given type */
 	void queryAll(TypeCache tcache) throws FlushError {
 		namespace.addType(tcache);
-		state.encoder.encode(Message.ENUMERATE, tcache.tname);
-		flush();
+		enumerateName(new Name(tcache.tname));
 	}
 
 	/** Create the specified object name */
@@ -368,6 +367,12 @@ class ClientConduit extends Conduit {
 	/** Remove the specified object name */
 	void removeObject(Name name) throws FlushError {
 		state.encoder.encode(Message.REMOVE, name.toString());
+		flush();
+	}
+
+	/** Enumerate the specified name */
+	void enumerateName(Name name) throws FlushError {
+		state.encoder.encode(Message.ENUMERATE, name.toString());
 		flush();
 	}
 
