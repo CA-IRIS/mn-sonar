@@ -113,7 +113,7 @@ class SonarInvoker implements InvocationHandler {
 					args[0]);
 			}
 		}
-		throw NamespaceError.NAME_UNKNOWN;
+		throw NamespaceError.nameUnknown("*method*");
 	}
 
 	/** Create attributes for one proxy instance */

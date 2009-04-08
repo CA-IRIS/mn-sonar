@@ -62,7 +62,7 @@ public class ServerNamespace extends Namespace {
 	protected TypeNode getTypeNode(Name name) throws NamespaceError {
 		TypeNode t = _getTypeNode(name.getTypePart());
 		if(t == null)
-			throw NamespaceError.NAME_UNKNOWN;
+			throw NamespaceError.nameUnknown(name.toString());
 		else
 			return t;
 	}

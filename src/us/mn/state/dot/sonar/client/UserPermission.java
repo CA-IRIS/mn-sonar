@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ class UserPermission {
 			if(m.equals("canRemove"))
 				return invokeCanRemove(user, name);
 		}
-		throw NamespaceError.NAME_UNKNOWN;
+		throw NamespaceError.nameUnknown(null);
 	}
 
 	/** Check if a user can read the specified name */

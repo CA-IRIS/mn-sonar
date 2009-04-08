@@ -164,7 +164,7 @@ public class TypeCache<T extends SonarObject> {
 	T remove(String name) throws NamespaceError {
 		synchronized(children) {
 			if(!children.containsKey(name))
-				throw NamespaceError.NAME_UNKNOWN;
+				throw NamespaceError.nameUnknown(name);
 			T proxy = children.remove(name);
 			notifyProxyRemoved(proxy);
 			attributes.remove(hashCode(proxy));
@@ -206,7 +206,7 @@ public class TypeCache<T extends SonarObject> {
 		}
 		Attribute attr = amap.get(a);
 		if(attr == null)
-			throw NamespaceError.NAME_UNKNOWN;
+			throw NamespaceError.nameUnknown(a);
 		else
 			return attr;
 	}
@@ -214,10 +214,10 @@ public class TypeCache<T extends SonarObject> {
 	/** Get the value of an attribute from the named proxy */
 	Object getAttribute(String n, String a) throws NamespaceError {
 		T obj = lookupObject(n);
-		if(obj != null)
-			return getAttribute(obj, a);
+		if(obj == null)
+			throw NamespaceError.nameUnknown(n);
 		else
-			throw NamespaceError.NAME_UNKNOWN;
+			return getAttribute(obj, a);
 	}
 
 	/** Get the value of an attribute from the given proxy */

@@ -85,7 +85,7 @@ public class TypeNode {
 		synchronized(children) {
 			SonarObject obj = children.remove(n);
 			if(obj == null)
-				throw NamespaceError.NAME_UNKNOWN;
+				throw NamespaceError.nameUnknown(n);
 			if(obj != o)
 				throw NamespaceError.NAME_EXISTS;
 			try {
