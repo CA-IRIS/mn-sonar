@@ -294,6 +294,13 @@ public class TypeCache<T extends SonarObject> {
 		}
 	}
 
+	/** Ignore updates to the specified attribute for all objects */
+	public void ignoreAttribute(String a) {
+		// To ignore an attribute for all objects in the cache,
+		// the name must equal getAttributeName() for any object.
+		client.ignoreName(new Name(tname, "", a));
+	}
+
 	/** Find an object using the supplied checker callback */
 	public T findObject(Checker<T> c) {
 		synchronized(children) {

@@ -370,4 +370,10 @@ class ClientConduit extends Conduit {
 		state.encoder.encode(Message.REMOVE, name.toString());
 		flush();
 	}
+
+	/** Ignore the specified name */
+	void ignoreName(Name name) throws FlushError {
+		state.encoder.encode(Message.IGNORE, name.toString());
+		flush();
+	}
 }
