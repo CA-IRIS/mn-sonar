@@ -181,4 +181,9 @@ abstract public class Namespace {
 	 * @param c Checker callback
 	 * @return First object which Checker returns true */
 	abstract public SonarObject findObject(String tname, Checker c);
+
+	/** Get a count of the number of objects of the specified type.
+	 * @param tname Sonar type name
+	 * @return Total number of objects of the specified type */
+	abstract public int getCount(String tname);
 }

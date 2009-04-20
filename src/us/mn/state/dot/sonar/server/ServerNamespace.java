@@ -224,4 +224,15 @@ public class ServerNamespace extends Namespace {
 		else
 			return null;
 	}
+
+	/** Get a count of the number of objects of the specified type.
+	 * @param tname Sonar type name
+	 * @return Total number of objects of the specified type */
+	public int getCount(String tname) {
+		TypeNode t = _getTypeNode(tname);
+		if(t != null)
+			return t.size();
+		else
+			return 0;
+	}
 }

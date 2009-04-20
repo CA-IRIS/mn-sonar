@@ -191,4 +191,11 @@ public class TypeNode {
 		}
 		return null;
 	}
+
+	/** Get the number of objects of this type */
+	public int size() {
+		synchronized(children) {
+			return children.size();
+		}
+	}
 }
