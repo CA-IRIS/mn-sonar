@@ -19,6 +19,7 @@ import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.Role;
+import us.mn.state.dot.sonar.TestObj;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -51,14 +52,14 @@ public class TestClient extends Client {
 
 	protected final TypeCache<Connection> connections;
 
-	protected final TypeCache<Test> tests;
+	protected final TypeCache<TestObj> tests;
 
 	public TestClient() throws Exception {
 		super(createProperties(), HANDLER);
 		roles = new TypeCache<Role>(Role.class, this);
 		users = new TypeCache<User>(User.class, this);
 		connections = new TypeCache<Connection>(Connection.class, this);
-		tests = new TypeCache<Test>(Test.class, this);
+		tests = new TypeCache<TestObj>(TestObj.class, this);
 		login("username", "password");
 		populate(roles);
 		populate(users);

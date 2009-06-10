@@ -185,15 +185,14 @@
 
 	<!-- Create the test jar -->
 	<target name="test-jar"
-	        depends="compile"
+	        depends="compile-junit"
 	        description="Create the test jar">
 		<jar jarfile="${build.lib}/${test.jar}"
 		     manifest="${build.etc}/${manifest.test}">
 			<fileset dir="${etc.dir}">
 				<include name="sonar-test.keystore"/>
 			</fileset>
-			<fileset dir="${build.classes}"
-				 includes="us/mn/state/dot/sonar/test/*.class"/>
+			<fileset dir="${testbuild.dir}"/>
 		</jar>
 	</target>
 

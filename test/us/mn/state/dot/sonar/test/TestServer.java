@@ -16,6 +16,7 @@ package us.mn.state.dot.sonar.test;
 
 import java.util.Properties;
 import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.sonar.TestObjImpl;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.RoleImpl;
 import us.mn.state.dot.sonar.server.Server;
@@ -48,10 +49,10 @@ public class TestServer extends Server {
 		u.setRoles(new RoleImpl[] { r });
 		u.setFullName("Test user");
 		n.addObject(u);
-		n.addObject(new TestImpl("name_A", 10));
-		n.addObject(new TestImpl("name_B", 20));
+		n.addObject(new TestObjImpl("name_A", 10));
+		n.addObject(new TestObjImpl("name_B", 20));
 		for(int i = 0; i < 5000; i++)
-			n.addObject(new TestImpl("name_" + i, i));
+			n.addObject(new TestObjImpl("name_" + i, i));
 		return n;
 	}
 
