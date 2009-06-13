@@ -24,6 +24,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -169,7 +170,9 @@ public class Server extends Thread {
 		}
 		if(c != null) {
 			updateSessionList();
-			System.err.println("SONAR: Disconnected " +c.getName());
+			System.err.println("SONAR: Disconnected " + 
+				c.getName() + ", on " + 
+				new Date() + ".");
 			removeObject(c);
 		}
 	}

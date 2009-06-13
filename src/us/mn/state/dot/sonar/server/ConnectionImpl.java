@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 import java.nio.BufferOverflowException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -425,11 +426,19 @@ public class ConnectionImpl extends Conduit implements Connection {
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		String name = params.get(1);
 		String password = params.get(2);
-		UserImpl u = lookupUser(name);
-		server.getAuthenticator().authenticate(u.getDn(),
-			password.toCharArray());
+		UserImpl u;
+		try {
+			u = lookupUser(name);
+			server.getAuthenticator().authenticate(u.getDn(),
+				password.toCharArray());
+		} catch(SonarException ex) {
+			System.err.println("SONAR: authentication failure for "
+				+ name + ", from " + getName() + ", "
+				+ new Date() + ".");
+			throw ex;
+		}
 		System.err.println("SONAR: Login " + name + " from " +
-			getName());
+			getName() + ", " + new Date() + ".");
 		user = u;
 		// The first TYPE message indicates a successful login
 		state.encoder.encode(Message.TYPE);
