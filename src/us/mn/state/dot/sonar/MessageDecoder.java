@@ -29,7 +29,7 @@ import java.util.List;
 public class MessageDecoder {
 
 	/** Maximum size (characters) of a single message */
-	static protected final int MAX_MESSAGE_SIZE = 2048;
+	static protected final int MAX_MESSAGE_SIZE = 4096;
 
 	/** Everything on the wire is encoded to UTF-8 */
 	static protected final Charset UTF8 = Charset.forName("UTF-8");

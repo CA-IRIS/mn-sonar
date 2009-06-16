@@ -28,7 +28,7 @@ import java.nio.charset.Charset;
 public class MessageEncoder {
 
 	/** Maximum size (characters) of a single message */
-	static protected final int MAX_MESSAGE_SIZE = 2048;
+	static protected final int MAX_MESSAGE_SIZE = 4096;
 
 	/** Number of tries to flush write buffer */
 	static protected final int FLUSH_TRIES = 40;
