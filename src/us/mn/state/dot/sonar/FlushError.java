@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ package us.mn.state.dot.sonar;
 public class FlushError extends SonarException {
 
 	/** Create a new flush error */
-	public FlushError() {
-		super("Flush error");
+	public FlushError(String m) {
+		super("Flush error: " + m);
 	}
 }

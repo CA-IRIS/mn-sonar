@@ -85,7 +85,7 @@ public class MessageEncoder {
 			m_buf.flip();
 		}
 		catch(BufferOverflowException e) {
-			throw new FlushError();
+			throw new FlushError("encode");
 		}
 		fillBuffer(UTF8.encode(m_buf));
 	}
@@ -124,7 +124,7 @@ public class MessageEncoder {
 			} else
 				return;
 		}
-		throw new FlushError();
+		throw new FlushError("ensureCapacity");
 	}
 
 	/** Fill the output buffer with encoded message data */
@@ -136,7 +136,7 @@ public class MessageEncoder {
 			}
 		}
 		catch(BufferOverflowException e) {
-			throw new FlushError();
+			throw new FlushError("fillBuffer");
 		}
 	}
 }
