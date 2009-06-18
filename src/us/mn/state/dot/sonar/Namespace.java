@@ -170,6 +170,42 @@ abstract public class Namespace {
 		return params;
 	}
 
+	/** Check if a user has read privileges for a name */
+	public boolean canRead(User u, Name n) {
+		for(Role r: u.getRoles()) {
+			if(r.getPrivR() && n.matches(r.getPattern()))
+				return true;
+		}
+		return false;
+	}
+
+	/** Check if a user has update privileges for a name */
+	public boolean canUpdate(User u, Name n) {
+		for(Role r: u.getRoles()) {
+			if(r.getPrivW() && n.matches(r.getPattern()))
+				return true;
+		}
+		return false;
+	}
+
+	/** Check if a user has add privileges for a name */
+	public boolean canAdd(User u, Name n) {
+		for(Role r: u.getRoles()) {
+			if(r.getPrivC() && n.matches(r.getPattern()))
+				return true;
+		}
+		return false;
+	}
+
+	/** Check if a user has remove privileges for a name */
+	public boolean canRemove(User u, Name n) {
+		for(Role r: u.getRoles()) {
+			if(r.getPrivD() && n.matches(r.getPattern()))
+				return true;
+		}
+		return false;
+	}
+
 	/** Lookup an object in the SONAR namespace.
 	 * @param tname Sonar type name
 	 * @param oname Sonar object name

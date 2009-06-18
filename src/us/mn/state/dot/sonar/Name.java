@@ -27,7 +27,7 @@ public class Name {
 	/** Name path */
 	protected final String path;
 
-	/** Name parst */
+	/** Name parts */
 	protected final String[] parts;
 
 	/** Create a new name */
@@ -121,5 +121,10 @@ public class Name {
 	/** Get the attribute name with no object specified */
 	public String getAttributeName() {
 		return getTypePart() + SEP + SEP + getAttributePart();
+	}
+
+	/** Check if a name matches a pattern */
+	public boolean matches(String pattern) {
+		return path.matches(pattern);
 	}
 }

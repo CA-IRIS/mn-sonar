@@ -453,7 +453,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			name = new Name(params.get(1));
 		else
 			name = new Name("");
-		if(!user.canRead(name.toString()))
+		if(!namespace.canRead(user, name))
 			throw PermissionDenied.INSUFFICIENT_PRIVILEGES;
 		startWatching(name);
 		namespace.enumerate(name, state.encoder);
@@ -475,7 +475,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		Name name = new Name(params.get(1));
 		if(name.isObject()) {
-			if(!user.canAdd(name.toString()))
+			if(!namespace.canAdd(user, name))
 				throw PermissionDenied.INSUFFICIENT_PRIVILEGES;
 			createObject(name);
 		} else
@@ -488,7 +488,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		if(params.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		Name name = new Name(params.get(1));
-		if(!user.canRemove(name.toString()))
+		if(!namespace.canRemove(user, name))
 			throw PermissionDenied.INSUFFICIENT_PRIVILEGES;
 		SonarObject obj = namespace.lookupObject(name);
 		if(obj != null) {
@@ -505,7 +505,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		Name name = new Name(params.get(1));
 		if(name.isAttribute()) {
-			if(!user.canUpdate(name.toString()))
+			if(!namespace.canUpdate(user, name))
 				throw PermissionDenied.INSUFFICIENT_PRIVILEGES;
 			setAttribute(name, params);
 		} else

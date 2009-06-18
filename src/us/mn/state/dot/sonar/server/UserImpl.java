@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,41 +93,5 @@ public class UserImpl implements User {
 	/** Get the user's full name */
 	public String getFullName() {
 		return fullName;
-	}
-
-	/** Check if the user can read the specified name */
-	public boolean canRead(String name) {
-		for(RoleImpl r: roles) {
-			if(r.getPrivR() && r.matches(name))
-				return true;
-		}
-		return false;
-	}
-
-	/** Check if the user can update the specified name */
-	public boolean canUpdate(String name) {
-		for(RoleImpl r: roles) {
-			if(r.getPrivW() && r.matches(name))
-				return true;
-		}
-		return false;
-	}
-
-	/** Check if the user can add the specified name */
-	public boolean canAdd(String name) {
-		for(RoleImpl r: roles) {
-			if(r.getPrivC() && r.matches(name))
-				return true;
-		}
-		return false;
-	}
-
-	/** Check if the user can remove the specified name */
-	public boolean canRemove(String name) {
-		for(RoleImpl r: roles) {
-			if(r.getPrivD() && r.matches(name))
-				return true;
-		}
-		return false;
 	}
 }

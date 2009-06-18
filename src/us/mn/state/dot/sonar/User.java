@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,16 +41,4 @@ public interface User extends SonarObject {
 
 	/** Get the user's full name */
 	String getFullName();
-
-	/** Check if the user can read the specified name */
-	boolean canRead(String name);
-
-	/** Check if the user can update the specified name */
-	boolean canUpdate(String name);
-
-	/** Check if the user can add the specified name */
-	boolean canAdd(String name);
-
-	/** Check if the user can remove the specified name */
-	boolean canRemove(String name);
 }

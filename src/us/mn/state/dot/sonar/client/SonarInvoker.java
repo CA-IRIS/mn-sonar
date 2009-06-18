@@ -108,10 +108,6 @@ class SonarInvoker implements InvocationHandler {
 				cache.removeObject(o);
 				return null;
 			}
-			if(o instanceof User) {
-				return UserPermission.invokeMethod((User)o, m,
-					args[0]);
-			}
 		}
 		throw NamespaceError.nameUnknown("*method*");
 	}
