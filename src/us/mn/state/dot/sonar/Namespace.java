@@ -173,37 +173,89 @@ abstract public class Namespace {
 	/** Check if a user has read privileges for a name */
 	public boolean canRead(User u, Name n) {
 		for(Role r: u.getRoles()) {
-			if(r.getPrivR() && n.matches(r.getPattern()))
+			if(r.getEnabled() && canRead(r, n))
 				return true;
 		}
 		return false;
+	}
+
+	/** Check if a role has read privileges for a name */
+	protected boolean canRead(final Role r, final Name n) {
+		return null != findObject(Privilege.SONAR_TYPE,
+			new Checker<Privilege>()
+		{
+			public boolean check(Privilege p) {
+				return p.getRole() == r &&
+				       p.getPrivR() &&
+				       n.matches(p);
+			}
+		});
 	}
 
 	/** Check if a user has update privileges for a name */
 	public boolean canUpdate(User u, Name n) {
 		for(Role r: u.getRoles()) {
-			if(r.getPrivW() && n.matches(r.getPattern()))
+			if(r.getEnabled() && canUpdate(r, n))
 				return true;
 		}
 		return false;
+	}
+
+	/** Check if a role has update privileges for a name */
+	protected boolean canUpdate(final Role r, final Name n) {
+		return null != findObject(Privilege.SONAR_TYPE,
+			new Checker<Privilege>()
+		{
+			public boolean check(Privilege p) {
+				return p.getRole() == r &&
+				       p.getPrivW() &&
+				       n.matches(p);
+			}
+		});
 	}
 
 	/** Check if a user has add privileges for a name */
 	public boolean canAdd(User u, Name n) {
 		for(Role r: u.getRoles()) {
-			if(r.getPrivC() && n.matches(r.getPattern()))
+			if(r.getEnabled() && canAdd(r, n))
 				return true;
 		}
 		return false;
 	}
 
+	/** Check if a role has add privileges for a name */
+	protected boolean canAdd(final Role r, final Name n) {
+		return null != findObject(Privilege.SONAR_TYPE,
+			new Checker<Privilege>()
+		{
+			public boolean check(Privilege p) {
+				return p.getRole() == r &&
+				       p.getPrivC() &&
+				       n.matches(p);
+			}
+		});
+	}
+
 	/** Check if a user has remove privileges for a name */
 	public boolean canRemove(User u, Name n) {
 		for(Role r: u.getRoles()) {
-			if(r.getPrivD() && n.matches(r.getPattern()))
+			if(r.getEnabled() && canRemove(r, n))
 				return true;
 		}
 		return false;
+	}
+
+	/** Check if a role has remove privileges for a name */
+	protected boolean canRemove(final Role r, final Name n) {
+		return null != findObject(Privilege.SONAR_TYPE,
+			new Checker<Privilege>()
+		{
+			public boolean check(Privilege p) {
+				return p.getRole() == r &&
+				       p.getPrivD() &&
+				       n.matches(p);
+			}
+		});
 	}
 
 	/** Lookup an object in the SONAR namespace.

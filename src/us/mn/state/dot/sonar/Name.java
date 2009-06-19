@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -124,7 +124,7 @@ public class Name {
 	}
 
 	/** Check if a name matches a pattern */
-	public boolean matches(String pattern) {
-		return path.matches(pattern);
+	public boolean matches(Privilege p) {
+		return path.matches(p.getPattern());
 	}
 }

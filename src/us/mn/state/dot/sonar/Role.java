@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 package us.mn.state.dot.sonar;
 
 /**
- * A role controls access to the SONAR namespace.
+ * A role is a set of privileges for the SONAR namespace.
  *
  * @author Douglas Lau
  */
@@ -24,33 +24,9 @@ public interface Role extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "role";
 
-	/** Get the namespace pattern */
-	String getPattern();
+	/** Enable or disable the role */
+	void setEnabled(boolean e);
 
-	/** Set the namespace pattern */
-	void setPattern(String p);
-
-	/** Set the read privilege */
-	void setPrivR(boolean p);
-
-	/** Get the read privilege */
-	boolean getPrivR();
-
-	/** Set the write privilege */
-	void setPrivW(boolean p);
-
-	/** Get the write privilege */
-	boolean getPrivW();
-
-	/** Set the create privilege */
-	void setPrivC(boolean p);
-
-	/** Get the create privilege */
-	boolean getPrivC();
-
-	/** Set the delete privilege */
-	void setPrivD(boolean p);
-
-	/** Get the delete privilege */
-	boolean getPrivD();
+	/** Get the enabled flag */
+	boolean getEnabled();
 }
