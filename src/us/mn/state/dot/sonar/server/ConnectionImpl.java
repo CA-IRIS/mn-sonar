@@ -449,8 +449,9 @@ public class ConnectionImpl extends Conduit implements Connection {
 		if(params.size() > 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		Name name;
+		// Use oname "" so that patterns like "tname/.*" match
 		if(params.size() > 1)
-			name = new Name(params.get(1));
+			name = new Name(params.get(1), "");
 		else
 			name = new Name("");
 		if(!namespace.canRead(user, name))
