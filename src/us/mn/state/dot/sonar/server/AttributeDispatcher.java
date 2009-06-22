@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -243,6 +243,13 @@ public class AttributeDispatcher {
 			Field f = c.getDeclaredField(a);
 			f.setAccessible(true);
 			return f;
+		}
+		catch(NoSuchFieldException e) {
+			c = c.getSuperclass();
+			if(c != null)
+				return lookupField(c, a);
+			else
+				throw new SonarException("No such field: " + a);
 		}
 		catch(Exception e) {
 			throw new SonarException(e);
