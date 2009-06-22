@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.sonar.server;
 
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.SonarException;
 
 /**
@@ -32,10 +33,6 @@ public class PermissionDenied extends SonarException {
 	static public final PermissionDenied AUTHENTICATION_FAILED =
 		new PermissionDenied("Authentication failed");
 
-	/** Thrown when the user has insufficient privileges */
-	static public final PermissionDenied INSUFFICIENT_PRIVILEGES =
-		new PermissionDenied("Insufficient privileges");
-
 	/** Thrown when a name cannot be added */
 	static public final PermissionDenied CANNOT_ADD =
 		new PermissionDenied("Unable to add object");
@@ -51,4 +48,10 @@ public class PermissionDenied extends SonarException {
 	/** Thrown when an attribute cannot be written */
 	static public final PermissionDenied CANNOT_WRITE =
 		new PermissionDenied("Unable to write attribute");
+
+	/** Create a new "insufficient privileges" exception */
+	static public PermissionDenied create(Name n) {
+		return new PermissionDenied("Insufficient privileges: " +
+			n.toString());
+	}
 }
