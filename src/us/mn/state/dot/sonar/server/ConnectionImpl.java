@@ -262,7 +262,9 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Disconnect the client connection */
 	protected void disconnect(String msg) {
 		super.disconnect(msg);
-		System.err.println("SONAR: " + msg + " on " + getName());
+		System.err.println("SONAR: " + msg + " on " + getName() + 
+			", " + (user == null ? "user=null" : user.getName()) +
+			", " + new Date() + ".");
 		synchronized(watching) {
 			watching.clear();
 		}
