@@ -29,7 +29,7 @@ public class PrivilegeImpl implements Privilege {
 
 	/** Namespace access regex pattern */
 	static protected final Pattern NAMESPACE_PATTERN =
-		Pattern.compile("[.*?_\\p{L}0-9]*(/[.*?_\\p{L}0-9]*){0,2}");
+		Pattern.compile("[A-Za-z0-9_.*+?()/]*");
 
 	/** Create a new privilege */
 	static public Privilege create(String name) {
