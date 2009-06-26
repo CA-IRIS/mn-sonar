@@ -92,10 +92,12 @@ public class ConnectionImpl extends Conduit implements Connection {
 		return hostport;
 	}
 
-	/** User logged in on the connection */
+	/** User logged in on the connection.
+	 * May be null (before a successful login). */
 	protected UserImpl user;
 
-	/** Get the user logged in on the connection */
+	/** Get the user logged in on the connection.
+	 * May be null (before a successful login). */
 	public User getUser() {
 		return user;
 	}
