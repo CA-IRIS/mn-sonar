@@ -125,6 +125,8 @@ public class TypeCache<T extends SonarObject> {
 			invoker.createAttributes(namespace);
 		amap.put("typeName", typeName);
 		amap.put("name", new Attribute(name, namespace));
+		// NOTE: after this point, the amap is considered immutable.
+		//       If only there were a way to enforce this...
 		synchronized(children) {
 			children.put(name, o);
 			attributes.put(hashCode(o), amap);
@@ -245,9 +247,9 @@ public class TypeCache<T extends SonarObject> {
 	void updateAttribute(T o, String a, String[] v)
 		throws SonarException
 	{
+		Attribute attr = lookupAttribute(o, a);
+		attr.unmarshall(v);
 		synchronized(children) {
-			Attribute attr = lookupAttribute(o, a);
-			attr.unmarshall(v);
 			if(o != phantom)
 				notifyProxyChanged(o, a);
 		}
