@@ -91,7 +91,7 @@ public class TypeCache<T extends SonarObject> {
 		invoker = new SonarInvoker(this, iface);
 		client = c;
 		namespace = client.getNamespace();
-		typeName = new Attribute(tname, namespace);
+		typeName = new Attribute(tname);
 	}
 
 	/** Notify proxy listeners that a proxy has been added */
@@ -121,10 +121,9 @@ public class TypeCache<T extends SonarObject> {
 	/** Create a proxy in the type cache */
 	T createProxy(String name) {
 		T o = (T)Proxy.newProxyInstance(LOADER, ifaces, invoker);
-		HashMap<String, Attribute> amap =
-			invoker.createAttributes(namespace);
+		HashMap<String, Attribute> amap = invoker.createAttributes();
 		amap.put("typeName", typeName);
-		amap.put("name", new Attribute(name, namespace));
+		amap.put("name", new Attribute(name));
 		// NOTE: after this point, the amap is considered immutable.
 		//       If only there were a way to enforce this...
 		synchronized(children) {
@@ -204,7 +203,7 @@ public class TypeCache<T extends SonarObject> {
 		if(amap == null) {
 			// This happens if a proxy has been removed, but
 			// references still exist in other data structures.
-			return new Attribute(Object.class, namespace);
+			return new Attribute(Object.class);
 		}
 		Attribute attr = amap.get(a);
 		if(attr == null)
@@ -239,7 +238,7 @@ public class TypeCache<T extends SonarObject> {
 		Attribute attr = lookupAttribute(o, a);
 		if(check && attr.valueEquals(args))
 			return;
-		String[] values = attr.marshall(args);
+		String[] values = namespace.marshall(attr.type, args);
 		client.setAttribute(new Name(o, a), values);
 	}
 
@@ -248,7 +247,7 @@ public class TypeCache<T extends SonarObject> {
 		throws SonarException
 	{
 		Attribute attr = lookupAttribute(o, a);
-		attr.unmarshall(v);
+		attr.setValue(namespace.unmarshall(attr.type, v));
 		synchronized(children) {
 			if(o != phantom)
 				notifyProxyChanged(o, a);

@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,11 +13,6 @@
  * GNU General Public License for more details.
  */
 package us.mn.state.dot.sonar.client;
-
-import java.lang.reflect.Method;
-import java.util.TreeSet;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.ProtocolError;
 
 /**
  * Attributes are named values attached to SONAR proxy objects.
@@ -32,36 +27,26 @@ class Attribute {
 	/** The value of the attribute */
 	protected Object value;
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
 	/** Create a new attribute of the specified class */
-	public Attribute(Class t, Namespace ns) {
+	public Attribute(Class t) {
 		type = t;
 		value = null;
-		namespace = ns;
 	}
 
 	/** Create a new attribute with the specified value */
-	public Attribute(Object v, Namespace ns) {
+	public Attribute(Object v) {
 		type = v.getClass();
 		value = v;
-		namespace = ns;
+	}
+
+	/** Set the value of the attribute */
+	public void setValue(Object v) {
+		value = v;
 	}
 
 	/** Get the value of the attribute */
 	public Object getValue() {
 		return value;
-	}
-
-	/** Unmarshall a value and store it in the attribute */
-	public void unmarshall(String[] v) throws ProtocolError {
-		value = namespace.unmarshall(type, v);
-	}
-
-	/** Marshall the given attribute value */
-	public String[] marshall(Object[] args) {
-		return namespace.marshall(type, args);
 	}
 
 	/** Check if the attribute value equals the given value */

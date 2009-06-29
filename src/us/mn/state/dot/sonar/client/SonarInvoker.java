@@ -18,7 +18,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
@@ -113,13 +112,13 @@ class SonarInvoker implements InvocationHandler {
 	}
 
 	/** Create attributes for one proxy instance */
-	public HashMap<String, Attribute> createAttributes(Namespace ns) {
+	public HashMap<String, Attribute> createAttributes() {
 		HashMap<String, Attribute> amap =
 			new HashMap<String, Attribute>();
 		for(Map.Entry<Method, String> e: getters.entrySet()) {
 			Method m = e.getKey();
 			String n = e.getValue();
-			Attribute a = new Attribute(m.getReturnType(), ns);
+			Attribute a = new Attribute(m.getReturnType());
 			amap.put(n, a);
 		}
 		for(Map.Entry<Method, String> e: setters.entrySet()) {
@@ -127,7 +126,7 @@ class SonarInvoker implements InvocationHandler {
 			String n = e.getValue();
 			if(!amap.containsKey(n)) {
 				Class[] p_types = m.getParameterTypes();
-				Attribute a = new Attribute(p_types[0], ns);
+				Attribute a = new Attribute(p_types[0]);
 				amap.put(n, a);
 			}
 		}
