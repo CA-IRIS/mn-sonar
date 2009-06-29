@@ -75,11 +75,15 @@ class SonarInvoker implements InvocationHandler {
 	/** Map of getter methods to attribute names */
 	protected final HashMap<Method, String> getters;
 
+	/** Type name attribute (shared by all proxies of a type) */
+	protected final Attribute typeName;
+
 	/** Create an invoker for the specified interface */
 	public SonarInvoker(TypeCache c, Class iface) {
 		cache = c;
 		setters = lookup_setters(iface);
 		getters = lookup_getters(iface);
+		typeName = new Attribute(c.tname);
 	}
 
 	/** Invoke a method call on a proxy instance */
@@ -112,7 +116,7 @@ class SonarInvoker implements InvocationHandler {
 	}
 
 	/** Create attributes for one proxy instance */
-	public HashMap<String, Attribute> createAttributes() {
+	public HashMap<String, Attribute> createAttributes(String name) {
 		HashMap<String, Attribute> amap =
 			new HashMap<String, Attribute>();
 		for(Map.Entry<Method, String> e: getters.entrySet()) {
@@ -130,6 +134,8 @@ class SonarInvoker implements InvocationHandler {
 				amap.put(n, a);
 			}
 		}
+		amap.put("typeName", typeName);
+		amap.put("name", new Attribute(name));
 		return amap;
 	}
 }
