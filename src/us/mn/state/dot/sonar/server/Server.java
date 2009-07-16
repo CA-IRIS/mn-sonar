@@ -361,13 +361,20 @@ public class Server extends Thread {
 		// FIXME: should be renamed to storeObject
 		Job job = new Job() {
 			public void perform() throws SonarException {
-				DEBUG_TASK.log("Storing object " + o.getName());
-				namespace.storeObject(o);
-				notifyObject(o);
+				doCreateObject(o);
 			}
 		};
 		processor.addJob(job);
+		// FIXME: if this is run on the TaskProcessor thread,
+		//        this next method will never return ...
 		job.waitForCompletion();
+	}
+
+	/** Create (synchronously) an object in the server's namespace */
+	void doCreateObject(SonarObject o) throws SonarException {
+		DEBUG_TASK.log("Storing object " + o.getName());
+		namespace.storeObject(o);
+		notifyObject(o);
 	}
 
 	/** Remove the specified object from the server's namespace */
