@@ -357,17 +357,17 @@ public class Server extends Thread {
 	}
 
 	/** Create (synchronously) an object in the server's namespace */
-	public void createObject(SonarObject o) throws SonarException {
-		// FIXME: should be renames to storeObject
-		// FIXME: this method should not be public, because it allows
-		//        threads other than the processor to perform database
-		//        updates and modify the app_out buffer.  If this was
-		//        not public, we could enable database user logging
-		//        using triggers and a unique boolean current column in
-		//        the user table.  Also, we could remove the
-		//        synchronized lock on access to the app_out buffer.
-		namespace.storeObject(o);
-		notifyObject(o);
+	public void createObject(final SonarObject o) {
+		// FIXME: should be renamed to storeObject
+		Job job = new Job() {
+			public void perform() throws SonarException {
+				DEBUG_TASK.log("Storing object " + o.getName());
+				namespace.storeObject(o);
+				notifyObject(o);
+			}
+		};
+		processor.addJob(job);
+		job.waitForCompletion();
 	}
 
 	/** Remove the specified object from the server's namespace */
