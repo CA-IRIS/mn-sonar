@@ -360,9 +360,7 @@ public class Server extends Thread {
 	public void createObject(final SonarObject o) throws SonarException {
 		// FIXME: should be renamed to storeObject
 		if(Thread.currentThread() == processor) {
-			System.err.println("Server.createObject:");
 			doCreateObject(o);
-			Thread.dumpStack();
 			return;
 		}
 		Job job = new Job() {
@@ -375,7 +373,7 @@ public class Server extends Thread {
 	}
 
 	/** Create (synchronously) an object in the server's namespace */
-	void doCreateObject(SonarObject o) throws SonarException {
+	protected void doCreateObject(SonarObject o) throws SonarException {
 		DEBUG_TASK.log("Storing object " + o.getName());
 		namespace.storeObject(o);
 		notifyObject(o);
