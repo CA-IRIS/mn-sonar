@@ -357,16 +357,20 @@ public class Server extends Thread {
 	}
 
 	/** Create (synchronously) an object in the server's namespace */
-	public void createObject(final SonarObject o) {
+	public void createObject(final SonarObject o) throws SonarException {
 		// FIXME: should be renamed to storeObject
+		if(Thread.currentThread() == processor) {
+			System.err.println("Server.createObject:");
+			doCreateObject(o);
+			Thread.dumpStack();
+			return;
+		}
 		Job job = new Job() {
 			public void perform() throws SonarException {
 				doCreateObject(o);
 			}
 		};
 		processor.addJob(job);
-		// FIXME: if this is run on the TaskProcessor thread,
-		//        this next method will never return ...
 		job.waitForCompletion();
 	}
 
