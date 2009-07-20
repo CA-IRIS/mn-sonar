@@ -183,82 +183,10 @@ public class ConnectionImpl extends Conduit implements Connection {
 		}
 	}
 
-	/** Notify the client of a new object being added */
-	protected void notifyObject(SonarObject o) {
-		try {
-			namespace.enumerateObject(state.encoder, o);
-			flush();
-		}
-		catch(SonarException e) {
-			disconnect("Notify error: " + e.getMessage());
-		}
-	}
-
-	/** Notify the client of a new object being added */
-	void notifyObject(Name name, SonarObject o) {
-		if(isWatching(name))
-			notifyObject(o);
-	}
-
-	/** Notify the client of an attribute change */
-	void notifyAttribute(Name name, String[] params) {
-		if(isWatching(name))
-			notifyAttribute(name.toString(), params);
-	}
-
-	/** Notify the client of an attribute change */
-	protected void notifyAttribute(String name, String[] params) {
-		try {
-			state.encoder.encode(Message.ATTRIBUTE, name, params);
-			flush();
-		}
-		catch(FlushError e) {
-			disconnect("Flush error: notifyAttribute " + name);
-		}
-	}
-
-	/** Notify the client of a name being removed */
-	void notifyRemove(Name name) {
-		if(isWatching(name)) {
-			notifyRemove(name.toString());
-			stopWatching(name);
-		}
-	}
-
-	/** Notify the client of a name being removed */
-	protected void notifyRemove(String name) {
-		try {
-			state.encoder.encode(Message.REMOVE, name);
-			flush();
-		}
-		catch(FlushError e) {
-			disconnect("Flush error: notifyRemove " + name);
-		}
-	}
-
-	/** Read messages from the socket channel */
-	void doRead() throws IOException {
-		int nbytes;
-		ByteBuffer net_in = state.getNetInBuffer();
-		synchronized(net_in) {
-			nbytes = channel.read(net_in);
-		}
-		if(nbytes > 0)
-			server.processMessages(this);
-		else if(nbytes < 0)
-			throw new IOException("EOF");
-	}
-
-	/** Write pending data to the socket channel */
-	void doWrite() throws IOException {
-		ByteBuffer net_out = state.getNetOutBuffer();
-		synchronized(net_out) {
-			net_out.flip();
-			channel.write(net_out);
-			if(!net_out.hasRemaining())
-				disableWrite();
-			net_out.compact();
-		}
+	/** Destroy the connection */
+	public void destroy() {
+		if(isConnected())
+			disconnect("Connection destroyed");
 	}
 
 	/** Disconnect the client connection */
@@ -280,13 +208,111 @@ public class ConnectionImpl extends Conduit implements Connection {
 		}
 	}
 
-	/** Destroy the connection */
-	public void destroy() {
-		if(isConnected())
-			disconnect("Connection destroyed");
+	/** Read messages from the socket channel.
+	 * This may only be called on the Server thread. */
+	void doRead() throws IOException {
+		int nbytes;
+		ByteBuffer net_in = state.getNetInBuffer();
+		synchronized(net_in) {
+			nbytes = channel.read(net_in);
+		}
+		if(nbytes > 0)
+			server.processMessages(this);
+		else if(nbytes < 0)
+			throw new IOException("EOF");
 	}
 
-	/** Process any incoming messages */
+	/** Write pending data to the socket channel.
+	 * This may only be called on the Server thread. */
+	void doWrite() throws IOException {
+		ByteBuffer net_out = state.getNetOutBuffer();
+		synchronized(net_out) {
+			net_out.flip();
+			channel.write(net_out);
+			if(!net_out.hasRemaining())
+				disableWrite();
+			net_out.compact();
+		}
+	}
+
+	/** Enable writing data back to the client */
+	public void enableWrite() {
+		key.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+		key.selector().wakeup();
+	}
+
+	/** Disable writing data back to the client */
+	public void disableWrite() {
+		key.interestOps(SelectionKey.OP_READ);
+	}
+
+	/** Notify the client of a new object being added.
+	 * This may only be called on the Task Processor thread. */
+	protected void notifyObject(SonarObject o) {
+		try {
+			namespace.enumerateObject(state.encoder, o);
+			flush();
+		}
+		catch(SonarException e) {
+			disconnect("Notify error: " + e.getMessage());
+		}
+	}
+
+	/** Notify the client of a new object being added.
+	 * This may only be called on the Task Processor thread. */
+	void notifyObject(Name name, SonarObject o) {
+		if(isWatching(name))
+			notifyObject(o);
+	}
+
+	/** Notify the client of an attribute change.
+	 * This may only be called on the Task Processor thread. */
+	void notifyAttribute(Name name, String[] params) {
+		if(isWatching(name))
+			notifyAttribute(name.toString(), params);
+	}
+
+	/** Notify the client of an attribute change.
+	 * This may only be called on the Task Processor thread. */
+	protected void notifyAttribute(String name, String[] params) {
+		try {
+			state.encoder.encode(Message.ATTRIBUTE, name, params);
+			flush();
+		}
+		catch(FlushError e) {
+			disconnect("Flush error: notifyAttribute " + name);
+		}
+	}
+
+	/** Notify the client of a name being removed.
+	 * This may only be called on the Task Processor thread. */
+	void notifyRemove(Name name) {
+		if(isWatching(name)) {
+			notifyRemove(name.toString());
+			stopWatching(name);
+		}
+	}
+
+	/** Notify the client of a name being removed.
+	 * This may only be called on the Task Processor thread. */
+	protected void notifyRemove(String name) {
+		try {
+			state.encoder.encode(Message.REMOVE, name);
+			flush();
+		}
+		catch(FlushError e) {
+			disconnect("Flush error: notifyRemove " + name);
+		}
+	}
+
+	/** Check that the client is logged in */
+	protected void checkLoggedIn() throws SonarException {
+		if(user == null)
+			throw ProtocolError.AUTHENTICATION_REQUIRED;
+	}
+
+	/** Process any incoming messages.
+	 * This may only be called on the Task Processor thread. */
 	void processMessages() {
 		if(!isConnected())
 			return;
@@ -301,7 +327,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 		}
 	}
 
-	/** Process any incoming messages */
+	/** Process any incoming messages.
+	 * This may only be called on the Task Processor thread. */
 	protected void _processMessages() throws SSLException, FlushError {
 		while(state.doRead()) {
 			List<String> params = state.decoder.decode();
@@ -313,7 +340,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 		flush();
 	}
 
-	/** Process one message from the client */
+	/** Process one message from the client.
+	 * This may only be called on the Task Processor thread. */
 	protected void processMessage(List<String> params)
 		throws FlushError
 	{
@@ -326,7 +354,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 		}
 	}
 
-	/** Process one message from the client */
+	/** Process one message from the client.
+	 * This may only be called on the Task Processor thread. */
 	protected void _processMessage(List<String> params)
 		throws SonarException
 	{
@@ -337,45 +366,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 		m.handle(this, params);
 	}
 
-	/** Check that the client is logged in */
-	protected void checkLoggedIn() throws SonarException {
-		if(user == null)
-			throw ProtocolError.AUTHENTICATION_REQUIRED;
-	}
-
-	/** Lookup a user by name */
-	protected UserImpl lookupUser(String n) throws PermissionDenied {
-		UserImpl u = (UserImpl)namespace.lookupObject(User.SONAR_TYPE,
-			n);
-		if(u != null)
-			return u;
-		else
-			throw PermissionDenied.AUTHENTICATION_FAILED;
-	}
-
-	/** Check if the specified name refers to the phantom object */
-	protected boolean isPhantom(Name name) {
-		return phantom != null &&
-		       phantom.getTypeName().equals(name.getTypePart()) &&
-		       phantom.getName().equals(name.getObjectPart());
-	}
-
-	/** Get the specified object (either phantom or new object) */
-	protected SonarObject getObject(Name name) throws SonarException {
-		if(isPhantom(name))
-			return phantom;
-		else
-			return namespace.createObject(name);
-	}
-
-	/** Create a new object in the server namespace */
-	protected void createObject(Name name) throws SonarException {
-		SonarObject o = getObject(name);
-		server.createObject(o);
-		phantom = null;
-	}
-
-	/** Set the value of an attribute */
+	/** Set the value of an attribute.
+	 * This may only be called on the Task Processor thread. */
 	protected void setAttribute(Name name, List<String> params)
 		throws SonarException
 	{
@@ -391,13 +383,15 @@ public class ConnectionImpl extends Conduit implements Connection {
 		}
 	}
 
-	/** Start writing data to client */
+	/** Start writing data to client.
+	 * This may only be called on the Task Processor thread. */
 	protected void startWrite() throws IOException {
 		if(state.doWrite())
 			server.flush(this);
 	}
 
-	/** Tell the I/O thread to flush the output buffer */
+	/** Tell the I/O thread to flush the output buffer.
+	 * This may only be called on the Task Processor thread. */
 	public void flush() {
 		try {
 			if(isConnected())
@@ -411,18 +405,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 		}
 	}
 
-	/** Enable writing data back to the client */
-	public void enableWrite() {
-		key.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
-		key.selector().wakeup();
-	}
-
-	/** Disable writing data back to the client */
-	public void disableWrite() {
-		key.interestOps(SelectionKey.OP_READ);
-	}
-
-	/** Respond to a LOGIN message */
+	/** Respond to a LOGIN message.
+	 * This may only be called on the Task Processor thread. */
 	public void doLogin(List<String> params) throws SonarException {
 		if(user != null)
 			throw ProtocolError.ALREADY_LOGGED_IN;
@@ -451,12 +435,25 @@ public class ConnectionImpl extends Conduit implements Connection {
 		server.setAttribute(this, "user");
 	}
 
-	/** Respond to a QUIT message */
+	/** Lookup a user by name.
+	 * This may only be called on the Task Processor thread. */
+	protected UserImpl lookupUser(String n) throws PermissionDenied {
+		UserImpl u = (UserImpl)namespace.lookupObject(User.SONAR_TYPE,
+			n);
+		if(u != null)
+			return u;
+		else
+			throw PermissionDenied.AUTHENTICATION_FAILED;
+	}
+
+	/** Respond to a QUIT message.
+	 * This may only be called on the Task Processor thread. */
 	public void doQuit(List<String> params) {
 		disconnect("Client QUIT");
 	}
 
-	/** Respond to an ENUMERATE message */
+	/** Respond to an ENUMERATE message.
+	 * This may only be called on the Task Processor thread. */
 	public void doEnumerate(List<String> params) throws SonarException {
 		checkLoggedIn();
 		if(params.size() > 2)
@@ -472,7 +469,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 		namespace.enumerate(name, state.encoder);
 	}
 
-	/** Respond to an IGNORE message */
+	/** Respond to an IGNORE message.
+	 * This may only be called on the Task Processor thread. */
 	public void doIgnore(List<String> params) throws SonarException {
 		checkLoggedIn();
 		if(params.size() != 2)
@@ -481,7 +479,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 		stopWatching(name);
 	}
 
-	/** Respond to an OBJECT message */
+	/** Respond to an OBJECT message.
+	 * This may only be called on the Task Processor thread. */
 	public void doObject(List<String> params) throws SonarException {
 		checkLoggedIn();
 		if(params.size() != 2)
@@ -495,7 +494,33 @@ public class ConnectionImpl extends Conduit implements Connection {
 			throw NamespaceError.NAME_INVALID;
 	}
 
-	/** Respond to a REMOVE message */
+	/** Create a new object in the server namespace.
+	 * This may only be called on the Task Processor thread. */
+	protected void createObject(Name name) throws SonarException {
+		SonarObject o = getObject(name);
+		server.createObject(o);
+		phantom = null;
+	}
+
+	/** Get the specified object (either phantom or new object).
+	 * This may only be called on the Task Processor thread. */
+	protected SonarObject getObject(Name name) throws SonarException {
+		if(isPhantom(name))
+			return phantom;
+		else
+			return namespace.createObject(name);
+	}
+
+	/** Check if the specified name refers to the phantom object.
+	 * This may only be called on the Task Processor thread. */
+	protected boolean isPhantom(Name name) {
+		return phantom != null &&
+		       phantom.getTypeName().equals(name.getTypePart()) &&
+		       phantom.getName().equals(name.getObjectPart());
+	}
+
+	/** Respond to a REMOVE message.
+	 * This may only be called on the Task Processor thread. */
 	public void doRemove(List<String> params) throws SonarException {
 		checkLoggedIn();
 		if(params.size() != 2)
@@ -511,7 +536,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 			throw NamespaceError.NAME_INVALID;
 	}
 
-	/** Respond to an ATTRIBUTE message */
+	/** Respond to an ATTRIBUTE message.
+	 * This may only be called on the Task Processor thread. */
 	public void doAttribute(List<String> params) throws SonarException {
 		checkLoggedIn();
 		if(params.size() < 2)

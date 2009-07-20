@@ -312,7 +312,8 @@ public class Server extends Thread {
 		}
 	}
 
-	/** Notify all connections watching a name of an object add */
+	/** Notify all connections watching a name of an object add.
+	 * This may only be called on the Task Processor thread. */
 	void notifyObject(SonarObject o) {
 		Name name = new Name(o);
 		List<ConnectionImpl> clist = getConnectionList();
@@ -320,14 +321,16 @@ public class Server extends Thread {
 			c.notifyObject(name, o);
 	}
 
-	/** Notify all connections watching a name of an attribute change */
+	/** Notify all connections watching a name of an attribute change.
+	 * This may only be called on the Task Processor thread. */
 	void notifyAttribute(Name name, String[] params) {
 		List<ConnectionImpl> clist = getConnectionList();
 		for(ConnectionImpl c: clist)
 			c.notifyAttribute(name, params);
 	}
 
-	/** Notify all connections watching a name of an object remove */
+	/** Notify all connections watching a name of an object remove.
+	 * This may only be called on the Task Processor thread. */
 	void notifyRemove(Name name) {
 		List<ConnectionImpl> clist = getConnectionList();
 		for(ConnectionImpl c: clist)
@@ -350,7 +353,8 @@ public class Server extends Thread {
 		});
 	}
 
-	/** Perform an add object task */
+	/** Perform an add object task.
+	 * This may only be called on the Task Processor thread. */
 	protected void doAddObject(SonarObject o) throws NamespaceError {
 		namespace.addObject(o);
 		notifyObject(o);
@@ -372,7 +376,8 @@ public class Server extends Thread {
 		job.waitForCompletion();
 	}
 
-	/** Create (synchronously) an object in the server's namespace */
+	/** Create (synchronously) an object in the server's namespace.
+	 * This may only be called on the Task Processor thread. */
 	protected void doCreateObject(SonarObject o) throws SonarException {
 		DEBUG_TASK.log("Storing object " + o.getName());
 		namespace.storeObject(o);
@@ -389,7 +394,8 @@ public class Server extends Thread {
 		});
 	}
 
-	/** Perform a remove object task */
+	/** Perform a remove object task.
+	 * This may only be called on the Task Processor thread. */
 	protected void doRemoveObject(SonarObject o) throws SonarException {
 		notifyRemove(new Name(o));
 		namespace.removeObject(o);
@@ -406,7 +412,8 @@ public class Server extends Thread {
 		});
 	}
 
-	/** Perform a "set attribute" task */
+	/** Perform a "set attribute" task.
+	 * This may only be called on the Task Processor thread. */
 	protected void doSetAttribute(SonarObject o, String aname)
 		throws SonarException
 	{

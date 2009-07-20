@@ -65,17 +65,20 @@ public class MessageEncoder {
 		conduit = c;
 	}
 
-	/** Encode one message with the given code */
+	/** Encode one message with the given code.
+	 * This may only be called on the Task Processor thread. */
 	public void encode(Message m) throws FlushError {
 		encode(m, null, null);
 	}
 
-	/** Encode one message with the given code and name */
+	/** Encode one message with the given code and name.
+	 * This may only be called on the Task Processor thread. */
 	public void encode(Message m, String name) throws FlushError {
 		encode(m, name, null);
 	}
 
-	/** Encode one message with the given code, name and parameters */
+	/** Encode one message with the given code, name and parameters.
+	 * This may only be called on the Task Processor thread. */
 	public void encode(Message m, String name, String[] params)
 		throws FlushError
 	{

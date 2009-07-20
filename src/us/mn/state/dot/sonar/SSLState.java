@@ -101,7 +101,8 @@ public class SSLState {
 		return net_in;
 	}
 
-	/** Read available data from network input buffer */
+	/** Read available data from network input buffer.
+	 * This may only be called on the Task Processor thread. */
 	public boolean doRead() throws SSLException {
 		doUnwrap();
 		while(doHandshake());
@@ -125,7 +126,8 @@ public class SSLState {
 		}
 	}
 
-	/** Write data to the network output buffer */
+	/** Write data to the network output buffer.
+	 * This may only be called on the Task Processor thread. */
 	public boolean doWrite() throws SSLException {
 		doWrap();
 		return app_out.position() > 0;
