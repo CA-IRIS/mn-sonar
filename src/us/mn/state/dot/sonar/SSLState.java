@@ -128,9 +128,7 @@ public class SSLState {
 	/** Write data to the network output buffer */
 	public boolean doWrite() throws SSLException {
 		doWrap();
-		synchronized(app_out) {
-			return app_out.position() > 0;
-		}
+		return app_out.position() > 0;
 	}
 
 	/** Perform a delegated SSL engine task */
@@ -143,14 +141,12 @@ public class SSLState {
 	/** Wrap application data into SSL buffer */
 	protected void doWrap() throws SSLException {
 		ssl_out.clear();
-		synchronized(app_out) {
-			app_out.flip();
-			try {
-				engine.wrap(app_out, ssl_out);
-			}
-			finally {
-				app_out.compact();
-			}
+		app_out.flip();
+		try {
+			engine.wrap(app_out, ssl_out);
+		}
+		finally {
+			app_out.compact();
 		}
 		ssl_out.flip();
 		int n_bytes;
