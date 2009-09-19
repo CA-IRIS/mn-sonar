@@ -61,6 +61,9 @@ public class TypeCache<T extends SonarObject> {
 	 * All access must be synchronized on the "children" lock. */
 	private final HashMap<String, T> children = new HashMap<String, T>();
 
+	/** Flag to indicate enumeration from server is complete */
+	private boolean enumerated = false;
+
 	/** A phantom is a new object which has had attributes set, but not
 	 * been declared with Message.OBJECT ("o") */
 	private T phantom;
@@ -152,6 +155,7 @@ public class TypeCache<T extends SonarObject> {
 	void enumerationComplete() {
 		synchronized(children) {
 			notifyEnumerationComplete();
+			enumerated = true;
 		}
 	}
 
@@ -279,6 +283,8 @@ public class TypeCache<T extends SonarObject> {
 			listeners.add(l);
 			for(T proxy: children.values())
 				l.proxyAdded(proxy);
+			if(enumerated)
+				l.enumerationComplete();
 		}
 	}
 
