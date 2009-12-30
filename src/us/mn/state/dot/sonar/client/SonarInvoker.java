@@ -21,7 +21,6 @@ import java.util.Map;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.sonar.User;
 
 /**
  * A SonarInvoker handles method invocations on SonarObject proxies.
