@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -152,7 +152,7 @@ public class TypeCache<T extends SonarObject> {
 	}
 
 	/** Enumeration of proxy type is complete */
-	void enumerationComplete() {
+	public void enumerationComplete() {
 		synchronized(children) {
 			notifyEnumerationComplete();
 			enumerated = true;
