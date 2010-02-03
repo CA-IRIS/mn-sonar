@@ -42,6 +42,9 @@ public class TypeCache<T extends SonarObject> {
 		return System.identityHashCode(o);
 	}
 
+	/** Number of entries in the removed proxy cache */
+	static protected final int REMOVED_CACHE_ENTRIES = 16;
+
 	/** Type name */
 	public final String tname;
 
@@ -60,6 +63,9 @@ public class TypeCache<T extends SonarObject> {
 	/** All SONAR objects of this type are put here.
 	 * All access must be synchronized on the "children" lock. */
 	private final HashMap<String, T> children = new HashMap<String, T>();
+
+	/** All removed SONAR objects of this type are put here */
+	private final LinkedList<Integer> removed = new LinkedList<Integer>();
 
 	/** Flag to indicate enumeration from server is complete */
 	private boolean enumerated = false;
@@ -165,8 +171,12 @@ public class TypeCache<T extends SonarObject> {
 			if(!children.containsKey(name))
 				throw NamespaceError.nameUnknown(name);
 			T proxy = children.remove(name);
+			removed.addLast(hashCode(proxy));
+			while(removed.size() > REMOVED_CACHE_ENTRIES) {
+				Integer hc = removed.pollFirst();
+				attributes.remove(hc);
+			}
 			notifyProxyRemoved(proxy);
-			attributes.remove(hashCode(proxy));
 			return proxy;
 		}
 	}
@@ -199,7 +209,7 @@ public class TypeCache<T extends SonarObject> {
 		int i = System.identityHashCode(o);
 		HashMap<String, Attribute> amap = lookupAttributeMap(i);
 		if(amap == null) {
-			// This happens if a proxy has been removed, but
+			// This can happen if a proxy has been removed, but
 			// references still exist in other data structures.
 			return new Attribute(Object.class);
 		}
