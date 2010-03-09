@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.sonar.server;
 
+import java.io.IOException;
 import java.util.HashMap;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Message;
@@ -114,7 +115,7 @@ public class TypeNode {
 
 	/** Enumerate all attributes of the named object */
 	public void enumerateObject(MessageEncoder enc, SonarObject o)
-		throws SonarException
+		throws SonarException, IOException
 	{
 		assert(o.getTypeName() == name);
 		boolean first = true;
@@ -132,7 +133,9 @@ public class TypeNode {
 	}
 
 	/** Enumerate all the objects of the type node */
-	public void enumerateObjects(MessageEncoder enc) throws SonarException {
+	public void enumerateObjects(MessageEncoder enc) throws SonarException,
+		IOException
+	{
 		synchronized(children) {
 			for(SonarObject o: children.values())
 				enumerateObject(enc, o);
@@ -141,7 +144,7 @@ public class TypeNode {
 
 	/** Enumerate an attribute for all objects of the type node */
 	public void enumerateAttribute(MessageEncoder enc, String aname)
-		throws SonarException
+		throws SonarException, IOException
 	{
 		synchronized(children) {
 			for(SonarObject o: children.values()) {

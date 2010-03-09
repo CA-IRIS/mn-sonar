@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.ConfigurationError;
-import us.mn.state.dot.sonar.FlushError;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.Security;
@@ -126,7 +125,7 @@ public class Client extends Thread {
 	/** Populate the specified type cache */
 	public void populate(final TypeCache tc) {
 		processor.addJob(new Job() {
-			public void perform() throws FlushError {
+			public void perform() throws IOException {
 				conduit.queryAll(tc);
 			}
 		});
@@ -167,7 +166,7 @@ public class Client extends Thread {
 		throws SonarException
 	{
 		processor.addJob(new Job() {
-			public void perform() throws FlushError {
+			public void perform() throws IOException {
 				conduit.login(user, password);
 			}
 		});
@@ -221,7 +220,7 @@ public class Client extends Thread {
 	public void quit() {
 		quitting = true;
 		processor.addJob(new Job() {
-			public void perform() throws FlushError {
+			public void perform() throws IOException {
 				conduit.quit();
 			}
 		});
@@ -230,7 +229,7 @@ public class Client extends Thread {
 	/** Request an attribute change */
 	void setAttribute(final Name name, final String[] params) {
 		processor.addJob(new Job() {
-			public void perform() throws FlushError {
+			public void perform() throws IOException {
 				conduit.setAttribute(name, params);
 			}
 		});
@@ -239,7 +238,7 @@ public class Client extends Thread {
 	/** Create the specified object name */
 	void createObject(final Name name) {
 		processor.addJob(new Job() {
-			public void perform() throws FlushError {
+			public void perform() throws IOException {
 				conduit.createObject(name);
 			}
 		});
@@ -248,7 +247,7 @@ public class Client extends Thread {
 	/** Remove the specified object name */
 	void removeObject(final Name name) {
 		processor.addJob(new Job() {
-			public void perform() throws FlushError {
+			public void perform() throws IOException {
 				conduit.removeObject(name);
 			}
 		});
@@ -257,7 +256,7 @@ public class Client extends Thread {
 	/** Enumerate the specified name */
 	void enumerateName(final Name name) {
 		processor.addJob(new Job() {
-			public void perform() throws FlushError {
+			public void perform() throws IOException {
 				conduit.enumerateName(name);
 			}
 		});
@@ -266,7 +265,7 @@ public class Client extends Thread {
 	/** Ignore the specified name */
 	void ignoreName(final Name name) {
 		processor.addJob(new Job() {
-			public void perform() throws FlushError {
+			public void perform() throws IOException {
 				conduit.ignoreName(name);
 			}
 		});

@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@ import java.util.Set;
 import javax.net.ssl.SSLException;
 import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.Connection;
-import us.mn.state.dot.sonar.FlushError;
 import us.mn.state.dot.sonar.Message;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
@@ -134,13 +133,13 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Create a new connection */
 	public ConnectionImpl(Server s, SelectionKey k, SocketChannel c)
-		throws SSLException
+		throws SSLException, IOException
 	{
 		server = s;
 		namespace = server.getNamespace();
 		key = k;
 		channel = c;
-		state = new SSLState(this, server.createSSLEngine(), true);
+		state = new SSLState(this, server.createSSLEngine());
 		StringBuilder h = new StringBuilder();
 		h.append(c.socket().getInetAddress().getHostAddress());
 		h.append(':');
@@ -256,6 +255,9 @@ public class ConnectionImpl extends Conduit implements Connection {
 		catch(SonarException e) {
 			disconnect("Notify error: " + e.getMessage());
 		}
+		catch(IOException e) {
+			disconnect("Notify error: " + e.getMessage());
+		}
 	}
 
 	/** Notify the client of a new object being added.
@@ -279,8 +281,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 			state.encoder.encode(Message.ATTRIBUTE, name, params);
 			flush();
 		}
-		catch(FlushError e) {
-			disconnect("Flush error: notifyAttribute " + name);
+		catch(IOException e) {
+			disconnect("I/O error: notifyAttribute " + name);
 		}
 	}
 
@@ -300,8 +302,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 			state.encoder.encode(Message.REMOVE, name);
 			flush();
 		}
-		catch(FlushError e) {
-			disconnect("Flush error: notifyRemove " + name);
+		catch(IOException e) {
+			disconnect("I/O error: notifyRemove " + name);
 		}
 	}
 
@@ -322,14 +324,14 @@ public class ConnectionImpl extends Conduit implements Connection {
 		catch(SSLException e) {
 			disconnect("SSL error " + e.getMessage());
 		}
-		catch(FlushError e) {
-			disconnect("Flush error: processMessages");
+		catch(IOException e) {
+			disconnect("I/O error: processMessages");
 		}
 	}
 
 	/** Process any incoming messages.
 	 * This may only be called on the Task Processor thread. */
-	protected void _processMessages() throws SSLException, FlushError {
+	protected void _processMessages() throws SSLException, IOException {
 		while(state.doRead()) {
 			List<String> params = state.decoder.decode();
 			while(params != null) {
@@ -343,7 +345,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Process one message from the client.
 	 * This may only be called on the Task Processor thread. */
 	protected void processMessage(List<String> params)
-		throws FlushError
+		throws IOException
 	{
 		try {
 			if(params.size() > 0)
@@ -419,7 +421,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 			u = lookupUser(name);
 			server.getAuthenticator().authenticate(u.getDn(),
 				password.toCharArray());
-		} catch(SonarException ex) {
+		}
+		catch(SonarException ex) {
 			System.err.println("SONAR: authentication failure for "
 				+ name + ", from " + getName() + ", "
 				+ new Date() + ".");
@@ -428,10 +431,15 @@ public class ConnectionImpl extends Conduit implements Connection {
 		System.err.println("SONAR: Login " + name + " from " +
 			getName() + ", " + new Date() + ".");
 		user = u;
-		// The first TYPE message indicates a successful login
-		state.encoder.encode(Message.TYPE);
-		// Send the connection name to the client first
-		state.encoder.encode(Message.SHOW, hostport);
+		try {
+			// The first TYPE message indicates a successful login
+			state.encoder.encode(Message.TYPE);
+			// Send the connection name to the client first
+			state.encoder.encode(Message.SHOW, hostport);
+		}
+		catch(IOException e) {
+			throw new SonarException(e.getMessage());
+		}
 		server.setAttribute(this, "user");
 	}
 
@@ -466,7 +474,14 @@ public class ConnectionImpl extends Conduit implements Connection {
 		if(!namespace.canRead(user, name))
 			throw PermissionDenied.create(name);
 		startWatching(name);
-		namespace.enumerate(name, state.encoder);
+System.err.println("starting enumerate: " + name + ", " + new Date());
+		try {
+			namespace.enumerate(name, state.encoder);
+		}
+		catch(IOException e) {
+			throw new SonarException(e.getMessage());
+		}
+System.err.println("finished enumerate: " + name + ", " + new Date());
 	}
 
 	/** Respond to an IGNORE message.

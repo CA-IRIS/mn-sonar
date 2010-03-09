@@ -14,10 +14,11 @@
  */
 package us.mn.state.dot.sonar;
 
-import java.nio.BufferOverflowException;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * A message encoder provides a Java API for encoding messages to the SONAR
@@ -27,115 +28,68 @@ import java.nio.charset.Charset;
  */
 public class MessageEncoder {
 
-	/** Maximum size (characters) of a single message */
-	static protected final int MAX_MESSAGE_SIZE = 8192;
-
-	/** Number of tries to flush write buffer */
-	static protected final int FLUSH_TRIES = 40;
-
-	/** Time to allow I/O thread to flush output buffer */
-	static protected final int FLUSH_WAIT_MS = 100;
-
-	/** Sleep to allow the network thread to do some work */
-	protected void sleepBriefly() {
-		try {
-			Thread.sleep(FLUSH_WAIT_MS);
-		}
-		catch(InterruptedException e) {
-			// Shouldn't happen, and who cares?
-		}
-	}
-
 	/** Everything on the wire is encoded to UTF-8 */
 	static protected final Charset UTF8 = Charset.forName("UTF-8");
 
-	/** Character buffer used to build messages */
-	protected final CharBuffer m_buf;
+	/** Byte buffer output stream */
+	protected final ByteBufferOutputStream out_buf;
 
-	/** Byte buffer to write encoded data */
-	protected final ByteBuffer app_out;
+	/** GZIP output stream for compressing data */
+	protected final GZIPOutputStream gzip_out;
 
-	/** Client conduit */
-	protected final Conduit conduit;
+	/** Char writer output stream */
+	protected final OutputStreamWriter writer;
 
 	/** Create a new SONAR message encoder */
-	public MessageEncoder(ByteBuffer out, Conduit c) {
-		m_buf = CharBuffer.allocate(MAX_MESSAGE_SIZE);
-		app_out = out;
-		conduit = c;
+	public MessageEncoder(int n_bytes) throws IOException {
+		out_buf = new ByteBufferOutputStream(n_bytes);
+		gzip_out = new GZIPOutputStream(out_buf);
+		writer = new OutputStreamWriter(gzip_out, UTF8);
 	}
 
 	/** Encode one message with the given code.
 	 * This may only be called on the Task Processor thread. */
-	public void encode(Message m) throws FlushError {
+	public void encode(Message m) throws IOException {
 		encode(m, null, null);
 	}
 
 	/** Encode one message with the given code and name.
 	 * This may only be called on the Task Processor thread. */
-	public void encode(Message m, String name) throws FlushError {
+	public void encode(Message m, String name) throws IOException {
 		encode(m, name, null);
 	}
 
 	/** Encode one message with the given code, name and parameters.
 	 * This may only be called on the Task Processor thread. */
 	public void encode(Message m, String name, String[] params)
-		throws FlushError
+		throws IOException
 	{
-		try {
-			m_buf.clear();
-			_encode(m, name, params);
-			m_buf.flip();
-		}
-		catch(BufferOverflowException e) {
-			throw new FlushError("encode");
-		}
-		fillBuffer(UTF8.encode(m_buf));
-	}
-
-	/** Encode one message with the given code, name and parameters */
-	protected void _encode(Message m, String name, String[] params)
-		throws FlushError
-	{
-		m_buf.put(m.code);
+		writer.write(m.code);
 		if(name != null) {
-			m_buf.put(Message.DELIMITER.code);
-			m_buf.put(name);
+			writer.write(Message.DELIMITER.code);
+			writer.write(name);
 			if(params != null) {
 				for(String p: params) {
-					m_buf.put(Message.DELIMITER.code);
-					m_buf.put(p);
+					writer.write(Message.DELIMITER.code);
+					writer.write(p);
 				}
 			}
 		}
-		m_buf.put(Message.TERMINATOR.code);
+		writer.write(Message.TERMINATOR.code);
 	}
 
-	/** Check if we must flush the write buffer */
-	protected boolean mustFlush(int n_bytes) {
-		return app_out.remaining() < n_bytes + MAX_MESSAGE_SIZE;
+	/** Flush the encoded data */
+	public void flush() throws IOException {
+		writer.flush();
 	}
 
-	/** Ensure there is capacity in the write buffer */
-	protected void ensureCapacity(int n_bytes) throws FlushError {
-		for(int i = 0; i < FLUSH_TRIES; i++) {
-			if(mustFlush(n_bytes)) {
-				conduit.flush();
-				sleepBriefly();
-			} else
-				return;
-		}
-		throw new FlushError("ensureCapacity");
+	/** Get the current output buffer */
+	public ByteBuffer getBuffer() {
+		return out_buf.getBuffer();
 	}
 
-	/** Fill the output buffer with encoded message data */
-	protected void fillBuffer(ByteBuffer b) throws FlushError {
-		ensureCapacity(b.remaining());
-		try {
-			app_out.put(b);
-		}
-		catch(BufferOverflowException e) {
-			throw new FlushError("fillBuffer");
-		}
+	/** Check if there is any encoded data */
+	public boolean hasData() {
+		return getBuffer().position() > 0;
 	}
 }

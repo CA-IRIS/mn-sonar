@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,6 @@ import javax.net.ssl.SSLException;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.ConfigurationError;
-import us.mn.state.dot.sonar.FlushError;
 import us.mn.state.dot.sonar.Message;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
@@ -149,7 +148,7 @@ class ClientConduit extends Conduit {
 		client = c;
 		key = channel.register(selector, SelectionKey.OP_CONNECT);
 		engine.setUseClientMode(true);
-		state = new SSLState(this, engine, false);
+		state = new SSLState(this, engine);
 		namespace = new ClientNamespace();
 		handler = h;
 		connected = false;
@@ -334,50 +333,50 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Attempt to log in to the SONAR server */
-	void login(String name, String pwd) throws FlushError {
+	void login(String name, String pwd) throws IOException {
 		state.encoder.encode(Message.LOGIN, name, new String[] {pwd});
 		flush();
 	}
 
 	/** Quit the SONAR session */
-	void quit() throws FlushError {
+	void quit() throws IOException {
 		state.encoder.encode(Message.QUIT);
 		flush();
 	}
 
 	/** Query all SONAR objects of the given type */
-	void queryAll(TypeCache tcache) throws FlushError {
+	void queryAll(TypeCache tcache) throws IOException {
 		namespace.addType(tcache);
 		enumerateName(new Name(tcache.tname));
 	}
 
 	/** Create the specified object name */
-	void createObject(Name name) throws FlushError {
+	void createObject(Name name) throws IOException {
 		state.encoder.encode(Message.OBJECT, name.toString());
 		flush();
 	}
 
 	/** Request an attribute change */
-	void setAttribute(Name name, String[] params) throws FlushError {
+	void setAttribute(Name name, String[] params) throws IOException {
 		state.encoder.encode(Message.ATTRIBUTE, name.toString(),
 			params);
 		flush();
 	}
 
 	/** Remove the specified object name */
-	void removeObject(Name name) throws FlushError {
+	void removeObject(Name name) throws IOException {
 		state.encoder.encode(Message.REMOVE, name.toString());
 		flush();
 	}
 
 	/** Enumerate the specified name */
-	void enumerateName(Name name) throws FlushError {
+	void enumerateName(Name name) throws IOException {
 		state.encoder.encode(Message.ENUMERATE, name.toString());
 		flush();
 	}
 
 	/** Ignore the specified name */
-	void ignoreName(Name name) throws FlushError {
+	void ignoreName(Name name) throws IOException {
 		state.encoder.encode(Message.IGNORE, name.toString());
 		flush();
 	}

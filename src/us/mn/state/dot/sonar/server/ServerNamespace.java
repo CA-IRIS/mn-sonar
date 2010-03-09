@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,9 @@
  */
 package us.mn.state.dot.sonar.server;
 
+import java.io.IOException;
 import java.util.HashMap;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.FlushError;
 import us.mn.state.dot.sonar.Message;
 import us.mn.state.dot.sonar.MessageEncoder;
 import us.mn.state.dot.sonar.Name;
@@ -114,9 +114,7 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Enumerate the root of the namespace */
-	protected void enumerateRoot(MessageEncoder enc)
-		throws FlushError
-	{
+	protected void enumerateRoot(MessageEncoder enc) throws IOException {
 		synchronized(root) {
 			for(TypeNode t: root.values())
 				enc.encode(Message.TYPE, t.name);
@@ -126,7 +124,7 @@ public class ServerNamespace extends Namespace {
 
 	/** Enumerate all objects of the named type */
 	protected void enumerateType(MessageEncoder enc, Name name)
-		throws NamespaceError, SonarException
+		throws SonarException, IOException
 	{
 		TypeNode t = getTypeNode(name);
 		enc.encode(Message.TYPE, name.getTypePart());
@@ -136,7 +134,7 @@ public class ServerNamespace extends Namespace {
 
 	/** Enumerate all attributes of the named object */
 	protected void enumerateObject(MessageEncoder enc, SonarObject o)
-		throws SonarException
+		throws SonarException, IOException
 	{
 		TypeNode t = getTypeNode(o);
 		t.enumerateObject(enc, o);
@@ -144,7 +142,7 @@ public class ServerNamespace extends Namespace {
 
 	/** Enumerate all attributes of the named object */
 	protected void enumerateObject(MessageEncoder enc, Name name)
-		throws SonarException
+		throws SonarException, IOException
 	{
 		SonarObject o = lookupObject(name);
 		if(o != null)
@@ -155,7 +153,7 @@ public class ServerNamespace extends Namespace {
 
 	/** Enumerate a named attribute */
 	protected void enumerateAttribute(MessageEncoder enc, Name name)
-		throws SonarException
+		throws SonarException, IOException
 	{
 		if(name.getObjectPart().equals("")) {
 			TypeNode t = getTypeNode(name);
@@ -167,7 +165,9 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Enumerate everything contained by a name in the namespace */
-	void enumerate(Name name, MessageEncoder enc) throws SonarException {
+	void enumerate(Name name, MessageEncoder enc) throws SonarException,
+		IOException
+	{
 		if(name.isRoot())
 			enumerateRoot(enc);
 		else if(name.isType())

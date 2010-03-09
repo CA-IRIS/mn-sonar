@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.sonar;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
@@ -27,11 +28,8 @@ import javax.net.ssl.SSLSession;
  */
 public class SSLState {
 
-	/** Size (in bytes) of small network buffers */
-	static protected final int NETWORK_SMALL_SIZE = 1 << 16;
-
 	/** Size (in bytes) of network buffers */
-	static protected final int NETWORK_LARGE_SIZE = 1 << 21;
+	static protected final int NETWORK_SIZE = 1 << 16;
 
 	/** Conduit */
 	protected final Conduit conduit;
@@ -47,9 +45,6 @@ public class SSLState {
 
 	/** Byte buffer to store incoming encrypted network data */
 	protected final ByteBuffer net_in;
-
-	/** Byte buffer to store outgoing SONAR data */
-	protected final ByteBuffer app_out;
 
 	/** Byte buffer to store incoming SONAR data */
 	protected final ByteBuffer app_in;
@@ -67,27 +62,21 @@ public class SSLState {
 	public final MessageEncoder encoder;
 
 	/** Create a new SONAR SSL state */
-	public SSLState(Conduit c, SSLEngine e, boolean outbound)
-		throws SSLException
+	public SSLState(Conduit c, SSLEngine e) throws SSLException,
+		IOException
 	{
 		conduit = c;
 		engine = e;
 		SSLSession session = engine.getSession();
 		int p_size = session.getPacketBufferSize();
 		int a_size = session.getApplicationBufferSize();
-		if(outbound) {
-			net_out = ByteBuffer.allocate(NETWORK_LARGE_SIZE);
-			net_in = ByteBuffer.allocate(NETWORK_SMALL_SIZE);
-		} else {
-			net_out = ByteBuffer.allocate(NETWORK_SMALL_SIZE);
-			net_in = ByteBuffer.allocate(NETWORK_LARGE_SIZE);
-		}
-		app_out = ByteBuffer.allocate(a_size);
+		net_in = ByteBuffer.allocate(NETWORK_SIZE);
+		net_out = ByteBuffer.allocate(NETWORK_SIZE);
 		app_in = ByteBuffer.allocate(a_size);
 		ssl_out = ByteBuffer.allocate(p_size);
 		ssl_in = ByteBuffer.allocate(a_size);
 		decoder = new MessageDecoder(app_in);
-		encoder = new MessageEncoder(app_out, conduit);
+		encoder = new MessageEncoder(a_size);
 		engine.beginHandshake();
 	}
 
@@ -113,16 +102,16 @@ public class SSLState {
 	protected boolean doHandshake() throws SSLException {
 		hs = engine.getHandshakeStatus();
 		switch(hs) {
-			case NEED_TASK:
-				doTask();
-				return true;
-			case NEED_WRAP:
-				doWrap();
-				return true;
-			case NEED_UNWRAP:
-				return doUnwrap();
-			default:
-				return false;
+		case NEED_TASK:
+			doTask();
+			return true;
+		case NEED_WRAP:
+			doWrap();
+			return true;
+		case NEED_UNWRAP:
+			return doUnwrap();
+		default:
+			return false;
 		}
 	}
 
@@ -130,7 +119,7 @@ public class SSLState {
 	 * This may only be called on the Task Processor thread. */
 	public boolean doWrite() throws SSLException {
 		doWrap();
-		return app_out.position() > 0;
+		return encoder.hasData();
 	}
 
 	/** Perform a delegated SSL engine task */
@@ -143,6 +132,7 @@ public class SSLState {
 	/** Wrap application data into SSL buffer */
 	protected void doWrap() throws SSLException {
 		ssl_out.clear();
+		ByteBuffer app_out = encoder.getBuffer();
 		app_out.flip();
 		try {
 			engine.wrap(app_out, ssl_out);
@@ -183,14 +173,14 @@ public class SSLState {
 	/** Check the status of the SSL engine */
 	static protected boolean checkStatus(SSLEngineResult result) {
 		switch(result.getStatus()) {
-			case BUFFER_OVERFLOW:
-				System.err.println("SSL: buffer OVERFLOW");
-				break;
-			case BUFFER_UNDERFLOW:
-				break;
-			case CLOSED:
-				System.err.println("SSL: CLOSED");
-				break;
+		case BUFFER_OVERFLOW:
+			System.err.println("SSL: buffer OVERFLOW");
+			break;
+		case BUFFER_UNDERFLOW:
+			break;
+		case CLOSED:
+			System.err.println("SSL: CLOSED");
+			break;
 		}
 		return result.getStatus() == SSLEngineResult.Status.OK;
 	}
