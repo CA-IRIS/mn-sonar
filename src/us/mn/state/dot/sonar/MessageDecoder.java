@@ -45,7 +45,7 @@ public class MessageDecoder {
 	protected final StringBuilder m_buf = new StringBuilder();
 
 	/** List of decoded parameters */
-	protected final LinkedList<String> params = new LinkedList<String>();
+	protected LinkedList<String> params = new LinkedList<String>();
 
 	/** Create a new SONAR message decoder */
 	public MessageDecoder(ByteBuffer in) throws IOException {
@@ -73,7 +73,6 @@ public class MessageDecoder {
 
 	/** Decode messages */
 	protected List<String> _decode() throws IOException {
-		params.clear();
 		while(reader.ready()) {
 			int ch = reader.read();
 			if(ch < 0)
@@ -81,7 +80,9 @@ public class MessageDecoder {
 			char c = (char)ch;
 			if(c == Message.TERMINATOR.code) {
 				completeParameter();
-				return params;
+				List<String> p = params;
+				params = new LinkedList<String>();
+				return p;
 			} else if(c == Message.DELIMITER.code)
 				completeParameter();
 			else
