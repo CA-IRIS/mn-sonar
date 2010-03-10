@@ -197,6 +197,7 @@ class ClientConduit extends Conduit {
 	/** Flush out all outgoing data in the conduit */
 	public void flush() {
 		try {
+			state.encoder.flush();
 			if(isConnected())
 				startWrite();
 		}

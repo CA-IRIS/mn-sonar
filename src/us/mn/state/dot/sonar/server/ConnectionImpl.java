@@ -396,6 +396,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	 * This may only be called on the Task Processor thread. */
 	public void flush() {
 		try {
+			state.encoder.flush();
 			if(isConnected())
 				startWrite();
 		}
