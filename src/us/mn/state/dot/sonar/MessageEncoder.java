@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * A message encoder provides a Java API for encoding messages to the SONAR
@@ -34,17 +33,13 @@ public class MessageEncoder {
 	/** Byte buffer output stream */
 	protected final ByteBufferOutputStream out_buf;
 
-	/** GZIP output stream for compressing data */
-	protected final GZIPOutputStream gzip_out;
-
 	/** Char writer output stream */
 	protected final OutputStreamWriter writer;
 
 	/** Create a new SONAR message encoder */
 	public MessageEncoder(int n_bytes) throws IOException {
 		out_buf = new ByteBufferOutputStream(n_bytes);
-		gzip_out = new GZIPOutputStream(out_buf);
-		writer = new OutputStreamWriter(gzip_out, UTF8);
+		writer = new OutputStreamWriter(out_buf, UTF8);
 	}
 
 	/** Encode one message with the given code.

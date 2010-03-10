@@ -20,7 +20,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.zip.GZIPInputStream;
 
 /**
  * A message decoder provides a Java API for decoding messages from the SONAR
@@ -39,11 +38,8 @@ public class MessageDecoder {
 	/** Byte buffer input stream */
 	protected final ByteBufferInputStream in_buf;
 
-	/** GZIP input stream for decompressing data */
-	protected final GZIPInputStream gzip_in;
-
 	/** Char reader input stream */
-	protected final InputStreamReader reader;
+	protected InputStreamReader reader;
 
 	/** String builder to build decoded parameters */
 	protected final StringBuilder m_buf = new StringBuilder();
@@ -55,8 +51,7 @@ public class MessageDecoder {
 	public MessageDecoder(ByteBuffer in) throws IOException {
 		app_in = in;
 		in_buf = new ByteBufferInputStream(in);
-		gzip_in = new GZIPInputStream(in_buf);
-		reader = new InputStreamReader(gzip_in, UTF8);
+		reader = new InputStreamReader(in_buf, UTF8);
 	}
 
 	/** Complete the current parameter */
