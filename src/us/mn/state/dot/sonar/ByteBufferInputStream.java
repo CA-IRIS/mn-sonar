@@ -46,12 +46,12 @@ public class ByteBufferInputStream extends InputStream {
 	}
 
 	/** Read an array of bytes from the input stream */
-	public int read(byte[] b, int offset, int len) {
+	public int read(byte[] b, int off, int len) {
 		if(available() < 1)
 			return -1;
 		len = Math.min(len, available());
 		if(len > 0)
-			buffer.get(b, offset, len);
+			buffer.get(b, off, len);
 		return len;
 	}
 
