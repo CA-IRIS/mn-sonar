@@ -186,12 +186,13 @@ class ClientConduit extends Conduit {
 				disableWrite();
 			net_out.compact();
 		}
+		client.flush();
 	}
 
 	/** Start writing data to client */
 	protected void startWrite() throws IOException {
-		if(state.doWrite())
-			client.flush();
+		if(state.shouldWrite())
+			state.doWrite();
 	}
 
 	/** Flush out all outgoing data in the conduit */

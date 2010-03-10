@@ -117,9 +117,24 @@ public class SSLState {
 
 	/** Write data to the network output buffer.
 	 * This may only be called on the Task Processor thread. */
-	public boolean doWrite() throws SSLException {
-		doWrap();
-		return encoder.hasData();
+	public void doWrite() throws SSLException {
+		if(canWrite())
+			doWrap();
+		else
+			conduit.enableWrite();
+	}
+
+	/** Check if data should be written.
+	 * This may only be called on the Task Processor thread. */
+	public boolean shouldWrite() {
+		return encoder.hasData() && canWrite();
+	}
+
+	/** Check if data can be written to network buffer */
+	public boolean canWrite() {
+		synchronized(net_out) {
+			return net_out.remaining() > ssl_out.capacity();
+		}
 	}
 
 	/** Perform a delegated SSL engine task */

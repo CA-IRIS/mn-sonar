@@ -232,6 +232,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 				disableWrite();
 			net_out.compact();
 		}
+		server.flush(this);
 	}
 
 	/** Enable writing data back to the client */
@@ -388,8 +389,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Start writing data to client.
 	 * This may only be called on the Task Processor thread. */
 	protected void startWrite() throws IOException {
-		if(state.doWrite())
-			server.flush(this);
+		if(state.shouldWrite())
+			state.doWrite();
 	}
 
 	/** Tell the I/O thread to flush the output buffer.
