@@ -153,7 +153,7 @@ public class SSLState {
 			engine.wrap(app_out, ssl_out);
 		}
 		finally {
-			app_out.compact();
+			encoder.compact();
 		}
 		ssl_out.flip();
 		int n_bytes;

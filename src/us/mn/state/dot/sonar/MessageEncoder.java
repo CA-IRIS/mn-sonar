@@ -87,4 +87,9 @@ public class MessageEncoder {
 	public boolean hasData() {
 		return getBuffer().position() > 0;
 	}
+
+	/** Compact the output buffer */
+	public void compact() {
+		out_buf.compact();
+	}
 }

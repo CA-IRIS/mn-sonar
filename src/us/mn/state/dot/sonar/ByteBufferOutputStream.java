@@ -37,6 +37,9 @@ public class ByteBufferOutputStream extends OutputStream {
 		throw new IllegalArgumentException();
 	}
 
+	/** Default byte buffer (before expansion) */
+	protected final ByteBuffer o_buffer;
+
 	/** Byte buffer where data is written */
 	protected ByteBuffer buffer;
 
@@ -47,7 +50,8 @@ public class ByteBufferOutputStream extends OutputStream {
 
 	/** Create a new byte buffer output stream */
 	public ByteBufferOutputStream(int n_bytes) {
-		buffer = allocate(n_bytes);
+		o_buffer = allocate(n_bytes);
+		buffer = o_buffer;
 	}
 
 	/** Get the current byte buffer */
@@ -77,5 +81,15 @@ public class ByteBufferOutputStream extends OutputStream {
 		buffer.flip();
 		buf.put(buffer);
 		buffer = buf;
+	}
+
+	/** Compact the buffer */
+	public void compact() {
+		if(buffer.hasRemaining())
+			buffer.compact();
+		else {
+			buffer = o_buffer;
+			o_buffer.clear();
+		}
 	}
 }
