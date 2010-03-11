@@ -476,14 +476,12 @@ public class ConnectionImpl extends Conduit implements Connection {
 		if(!namespace.canRead(user, name))
 			throw PermissionDenied.create(name);
 		startWatching(name);
-System.err.println("starting enumerate: " + name + ", " + new Date());
 		try {
 			namespace.enumerate(name, state.encoder);
 		}
 		catch(IOException e) {
 			throw new SonarException(e.getMessage());
 		}
-System.err.println("finished enumerate: " + name + ", " + new Date());
 	}
 
 	/** Respond to an IGNORE message.
