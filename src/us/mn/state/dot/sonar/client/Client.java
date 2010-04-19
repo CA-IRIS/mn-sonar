@@ -162,7 +162,9 @@ public class Client extends Thread {
 	}
 
 	/** Login to the SONAR server */
-	public void login(final String user, final String password) {
+	public void login(final String user, final String password)
+		throws SonarException
+	{
 		processor.addJob(new Job() {
 			public void perform() throws IOException {
 				conduit.login(user, password);
