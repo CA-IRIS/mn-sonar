@@ -162,26 +162,17 @@ public class Client extends Thread {
 	}
 
 	/** Login to the SONAR server */
-	public void login(final String user, final String password)
-		throws SonarException
-	{
+	public void login(final String user, final String password) {
 		processor.addJob(new Job() {
 			public void perform() throws IOException {
 				conduit.login(user, password);
 			}
 		});
-		// Wait for up to 20 seconds
-		for(int i = 0; i < 200; i++) {
-			if(conduit.isLoggedIn())
-				return;
-			try {
-				Thread.sleep(100);
-			}
-			catch(InterruptedException e) {
-				handler.handle(e);
-			}
-		}
-		throw new SonarException("Login timed out");
+	}
+
+	/** Check if the client is logged in */
+	public boolean isLoggedIn() {
+		return conduit.isLoggedIn();
 	}
 
 	/** Process messages on the conduit */
