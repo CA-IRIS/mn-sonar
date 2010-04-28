@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,12 +15,17 @@
 package us.mn.state.dot.sonar;
 
 /**
- * A simple callback interface to check SONAR objects.
+ * A simple callback interface to check SONAR objects.  This is used by the
+ * Namespace.findObject method for searching.
  *
  * @author Douglas Lau
  */
 public interface Checker<T extends SonarObject> {
 
-	/** Check one SONAR object */
+	/** Check one SONAR object.  WARNING: this method is normally called
+	 * while holding a lock for the object type, so care should be taken to
+	 * avoid deadlocks.
+	 * @param o Object to check.
+	 * @return true if search should stop; false to continue. */
 	public boolean check(T o);
 }
