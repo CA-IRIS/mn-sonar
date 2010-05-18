@@ -30,6 +30,12 @@ public class MessageEncoder {
 	/** Everything on the wire is encoded to UTF-8 */
 	static protected final Charset UTF8 = Charset.forName("UTF-8");
 
+	/** Strip message delimiters and terminators from a string */
+	static protected String stripString(String s) {
+		s = s.replace(Message.DELIMITER.code, ' ');
+		return s.replace(Message.TERMINATOR.code, ' ');
+	}
+
 	/** Byte buffer output stream */
 	protected final ByteBufferOutputStream out_buf;
 
@@ -66,7 +72,7 @@ public class MessageEncoder {
 			if(params != null) {
 				for(String p: params) {
 					writer.write(Message.DELIMITER.code);
-					writer.write(p);
+					writer.write(stripString(p));
 				}
 			}
 		}
