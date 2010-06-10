@@ -37,24 +37,12 @@ public class Security {
 		throws GeneralSecurityException, ConfigurationError
 	{
 		try {
-			return loadKeyStoreURL(keystore);
+			return loadKeyStore(createURL(keystore).openStream());
 		}
 		catch(IOException e) {
-			try {
-				return loadKeyStoreResource(keystore);
-			}
-			catch(IOException ee) {
-				throw new ConfigurationError("Cannot read " +
-					keystore + ", " + e.getMessage());
-			}
+			throw new ConfigurationError("Cannot read " + keystore +
+				", " + e.getMessage());
 		}
-	}
-
-	/** Load a KeyStore from a URL in the jks format */
-	static protected KeyStore loadKeyStoreURL(String keystore)
-		throws IOException, GeneralSecurityException
-	{
-		return loadKeyStore(createURL(keystore).openStream());
 	}
 
 	/** Create a URL for the specified keystore */
@@ -65,17 +53,6 @@ public class Security {
 			return file.toURI().toURL();
 		else
 			return new URL(keystore);
-	}
-
-	/** Load a KeyStore from a resource in the jks format */
-	static protected KeyStore loadKeyStoreResource(String keystore)
-		throws IOException, GeneralSecurityException
-	{
-		InputStream is = Security.class.getResourceAsStream(keystore);
-		if(is != null)
-			return loadKeyStore(is);
-		else
-			throw new IOException();
 	}
 
 	/** Load a KeyStore from an InputStream in the jks format */
