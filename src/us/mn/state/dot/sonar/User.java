@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,4 +41,10 @@ public interface User extends SonarObject {
 
 	/** Get the user's full name */
 	String getFullName();
+
+	/** Set the active flag */
+	void setActive(boolean a);
+
+	/** Get the active flag */
+	boolean getActive();
 }

@@ -418,21 +418,9 @@ public class ConnectionImpl extends Conduit implements Connection {
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		String name = params.get(1);
 		String password = params.get(2);
-		UserImpl u;
-		try {
-			u = lookupUser(name);
-			server.getAuthenticator().authenticate(u.getDn(),
-				password.toCharArray());
-		}
-		catch(SonarException ex) {
-			System.err.println("SONAR: authentication failure for "
-				+ name + ", from " + getName() + ", "
-				+ new Date() + ".");
-			throw ex;
-		}
+		user = doLogin(name, password);
 		System.err.println("SONAR: Login " + name + " from " +
 			getName() + ", " + new Date() + ".");
-		user = u;
 		try {
 			// The first TYPE message indicates a successful login
 			state.encoder.encode(Message.TYPE);
@@ -443,6 +431,27 @@ public class ConnectionImpl extends Conduit implements Connection {
 			throw new SonarException(e.getMessage());
 		}
 		server.setAttribute(this, "user");
+	}
+
+	/** Login a user */
+	protected UserImpl doLogin(String name, String password)
+		throws PermissionDenied
+	{
+		try {
+			UserImpl u = lookupUser(name);
+			if(u.getActive()) {
+				server.getAuthenticator().authenticate(
+					u.getDn(), password.toCharArray());
+				return u;
+			} else
+				throw PermissionDenied.AUTHENTICATION_FAILED;
+		}
+		catch(PermissionDenied e) {
+			System.err.println("SONAR: authentication failure for "
+				+ name + ", from " + getName() + ", "
+				+ new Date() + ".");
+			throw e;
+		}
 	}
 
 	/** Lookup a user by name.
