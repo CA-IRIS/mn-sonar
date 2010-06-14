@@ -79,20 +79,18 @@ public class UserImpl implements User {
 		return dn;
 	}
 
-	/** Roles the user can assume */
-	protected RoleImpl[] roles = new RoleImpl[0];
+	/** Role of the user */
+	protected RoleImpl role;
 
-	/** Set the roles assigned to the user */
-	public void setRoles(Role[] r) {
-		RoleImpl[] _r = new RoleImpl[r.length];
-		for(int i = 0; i < r.length; i++)
-			_r[i] = (RoleImpl)r[i];
-		roles = _r;
+	/** Set the role */
+	public void setRole(Role r) {
+		if(r instanceof RoleImpl)
+			role = (RoleImpl)r;
 	}
 
-	/** Get the roles assigned to the user */
-	public Role[] getRoles() {
-		return roles;
+	/** Get the role */
+	public Role getRole() {
+		return role;
 	}
 
 	/** Active flag */

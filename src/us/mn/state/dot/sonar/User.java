@@ -36,11 +36,11 @@ public interface User extends SonarObject {
 	/** Get the LDAP Distinguished Name */
 	String getDn();
 
-	/** Set the roles assigned to the user */
-	void setRoles(Role[] r);
+	/** Set the role */
+	void setRole(Role r);
 
-	/** Get the roles assigned to the user */
-	Role[] getRoles();
+	/** Get the role */
+	Role getRole();
 
 	/** Set the active flag */
 	void setActive(boolean a);

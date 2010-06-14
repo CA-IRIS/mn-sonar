@@ -172,22 +172,31 @@ abstract public class Namespace {
 
 	/** Check if a user has read privileges for a name */
 	public boolean canRead(User u, Name n) {
-		if(u.getActive()) {
-			for(Role r: u.getRoles()) {
-				if(r.getEnabled() && canRead(r, n))
-					return true;
-			}
+		return u.getActive() && canRead(u.getRole(), n);
+	}
+
+	/** Check if a role has read privileges for a name */
+	protected boolean canRead(Role r, Name n) {
+		return r != null && r.getEnabled() &&
+		       canRead(r.getCapabilities(), n);
+	}
+
+	/** Check if a set of capabilites has read privileges for a name */
+	protected boolean canRead(Capability[] caps, Name n) {
+		for(Capability c: caps) {
+			if(canRead(c, n))
+				return true;
 		}
 		return false;
 	}
 
-	/** Check if a role has read privileges for a name */
-	protected boolean canRead(final Role r, final Name n) {
+	/** Check if a capability has read privileges for a name */
+	protected boolean canRead(final Capability c, final Name n) {
 		return null != findObject(Privilege.SONAR_TYPE,
 			new Checker<Privilege>()
 		{
 			public boolean check(Privilege p) {
-				return p.getRole() == r &&
+				return p.getCapability() == c &&
 				       p.getPrivR() &&
 				       n.matches(p);
 			}
@@ -196,22 +205,31 @@ abstract public class Namespace {
 
 	/** Check if a user has update privileges for a name */
 	public boolean canUpdate(User u, Name n) {
-		if(u.getActive()) {
-			for(Role r: u.getRoles()) {
-				if(r.getEnabled() && canUpdate(r, n))
-					return true;
-			}
+		return u.getActive() && canUpdate(u.getRole(), n);
+	}
+
+	/** Check if a role has update privileges for a name */
+	protected boolean canUpdate(Role r, Name n) {
+		return r != null && r.getEnabled() &&
+		       canUpdate(r.getCapabilities(), n);
+	}
+
+	/** Check if a set of capabilites has update privileges for a name */
+	protected boolean canUpdate(Capability[] caps, Name n) {
+		for(Capability c: caps) {
+			if(canUpdate(c, n))
+				return true;
 		}
 		return false;
 	}
 
-	/** Check if a role has update privileges for a name */
-	protected boolean canUpdate(final Role r, final Name n) {
+	/** Check if a capability has update privileges for a name */
+	protected boolean canUpdate(final Capability c, final Name n) {
 		return null != findObject(Privilege.SONAR_TYPE,
 			new Checker<Privilege>()
 		{
 			public boolean check(Privilege p) {
-				return p.getRole() == r &&
+				return p.getCapability() == c &&
 				       p.getPrivW() &&
 				       n.matches(p);
 			}
@@ -220,22 +238,31 @@ abstract public class Namespace {
 
 	/** Check if a user has add privileges for a name */
 	public boolean canAdd(User u, Name n) {
-		if(u.getActive()) {
-			for(Role r: u.getRoles()) {
-				if(r.getEnabled() && canAdd(r, n))
-					return true;
-			}
+		return u.getActive() && canAdd(u.getRole(), n);
+	}
+
+	/** Check if a role has add privileges for a name */
+	protected boolean canAdd(Role r, Name n) {
+		return r != null && r.getEnabled() &&
+		       canAdd(r.getCapabilities(), n);
+	}
+
+	/** Check if a set of capabilites has add privileges for a name */
+	protected boolean canAdd(Capability[] caps, Name n) {
+		for(Capability c: caps) {
+			if(canAdd(c, n))
+				return true;
 		}
 		return false;
 	}
 
-	/** Check if a role has add privileges for a name */
-	protected boolean canAdd(final Role r, final Name n) {
+	/** Check if a capability has add privileges for a name */
+	protected boolean canAdd(final Capability c, final Name n) {
 		return null != findObject(Privilege.SONAR_TYPE,
 			new Checker<Privilege>()
 		{
 			public boolean check(Privilege p) {
-				return p.getRole() == r &&
+				return p.getCapability() == c &&
 				       p.getPrivC() &&
 				       n.matches(p);
 			}
@@ -244,22 +271,31 @@ abstract public class Namespace {
 
 	/** Check if a user has remove privileges for a name */
 	public boolean canRemove(User u, Name n) {
-		if(u.getActive()) {
-			for(Role r: u.getRoles()) {
-				if(r.getEnabled() && canRemove(r, n))
-					return true;
-			}
+		return u.getActive() && canRemove(u.getRole(), n);
+	}
+
+	/** Check if a role has remove privileges for a name */
+	protected boolean canRemove(Role r, Name n) {
+		return r != null && r.getEnabled() &&
+		       canRemove(r.getCapabilities(), n);
+	}
+
+	/** Check if a set of capabilites has remove privileges for a name */
+	protected boolean canRemove(Capability[] caps, Name n) {
+		for(Capability c: caps) {
+			if(canRemove(c, n))
+				return true;
 		}
 		return false;
 	}
 
-	/** Check if a role has remove privileges for a name */
-	protected boolean canRemove(final Role r, final Name n) {
+	/** Check if a capability has remove privileges for a name */
+	protected boolean canRemove(final Capability c, final Name n) {
 		return null != findObject(Privilege.SONAR_TYPE,
 			new Checker<Privilege>()
 		{
 			public boolean check(Privilege p) {
-				return p.getRole() == r &&
+				return p.getCapability() == c &&
 				       p.getPrivD() &&
 				       n.matches(p);
 			}

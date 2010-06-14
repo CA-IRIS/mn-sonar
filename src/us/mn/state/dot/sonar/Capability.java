@@ -15,22 +15,16 @@
 package us.mn.state.dot.sonar;
 
 /**
- * A role is a set of capabilities for the SONAR namespace.
+ * A capability is a set of privileges for the SONAR namespace.
  *
  * @author Douglas Lau
  */
-public interface Role extends SonarObject {
+public interface Capability extends SonarObject {
 
 	/** SONAR type name */
-	String SONAR_TYPE = "role";
+	String SONAR_TYPE = "capability";
 
-	/** Set the capabilities assigned to the role */
-	void setCapabilities(Capability[] c);
-
-	/** Get the capabilities assigned to the role */
-	Capability[] getCapabilities();
-
-	/** Enable or disable the role */
+	/** Enable or disable the capability */
 	void setEnabled(boolean e);
 
 	/** Get the enabled flag */

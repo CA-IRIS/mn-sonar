@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +24,8 @@ public interface Privilege extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "privilege";
 
-	/** Get the role */
-	Role getRole();
+	/** Get the capability */
+	Capability getCapability();
 
 	/** Get the namespace pattern */
 	String getPattern();

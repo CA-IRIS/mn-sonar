@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.Privilege;
-import us.mn.state.dot.sonar.Role;
+import us.mn.state.dot.sonar.Capability;
 
 /**
  * A privilege controls access to the SONAR namespace.
@@ -59,12 +59,12 @@ public class PrivilegeImpl implements Privilege {
 		name = n;
 	}
 
-	/** Role */
-	protected Role role;
+	/** Capability */
+	protected Capability capability;
 
-	/** Get the role */
-	public Role getRole() {
-		return role;
+	/** Get the capability */
+	public Capability getCapability() {
+		return capability;
 	}
 
 	/** Pattern for matching names */

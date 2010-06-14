@@ -15,23 +15,22 @@
 package us.mn.state.dot.sonar.server;
 
 import us.mn.state.dot.sonar.Capability;
-import us.mn.state.dot.sonar.Role;
 
 /**
- * A role is a set of privileges for the SONAR namespace.
+ * A capability is a set of privileges for the SONAR namespace.
  *
  * @author Douglas Lau
  */
-public class RoleImpl implements Role {
+public class CapabilityImpl implements Capability {
 
-	/** Create a new role */
-	static public Role create(String name) {
-		return new RoleImpl(name);
+	/** Create a new capability */
+	static public Capability create(String name) {
+		return new CapabilityImpl(name);
 	}
 
-	/** Destroy a role */
+	/** Destroy a capability */
 	public void destroy() {
-		// Subclasses must remove role from backing store
+		// Subclasses must remove capability from backing store
 	}
 
 	/** Get the SONAR type name */
@@ -39,7 +38,7 @@ public class RoleImpl implements Role {
 		return SONAR_TYPE;
 	}
 
-	/** Role name */
+	/** Capability name */
 	protected final String name;
 
 	/** Get the SONAR object name */
@@ -47,15 +46,15 @@ public class RoleImpl implements Role {
 		return name;
 	}
 
-	/** Create a new role */
-	public RoleImpl(String n) {
+	/** Create a new capability */
+	public CapabilityImpl(String n) {
 		name = n;
 	}
 
-	/** Flag to enable the role */
+	/** Flag to enable the capability */
 	protected boolean enabled;
 
-	/** Enable or disable the role */
+	/** Enable or disable the capability */
 	public void setEnabled(boolean e) {
 		enabled = e;
 	}
@@ -63,21 +62,5 @@ public class RoleImpl implements Role {
 	/** Get the enabled flag */
 	public boolean getEnabled() {
 		return enabled;
-	}
-
-	/** Capabilities for the role */
-	protected CapabilityImpl[] capabilities = new CapabilityImpl[0];
-
-	/** Set the capabilities */
-	public void setCapabilities(Capability[] c) {
-		CapabilityImpl[] _c = new CapabilityImpl[c.length];
-		for(int i = 0; i < c.length; i++)
-			_c[i] = (CapabilityImpl)c[i];
-		capabilities = _c;
-	}
-
-	/** Get the capabilities */
-	public Capability[] getCapabilities() {
-		return capabilities;
 	}
 }
