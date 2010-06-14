@@ -439,7 +439,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	{
 		try {
 			UserImpl u = lookupUser(name);
-			if(u.getActive()) {
+			if(u.getEnabled()) {
 				server.getAuthenticator().authenticate(
 					u.getDn(), password.toCharArray());
 				return u;

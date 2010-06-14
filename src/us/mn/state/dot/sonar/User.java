@@ -42,9 +42,9 @@ public interface User extends SonarObject {
 	/** Get the role */
 	Role getRole();
 
-	/** Set the active flag */
-	void setActive(boolean a);
+	/** Set the enabled flag */
+	void setEnabled(boolean e);
 
-	/** Get the active flag */
-	boolean getActive();
+	/** Get the enabled flag */
+	boolean getEnabled();
 }

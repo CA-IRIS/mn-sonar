@@ -172,7 +172,7 @@ abstract public class Namespace {
 
 	/** Check if a user has read privileges for a name */
 	public boolean canRead(User u, Name n) {
-		return u.getActive() && canRead(u.getRole(), n);
+		return u.getEnabled() && canRead(u.getRole(), n);
 	}
 
 	/** Check if a role has read privileges for a name */
@@ -205,7 +205,7 @@ abstract public class Namespace {
 
 	/** Check if a user has update privileges for a name */
 	public boolean canUpdate(User u, Name n) {
-		return u.getActive() && canUpdate(u.getRole(), n);
+		return u.getEnabled() && canUpdate(u.getRole(), n);
 	}
 
 	/** Check if a role has update privileges for a name */
@@ -238,7 +238,7 @@ abstract public class Namespace {
 
 	/** Check if a user has add privileges for a name */
 	public boolean canAdd(User u, Name n) {
-		return u.getActive() && canAdd(u.getRole(), n);
+		return u.getEnabled() && canAdd(u.getRole(), n);
 	}
 
 	/** Check if a role has add privileges for a name */
@@ -271,7 +271,7 @@ abstract public class Namespace {
 
 	/** Check if a user has remove privileges for a name */
 	public boolean canRemove(User u, Name n) {
-		return u.getActive() && canRemove(u.getRole(), n);
+		return u.getEnabled() && canRemove(u.getRole(), n);
 	}
 
 	/** Check if a role has remove privileges for a name */

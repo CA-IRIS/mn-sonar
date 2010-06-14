@@ -93,16 +93,16 @@ public class UserImpl implements User {
 		return role;
 	}
 
-	/** Active flag */
-	protected boolean active;
+	/** Enabled flag */
+	protected boolean enabled;
 
-	/** Set the active flag */
-	public void setActive(boolean a) {
-		active = a;
+	/** Set the enabled flag */
+	public void setEnabled(boolean e) {
+		enabled = e;
 	}
 
-	/** Get the active flag */
-	public boolean getActive() {
-		return active;
+	/** Get the enabled flag */
+	public boolean getEnabled() {
+		return enabled;
 	}
 }
