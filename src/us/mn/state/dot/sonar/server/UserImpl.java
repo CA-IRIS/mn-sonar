@@ -53,20 +53,17 @@ public class UserImpl implements User {
 		dn = "cn=" + name;
 	}
 
-	/** Roles the user can assume */
-	protected RoleImpl[] roles = new RoleImpl[0];
+	/** Full (display) name */
+	protected String fullName;
 
-	/** Set the roles assigned to the user */
-	public void setRoles(Role[] r) {
-		RoleImpl[] _r = new RoleImpl[r.length];
-		for(int i = 0; i < r.length; i++)
-			_r[i] = (RoleImpl)r[i];
-		roles = _r;
+	/** Set the user's full name */
+	public void setFullName(String n) {
+		fullName = n;
 	}
 
-	/** Get the roles assigned to the user */
-	public Role[] getRoles() {
-		return roles;
+	/** Get the user's full name */
+	public String getFullName() {
+		return fullName;
 	}
 
 	/** LDAP Distinguished Name */
@@ -82,17 +79,20 @@ public class UserImpl implements User {
 		return dn;
 	}
 
-	/** Full (display) name */
-	protected String fullName;
+	/** Roles the user can assume */
+	protected RoleImpl[] roles = new RoleImpl[0];
 
-	/** Set the user's full name */
-	public void setFullName(String n) {
-		fullName = n;
+	/** Set the roles assigned to the user */
+	public void setRoles(Role[] r) {
+		RoleImpl[] _r = new RoleImpl[r.length];
+		for(int i = 0; i < r.length; i++)
+			_r[i] = (RoleImpl)r[i];
+		roles = _r;
 	}
 
-	/** Get the user's full name */
-	public String getFullName() {
-		return fullName;
+	/** Get the roles assigned to the user */
+	public Role[] getRoles() {
+		return roles;
 	}
 
 	/** Active flag */

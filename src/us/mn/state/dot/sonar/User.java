@@ -24,11 +24,11 @@ public interface User extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "user";
 
-	/** Set the roles assigned to the user */
-	void setRoles(Role[] r);
+	/** Set the user's full name */
+	void setFullName(String n);
 
-	/** Get the roles assigned to the user */
-	Role[] getRoles();
+	/** Get the user's full name */
+	String getFullName();
 
 	/** Set the LDAP Distinguished Name */
 	void setDn(String d);
@@ -36,11 +36,11 @@ public interface User extends SonarObject {
 	/** Get the LDAP Distinguished Name */
 	String getDn();
 
-	/** Set the user's full name */
-	void setFullName(String n);
+	/** Set the roles assigned to the user */
+	void setRoles(Role[] r);
 
-	/** Get the user's full name */
-	String getFullName();
+	/** Get the roles assigned to the user */
+	Role[] getRoles();
 
 	/** Set the active flag */
 	void setActive(boolean a);
