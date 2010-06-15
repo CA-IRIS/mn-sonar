@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -192,8 +192,8 @@ abstract public class Namespace {
 
 	/** Check if a capability has read privileges for a name */
 	protected boolean canRead(final Capability c, final Name n) {
-		return null != findObject(Privilege.SONAR_TYPE,
-			new Checker<Privilege>()
+		return c.getEnabled() && null != findObject(
+		       Privilege.SONAR_TYPE, new Checker<Privilege>()
 		{
 			public boolean check(Privilege p) {
 				return p.getCapability() == c &&
@@ -225,8 +225,8 @@ abstract public class Namespace {
 
 	/** Check if a capability has update privileges for a name */
 	protected boolean canUpdate(final Capability c, final Name n) {
-		return null != findObject(Privilege.SONAR_TYPE,
-			new Checker<Privilege>()
+		return c.getEnabled() && null != findObject(
+		       Privilege.SONAR_TYPE, new Checker<Privilege>()
 		{
 			public boolean check(Privilege p) {
 				return p.getCapability() == c &&
@@ -258,8 +258,8 @@ abstract public class Namespace {
 
 	/** Check if a capability has add privileges for a name */
 	protected boolean canAdd(final Capability c, final Name n) {
-		return null != findObject(Privilege.SONAR_TYPE,
-			new Checker<Privilege>()
+		return c.getEnabled() && null != findObject(
+		       Privilege.SONAR_TYPE, new Checker<Privilege>()
 		{
 			public boolean check(Privilege p) {
 				return p.getCapability() == c &&
@@ -291,8 +291,8 @@ abstract public class Namespace {
 
 	/** Check if a capability has remove privileges for a name */
 	protected boolean canRemove(final Capability c, final Name n) {
-		return null != findObject(Privilege.SONAR_TYPE,
-			new Checker<Privilege>()
+		return c.getEnabled() && null != findObject(
+		       Privilege.SONAR_TYPE, new Checker<Privilege>()
 		{
 			public boolean check(Privilege p) {
 				return p.getCapability() == c &&
