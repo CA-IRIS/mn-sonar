@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ import java.util.Set;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
@@ -52,11 +53,16 @@ import us.mn.state.dot.sonar.SonarObject;
  */
 public class Server extends Thread {
 
+	/** Directory to store IRIS log files FIXME */
+	static protected final String LOG_FILE_DIR = "/var/log/iris/";
+
 	/** SONAR debug log */
-	static protected final DebugLog DEBUG = new DebugLog("sonar");
+	static protected final DebugLog DEBUG = new DebugLog(LOG_FILE_DIR +
+		"sonar");
 
 	/** SONAR task debug log */
-	static protected final DebugLog DEBUG_TASK = new DebugLog("sonar_task");
+	static protected final DebugLog DEBUG_TASK = new DebugLog(LOG_FILE_DIR +
+		"sonar_task");
 
 	/** SONAR namespace being served */
 	protected final ServerNamespace namespace;
@@ -363,7 +369,7 @@ public class Server extends Thread {
 	/** Create (synchronously) an object in the server's namespace */
 	public void createObject(final SonarObject o) throws SonarException {
 		// FIXME: should be renamed to storeObject
-		if(Thread.currentThread() == processor) {
+		if(processor.isCurrentThread()) {
 			doCreateObject(o);
 			return;
 		}
