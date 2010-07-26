@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import javax.net.ssl.SSLException;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.Message;
@@ -193,7 +194,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		super.disconnect(msg);
 		System.err.println("SONAR: " + msg + " on " + getName() + 
 			", " + (user == null ? "user=null" : user.getName()) +
-			", " + new Date() + ".");
+			", " + TimeSteward.getDateInstance() + ".");
 		synchronized(watching) {
 			watching.clear();
 		}
@@ -420,7 +421,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		String password = params.get(2);
 		user = doLogin(name, password);
 		System.err.println("SONAR: Login " + name + " from " +
-			getName() + ", " + new Date() + ".");
+			getName() + ", " + TimeSteward.getDateInstance() + ".");
 		try {
 			// The first TYPE message indicates a successful login
 			state.encoder.encode(Message.TYPE);
@@ -449,7 +450,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		catch(PermissionDenied e) {
 			System.err.println("SONAR: authentication failure for "
 				+ name + ", from " + getName() + ", "
-				+ new Date() + ".");
+				+ TimeSteward.getDateInstance() + ".");
 			throw e;
 		}
 	}
