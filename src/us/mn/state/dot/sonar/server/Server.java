@@ -85,13 +85,9 @@ public class Server extends Thread {
 		new ExceptionHandler()
 	{
 		public boolean handle(Exception e) {
-			if(e instanceof PermissionDenied) {
-				// already dealt with
-			} else {
-				System.err.println("SONAR: auth error "+
-					e.getMessage());
-				e.printStackTrace();
-			}
+			System.err.println("SONAR: auth error " +
+				e.getMessage());
+			e.printStackTrace();
 			return true;
 		}
 	});
@@ -246,10 +242,16 @@ public class Server extends Thread {
 		final String password)
 	{
 		auth_sched.addJob(new Job() {
-			public void perform() throws PermissionDenied {
-				authenticator.authenticate(u.getDn(),
-					password.toCharArray());
-				finishLogin(c, u);
+			public void perform() throws IOException {
+				try {
+					authenticator.authenticate(u.getDn(),
+						password.toCharArray());
+					finishLogin(c, u);
+				}
+				catch(PermissionDenied e) {
+					c.failLogin(u);
+					c.flush();
+				}
 			}
 		});
 	}

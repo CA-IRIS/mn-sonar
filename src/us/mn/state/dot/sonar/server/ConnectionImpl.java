@@ -465,6 +465,16 @@ public class ConnectionImpl extends Conduit implements Connection {
 			getName() + ", " + TimeSteward.getDateInstance() + ".");
 	}
 
+	/** Fail a LOGIN attempt.
+	 * This may only be called on the Task Processor thread. */
+	public void failLogin(UserImpl u) throws IOException {
+		System.err.println("SONAR: LDAP auth failure for " +
+			u.getName() + ", from " + getName() + ", " +
+			TimeSteward.getDateInstance() + ".");
+		state.encoder.encode(Message.SHOW,
+			PermissionDenied.AUTHENTICATION_FAILED.getMessage());
+	}
+
 	/** Respond to a QUIT message.
 	 * This may only be called on the Task Processor thread. */
 	public void doQuit(List<String> params) {
