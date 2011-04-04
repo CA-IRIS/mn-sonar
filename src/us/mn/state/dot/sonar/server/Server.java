@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,6 +80,22 @@ public class Server extends Thread {
 	/** LDAP authenticator for user credentials */
 	protected final LDAPAuthenticator authenticator;
 
+	/** Authentication thread */
+	protected final Scheduler auth_sched = new Scheduler("LDAP Auth",
+		new ExceptionHandler()
+	{
+		public boolean handle(Exception e) {
+			if(e instanceof PermissionDenied) {
+				// already dealt with
+			} else {
+				System.err.println("SONAR: auth error "+
+					e.getMessage());
+				e.printStackTrace();
+			}
+			return true;
+		}
+	});
+
 	/** Map of active client connections */
 	protected final Map<SelectionKey, ConnectionImpl> clients =
 		new HashMap<SelectionKey, ConnectionImpl>();
@@ -146,11 +162,6 @@ public class Server extends Thread {
 		InetSocketAddress address = new InetSocketAddress(host, port);
 		c.socket().bind(address);
 		return c;
-	}
-
-	/** Get the user authenticator */
-	LDAPAuthenticator getAuthenticator() {
-		return authenticator;
 	}
 
 	/** Get the SONAR namespace */
@@ -225,6 +236,32 @@ public class Server extends Thread {
 		processor.addJob(new Job() {
 			public void perform() {
 				DEBUG_TASK.log("Flushing for " + c.getName());
+				c.flush();
+			}
+		});
+	}
+
+	/** Authenticate a user connection */
+	void authenticate(final ConnectionImpl c, final UserImpl u,
+		final String password)
+	{
+		auth_sched.addJob(new Job() {
+			public void perform() throws PermissionDenied {
+				authenticator.authenticate(u.getDn(),
+					password.toCharArray());
+				finishLogin(c, u);
+			}
+		});
+	}
+
+	/** Finish a LOGIN */
+	protected void finishLogin(final ConnectionImpl c, final UserImpl u) {
+		processor.addJob(new Job() {
+			public void perform() throws IOException {
+				DEBUG_TASK.log("Finishing LOGIN for " +
+					u.getName());
+				c.finishLogin(u);
+				setAttribute(c, "user");
 				c.flush();
 			}
 		});

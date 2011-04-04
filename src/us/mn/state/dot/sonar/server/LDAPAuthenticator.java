@@ -20,6 +20,7 @@ import javax.naming.AuthenticationException;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.InitialDirContext;
+import us.mn.state.dot.sched.TimeSteward;
 
 /**
  * Simple class to authenticate a user with an LDAP server.
@@ -114,6 +115,8 @@ public class LDAPAuthenticator {
 				}
 			}
 		}
+		System.err.println("SONAR: LDAP auth failure: " + dn + " @ " +
+			TimeSteward.getDateInstance() + ".");
 		throw PermissionDenied.AUTHENTICATION_FAILED;
 	}
 

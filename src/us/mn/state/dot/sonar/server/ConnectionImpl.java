@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -419,32 +419,19 @@ public class ConnectionImpl extends Conduit implements Connection {
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		String name = params.get(1);
 		String password = params.get(2);
-		user = doLogin(name, password);
-		System.err.println("SONAR: Login " + name + " from " +
-			getName() + ", " + TimeSteward.getDateInstance() + ".");
-		try {
-			// The first TYPE message indicates a successful login
-			state.encoder.encode(Message.TYPE);
-			// Send the connection name to the client first
-			state.encoder.encode(Message.SHOW, hostport);
-		}
-		catch(IOException e) {
-			throw new SonarException(e.getMessage());
-		}
-		server.setAttribute(this, "user");
+		doLogin(name, password);
 	}
 
-	/** Login a user */
-	protected UserImpl doLogin(String name, String password)
+	/** Login a user.
+	 * This may only be called on the Task Processor thread */
+	protected void doLogin(String name, String password)
 		throws PermissionDenied
 	{
 		try {
 			UserImpl u = lookupUser(name);
-			if(u.getEnabled()) {
-				server.getAuthenticator().authenticate(
-					u.getDn(), password.toCharArray());
-				return u;
-			} else
+			if(u.getEnabled())
+				server.authenticate(this, u, password);
+			else
 				throw PermissionDenied.AUTHENTICATION_FAILED;
 		}
 		catch(PermissionDenied e) {
@@ -464,6 +451,18 @@ public class ConnectionImpl extends Conduit implements Connection {
 			return u;
 		else
 			throw PermissionDenied.AUTHENTICATION_FAILED;
+	}
+
+	/** Finish a LOGIN after user has been authenticated.
+	 * This may only be called on the Task Processor thread. */
+	public void finishLogin(UserImpl u) throws IOException {
+		// The first TYPE message indicates a successful login
+		state.encoder.encode(Message.TYPE);
+		// Send the connection name to the client first
+		state.encoder.encode(Message.SHOW, hostport);
+		user = u;
+		System.err.println("SONAR: Login " + u.getName() + " from " +
+			getName() + ", " + TimeSteward.getDateInstance() + ".");
 	}
 
 	/** Respond to a QUIT message.
