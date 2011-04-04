@@ -51,6 +51,7 @@ public class LDAPAuthenticator {
 			env.put(Context.INITIAL_CONTEXT_FACTORY,
 				"com.sun.jndi.ldap.LdapCtxFactory");
 			env.put(Context.PROVIDER_URL, url);
+			env.put("com.sun.jndi.ldap.connect.timeout", "5000");
 			if(url.startsWith("ldaps")) {
 				env.put(Context.SECURITY_PROTOCOL, "ssl");
 				env.put("java.naming.ldap.factory.socket",
