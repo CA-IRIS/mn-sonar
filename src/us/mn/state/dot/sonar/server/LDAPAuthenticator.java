@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2011  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -108,12 +108,20 @@ public class LDAPAuthenticator {
 					// Try next provider
 				}
 				catch(NamingException e) {
-					System.err.println("SONAR: " + p + " " +
-						e.getMessage() + ", " + dn);
+					System.err.println("SONAR: " +
+						namingMessage(e) + " on " + p);
 					// Try next provider
 				}
 			}
 		}
 		throw PermissionDenied.AUTHENTICATION_FAILED;
+	}
+
+	/** Get a useful message string from a naming exception */
+	static protected String namingMessage(NamingException e) {
+		Throwable c = e.getCause();
+		return (c != null)
+			? c.getMessage()
+			: e.getClass().getSimpleName();
 	}
 }
