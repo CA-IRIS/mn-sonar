@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2011  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,15 +39,26 @@ public class LDAPAuthenticator {
 		return pwd != null && pwd.length > 0;
 	}
 
+	/** Authentication provider */
+	public interface Provider {
+		void authenticate(String dn, char[] pwd)
+			throws AuthenticationException, NamingException;
+	}
+
+	/** Bypass provider (for debugging) */
+	static protected class BypassProvider implements Provider {
+		public void authenticate(String dn, char[] pwd) { }
+	}
+
 	/** LDAP provider */
-	protected class Provider {
+	static protected class LDAPProvider implements Provider {
 
 		/** Environment for creating a directory context */
 		protected final Hashtable<String, Object> env =
 			new Hashtable<String, Object>();
 
 		/** Create a new LDAP provider */
-		protected Provider(String url) {
+		protected LDAPProvider(String url) {
 			env.put(Context.INITIAL_CONTEXT_FACTORY,
 				"com.sun.jndi.ldap.LdapCtxFactory");
 			env.put(Context.PROVIDER_URL, url);
@@ -69,7 +80,7 @@ public class LDAPAuthenticator {
 		}
 
 		/** Authenticate a user's credentials */
-		protected void authenticate(String dn, char[] pwd)
+		public void authenticate(String dn, char[] pwd)
 			throws AuthenticationException, NamingException
 		{
 			env.put(Context.SECURITY_PRINCIPAL, dn);
@@ -87,6 +98,14 @@ public class LDAPAuthenticator {
 		}
 	}
 
+	/** Create an authentication provider */
+	static private Provider createProvider(String url) {
+		if(url.equals("bypass_authentication"))
+			return new BypassProvider();
+		else
+			return new LDAPProvider(url);
+	}
+
 	/** List of LDAP providers */
 	protected final LinkedList<Provider> providers =
 		new LinkedList<Provider>();
@@ -94,7 +113,7 @@ public class LDAPAuthenticator {
 	/** Create a new LDAP authenticator */
 	public LDAPAuthenticator(String urls) {
 		for(String url: urls.split("[ \t]+"))
-			providers.add(new Provider(url));
+			providers.add(createProvider(url));
 	}
 
 	/** Authenticate a user's credentials */
