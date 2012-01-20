@@ -283,13 +283,12 @@ public class Server extends Thread {
 		}
 		catch(PermissionDenied e) {
 			processor.addJob(new Job() {
-				public void perform() throws IOException {
+				public void perform() {
 					DEBUG_TASK.log("Failing LOGIN for " +
 						name);
 					access_monitor.failAuthentication(
 						c.getName(), name);
-					c.failLogin(u);
-					c.flush();
+					c.failLogin();
 				}
 			});
 		}
@@ -304,14 +303,13 @@ public class Server extends Thread {
 	/** Finish a LOGIN */
 	private void finishLogin(final ConnectionImpl c, final UserImpl u) {
 		processor.addJob(new Job() {
-			public void perform() throws IOException {
+			public void perform() {
 				DEBUG_TASK.log("Finishing LOGIN for " +
 					u.getName());
 				access_monitor.authenticate(c.getName(),
 					c.getUserName());
-				c.finishLogin(u);
 				setAttribute(c, "user");
-				c.flush();
+				c.finishLogin(u);
 			}
 		});
 	}

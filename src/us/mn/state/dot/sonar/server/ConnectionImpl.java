@@ -443,22 +443,31 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Finish a LOGIN after user has been authenticated.
 	 * This may only be called on the Task Processor thread. */
-	public void finishLogin(UserImpl u) throws IOException {
-		// The first TYPE message indicates a successful login
-		state.encoder.encode(Message.TYPE);
-		// Send the connection name to the client first
-		state.encoder.encode(Message.SHOW, hostport);
-		user = u;
+	public void finishLogin(UserImpl u) {
+		try {
+			user = u;
+			// The first TYPE message indicates a successful login
+			state.encoder.encode(Message.TYPE);
+			// Send the connection name to the client first
+			state.encoder.encode(Message.SHOW, hostport);
+			flush();
+		}
+		catch(IOException e) {
+			disconnect("I/O error: finishLogin " + e.getMessage());
+		}
 	}
 
 	/** Fail a LOGIN attempt.
 	 * This may only be called on the Task Processor thread. */
-	public void failLogin(UserImpl u) throws IOException {
-		System.err.println("SONAR: LDAP auth failure for " +
-			u.getName() + ", from " + getName() + ", " +
-			TimeSteward.getDateInstance() + ".");
-		state.encoder.encode(Message.SHOW,
-			PermissionDenied.AUTHENTICATION_FAILED.getMessage());
+	public void failLogin() {
+		try {
+			state.encoder.encode(Message.SHOW, PermissionDenied.
+				AUTHENTICATION_FAILED.getMessage());
+			flush();
+		}
+		catch(IOException e) {
+			disconnect("I/O error: failLogin " + e.getMessage());
+		}
 	}
 
 	/** Respond to a QUIT message.
