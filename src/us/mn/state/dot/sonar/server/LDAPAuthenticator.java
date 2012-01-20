@@ -135,8 +135,6 @@ public class LDAPAuthenticator {
 				}
 			}
 		}
-		System.err.println("SONAR: LDAP auth failure: " + dn + " @ " +
-			TimeSteward.getDateInstance() + ".");
 		throw PermissionDenied.AUTHENTICATION_FAILED;
 	}
 

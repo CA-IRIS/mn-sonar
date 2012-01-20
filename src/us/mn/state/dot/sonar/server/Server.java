@@ -89,7 +89,7 @@ public class Server extends Thread {
 		new ExceptionHandler()
 	{
 		public boolean handle(Exception e) {
-			System.err.println("SONAR: auth error " +
+			System.err.println("SONAR: auth_sched error " +
 				e.getMessage());
 			e.printStackTrace();
 			return true;
