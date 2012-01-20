@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2011  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -102,6 +102,12 @@ public class ConnectionImpl extends Conduit implements Connection {
 		return user;
 	}
 
+	/** Get the name of the user logged in on the connection */
+	public String getUserName() {
+		UserImpl u = user;
+		return u != null ? u.getName() : "Unauthenticated";
+	}
+
 	/** Session ID (random cookie) */
 	protected final long sessionId;
 
@@ -189,12 +195,13 @@ public class ConnectionImpl extends Conduit implements Connection {
 			disconnect("Connection destroyed");
 	}
 
-	/** Disconnect the client connection */
+	/** Disconnect the client connection.
+	 * This may only be called on the Task Processor thread. */
 	protected void disconnect(String msg) {
 		super.disconnect(msg);
 		System.err.println("SONAR: " + msg + " on " + getName() + 
-			", " + (user == null ? "user=null" : user.getName()) +
-			", " + TimeSteward.getDateInstance() + ".");
+			", " + getUserName() + ", " +
+			TimeSteward.getDateInstance() + ".");
 		synchronized(watching) {
 			watching.clear();
 		}
@@ -424,33 +431,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Login a user.
 	 * This may only be called on the Task Processor thread */
-	protected void doLogin(String name, String password)
-		throws PermissionDenied
-	{
-		try {
-			UserImpl u = lookupUser(name);
-			if(u.getEnabled())
-				server.authenticate(this, u, password);
-			else
-				throw PermissionDenied.AUTHENTICATION_FAILED;
-		}
-		catch(PermissionDenied e) {
-			System.err.println("SONAR: authentication failure for "
-				+ name + ", from " + getName() + ", "
-				+ TimeSteward.getDateInstance() + ".");
-			throw e;
-		}
-	}
-
-	/** Lookup a user by name.
-	 * This may only be called on the Task Processor thread. */
-	protected UserImpl lookupUser(String n) throws PermissionDenied {
-		UserImpl u = (UserImpl)namespace.lookupObject(User.SONAR_TYPE,
-			n);
-		if(u != null)
-			return u;
-		else
-			throw PermissionDenied.AUTHENTICATION_FAILED;
+	protected void doLogin(String name, String password) {
+		server.authenticate(this, name, password);
 	}
 
 	/** Finish a LOGIN after user has been authenticated.
@@ -461,8 +443,6 @@ public class ConnectionImpl extends Conduit implements Connection {
 		// Send the connection name to the client first
 		state.encoder.encode(Message.SHOW, hostport);
 		user = u;
-		System.err.println("SONAR: Login " + u.getName() + " from " +
-			getName() + ", " + TimeSteward.getDateInstance() + ".");
 	}
 
 	/** Fail a LOGIN attempt.

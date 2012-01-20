@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2011  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@ import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.Security;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.sonar.User;
 
 /**
  * The SONAR server processes all data transfers with client connections.
@@ -67,6 +68,9 @@ public class Server extends Thread {
 
 	/** SONAR namespace being served */
 	protected final ServerNamespace namespace;
+
+	/** Access monitor */
+	protected final AccessMonitor access_monitor;
 
 	/** Selector for non-blocking I/O */
 	protected final Selector selector;
@@ -130,10 +134,11 @@ public class Server extends Thread {
 	}
 
 	/** Create a new SONAR server */
-	public Server(ServerNamespace n, Properties props) throws IOException,
-		ConfigurationError
+	public Server(ServerNamespace n, Properties props, AccessMonitor am)
+		throws IOException, ConfigurationError
 	{
 		namespace = n;
+		access_monitor = am;
 		selector = Selector.open();
 		channel = createChannel(getPort(props));
 		channel.register(selector, SelectionKey.OP_ACCEPT);
@@ -175,7 +180,18 @@ public class Server extends Thread {
 		return clist;
 	}
 
-	/** Disconnect the client associated with the selection key */
+	/** Schedule a disconnect on a selection key */
+	private void doDisconnect(final SelectionKey key) {
+		processor.addJob(new Job() {
+			public void perform() {
+				DEBUG_TASK.log("Disconnecting");
+				disconnect(key);
+			}
+		});
+	}
+
+	/** Disconnect the client associated with the selection key.
+	 * This may only be called on the Task Processor thread. */
 	void disconnect(SelectionKey key) {
 		key.cancel();
 		ConnectionImpl c;
@@ -183,10 +199,8 @@ public class Server extends Thread {
 			c = clients.remove(key);
 		}
 		if(c != null) {
+			access_monitor.disconnect(c.getName(), c.getUserName());
 			updateSessionList();
-			System.err.println("SONAR: Disconnected " + 
-				c.getName() + ", on " + 
-				TimeSteward.getDateInstance() + ".");
 			removeObject(c);
 		}
 	}
@@ -237,31 +251,64 @@ public class Server extends Thread {
 		});
 	}
 
-	/** Authenticate a user connection */
-	void authenticate(final ConnectionImpl c, final UserImpl u,
+	/** Authenticate a user connection.
+	 * This may only be called on the Task Processor thread */
+	void authenticate(final ConnectionImpl c, final String name,
 		final String password)
 	{
+		final UserImpl u = lookupUser(name);
 		auth_sched.addJob(new Job() {
-			public void perform() throws IOException {
-				try {
-					authenticator.authenticate(u.getDn(),
-						password.toCharArray());
-					finishLogin(c, u);
-				}
-				catch(PermissionDenied e) {
-					c.failLogin(u);
-					c.flush();
-				}
+			public void perform() {
+				doAuthenticate(c, u, name, password);
 			}
 		});
 	}
 
+	/** Lookup a user by name.
+	 * This may only be called on the Task Processor thread. */
+	private UserImpl lookupUser(String n) {
+		return (UserImpl)namespace.lookupObject(User.SONAR_TYPE, n);
+	}
+
+	/** Perform a user authentication.
+	 * This may only be called on the authentication thread. */
+	private void doAuthenticate(final ConnectionImpl c, final UserImpl u,
+		final String name, String password)
+	{
+		try {
+			checkUserEnabled(u);
+			authenticator.authenticate(u.getDn(),
+				password.toCharArray());
+			finishLogin(c, u);
+		}
+		catch(PermissionDenied e) {
+			processor.addJob(new Job() {
+				public void perform() throws IOException {
+					DEBUG_TASK.log("Failing LOGIN for " +
+						name);
+					access_monitor.failAuthentication(
+						c.getName(), name);
+					c.failLogin(u);
+					c.flush();
+				}
+			});
+		}
+	}
+
+	/** Check that a user is enabled */
+	private void checkUserEnabled(UserImpl u) throws PermissionDenied {
+		if(u == null || !u.getEnabled())
+			throw PermissionDenied.AUTHENTICATION_FAILED;
+	}
+
 	/** Finish a LOGIN */
-	protected void finishLogin(final ConnectionImpl c, final UserImpl u) {
+	private void finishLogin(final ConnectionImpl c, final UserImpl u) {
 		processor.addJob(new Job() {
 			public void perform() throws IOException {
 				DEBUG_TASK.log("Finishing LOGIN for " +
 					u.getName());
+				access_monitor.authenticate(c.getName(),
+					c.getUserName());
 				c.finishLogin(u);
 				setAttribute(c, "user");
 				c.flush();
@@ -275,7 +322,7 @@ public class Server extends Thread {
 		c.configureBlocking(false);
 		SelectionKey key = c.register(selector, SelectionKey.OP_READ);
 		ConnectionImpl con = new ConnectionImpl(this, key, c);
-		System.err.println("SONAR: Connected " + con.getName());
+		access_monitor.connect(con.getName());
 		addObject(con);
 		synchronized(clients) {
 			clients.put(key, con);
@@ -293,7 +340,7 @@ public class Server extends Thread {
 				return false;
 		}
 		catch(CancelledKeyException e) {
-			disconnect(key);
+			doDisconnect(key);
 		}
 		catch(IOException e) {
 			e.printStackTrace();
@@ -315,7 +362,7 @@ public class Server extends Thread {
 			c = clients.get(key);
 		}
 		if(c == null) {
-			disconnect(key);
+			doDisconnect(key);
 			return;
 		}
 		try {
@@ -329,11 +376,24 @@ public class Server extends Thread {
 			}
 		}
 		catch(CancelledKeyException e) {
-			c.disconnect("Key cancelled");
+			scheduleDisconnect(c, "Key cancelled");
 		}
 		catch(IOException e) {
-			c.disconnect("I/O error " + e.getMessage());
+			scheduleDisconnect(c, "I/O error " + e.getMessage());
 		}
+	}
+
+	/** Schedule a connection to be disconnected */
+	private void scheduleDisconnect(final ConnectionImpl c,
+		final String msg)
+	{
+		processor.addJob(new Job() {
+			public void perform() {
+				DEBUG_TASK.log("Schedule disconnect for " +
+					c.getName());
+				c.disconnect(msg);
+			}
+		});
 	}
 
 	/** Select and perform I/O on ready channels */
