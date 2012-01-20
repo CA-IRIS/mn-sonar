@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -210,7 +210,7 @@ class ClientConduit extends Conduit {
 
 	/** Disconnect the conduit */
 	protected void disconnect(String msg) {
-		super.disconnect(msg);
+		super.disconnect();
 		System.err.println("SONAR: " + msg);
 		try {
 			channel.close();

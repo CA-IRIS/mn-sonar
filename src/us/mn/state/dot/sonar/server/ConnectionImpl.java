@@ -197,11 +197,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Disconnect the client connection.
 	 * This may only be called on the Task Processor thread. */
-	protected void disconnect(String msg) {
-		super.disconnect(msg);
-		System.err.println("SONAR: " + msg + " on " + getName() + 
-			", " + getUserName() + ", " +
-			TimeSteward.getDateInstance() + ".");
+	protected void disconnect() {
+		super.disconnect();
 		synchronized(watching) {
 			watching.clear();
 		}
@@ -213,6 +210,15 @@ public class ConnectionImpl extends Conduit implements Connection {
 			System.err.println("SONAR: Close error: " +
 				e.getMessage() + " on " + getName());
 		}
+	}
+
+	/** Disconnect the client connection.
+	 * This may only be called on the Task Processor thread. */
+	protected void disconnect(String msg) {
+		System.err.println("SONAR: " + msg + " on " + getName() + 
+			", " + getUserName() + ", " +
+			TimeSteward.getDateInstance() + ".");
+		disconnect();
 	}
 
 	/** Read messages from the socket channel.
@@ -458,7 +464,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Respond to a QUIT message.
 	 * This may only be called on the Task Processor thread. */
 	public void doQuit(List<String> params) {
-		disconnect("Client QUIT");
+		disconnect();
 	}
 
 	/** Respond to an ENUMERATE message.
