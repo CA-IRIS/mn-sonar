@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.sonar.server;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.BufferOverflowException;
@@ -232,7 +233,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		if(nbytes > 0)
 			server.processMessages(this);
 		else if(nbytes < 0)
-			throw new IOException("EOF");
+			throw new EOFException();
 	}
 
 	/** Write pending data to the socket channel.

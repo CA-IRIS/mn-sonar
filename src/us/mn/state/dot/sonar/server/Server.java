@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.sonar.server;
 
+import java.io.EOFException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -376,6 +377,11 @@ public class Server extends Thread {
 		catch(CancelledKeyException e) {
 			scheduleDisconnect(c, "Key cancelled");
 		}
+		catch(EOFException e) {
+			scheduleDisconnect(c, null);
+			/* Let the task processor perform the disconnect */
+			Thread.yield();
+		}
 		catch(IOException e) {
 			scheduleDisconnect(c, "I/O error " + e.getMessage());
 		}
@@ -389,7 +395,10 @@ public class Server extends Thread {
 			public void perform() {
 				DEBUG_TASK.log("Schedule disconnect for " +
 					c.getName());
-				c.disconnect(msg);
+				if(msg != null)
+					c.disconnect(msg);
+				else
+					c.disconnect();
 			}
 		});
 	}
