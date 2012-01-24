@@ -307,7 +307,7 @@ public class Server extends Thread {
 				DEBUG_TASK.log("Finishing LOGIN for " +
 					u.getName());
 				access_monitor.authenticate(c.getName(),
-					c.getUserName());
+					u.getName());
 				setAttribute(c, "user");
 				c.finishLogin(u);
 			}
