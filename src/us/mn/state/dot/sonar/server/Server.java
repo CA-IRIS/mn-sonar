@@ -347,9 +347,20 @@ public class Server extends Thread {
 		return true;
 	}
 
+	/** Get an array of cipher suites which should be enabled */
+	private String[] getCipherSuites(SSLEngine engine) {
+		LinkedList<String> enabled = new LinkedList<String>();
+		for(String cs: engine.getEnabledCipherSuites()) {
+			if(cs.startsWith("TLS_") && cs.contains("AES_128"))
+				enabled.add(cs);
+		}
+		return enabled.toArray(new String[0]);
+	}
+
 	/** Create an SSL engine in the server context */
 	SSLEngine createSSLEngine() {
 		SSLEngine engine = context.createSSLEngine();
+		engine.setEnabledCipherSuites(getCipherSuites(engine));
 		engine.setUseClientMode(false);
 		return engine;
 	}
