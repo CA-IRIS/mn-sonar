@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -183,20 +183,5 @@ public class SSLState {
 				net_in.compact();
 			}
 		}
-	}
-
-	/** Check the status of the SSL engine */
-	static protected boolean checkStatus(SSLEngineResult result) {
-		switch(result.getStatus()) {
-		case BUFFER_OVERFLOW:
-			System.err.println("SSL: buffer OVERFLOW");
-			break;
-		case BUFFER_UNDERFLOW:
-			break;
-		case CLOSED:
-			System.err.println("SSL: CLOSED");
-			break;
-		}
-		return result.getStatus() == SSLEngineResult.Status.OK;
 	}
 }
