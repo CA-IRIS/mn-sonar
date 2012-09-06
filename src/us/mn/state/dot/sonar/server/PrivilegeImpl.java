@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,11 +30,6 @@ public class PrivilegeImpl implements Privilege {
 	/** Namespace access regex pattern */
 	static protected final Pattern NAMESPACE_PATTERN =
 		Pattern.compile("[A-Za-z0-9_.*+?()/]*");
-
-	/** Create a new privilege */
-	static public Privilege create(String name) {
-		return new PrivilegeImpl(name);
-	}
 
 	/** Destroy a privilege */
 	public void destroy() {

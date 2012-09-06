@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,11 +23,6 @@ import us.mn.state.dot.sonar.Role;
  * @author Douglas Lau
  */
 public class RoleImpl implements Role {
-
-	/** Create a new role */
-	static public Role create(String name) {
-		return new RoleImpl(name);
-	}
 
 	/** Destroy a role */
 	public void destroy() {

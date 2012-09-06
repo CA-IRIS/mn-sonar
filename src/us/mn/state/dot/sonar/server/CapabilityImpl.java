@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,11 +22,6 @@ import us.mn.state.dot.sonar.Capability;
  * @author Douglas Lau
  */
 public class CapabilityImpl implements Capability {
-
-	/** Create a new capability */
-	static public Capability create(String name) {
-		return new CapabilityImpl(name);
-	}
 
 	/** Destroy a capability */
 	public void destroy() {

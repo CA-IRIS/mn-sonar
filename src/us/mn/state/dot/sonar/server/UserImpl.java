@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,11 +23,6 @@ import us.mn.state.dot.sonar.User;
  * @author Douglas Lau
  */
 public class UserImpl implements User {
-
-	/** Create a new user */
-	static public User create(String name) {
-		return new UserImpl(name);
-	}
 
 	/** Destroy a user */
 	public void destroy() {
