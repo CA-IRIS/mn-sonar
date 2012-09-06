@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!-- ant build file for sonar project
-     Copyright (C) 2007-2009  Minnesota Department of Transportation
+     Copyright (C) 2007-2012  Minnesota Department of Transportation
 
      This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -189,9 +189,6 @@
 	        description="Create the test jar">
 		<jar jarfile="${build.lib}/${test.jar}"
 		     manifest="${build.etc}/${manifest.test}">
-			<fileset dir="${etc.dir}">
-				<include name="sonar-test.keystore"/>
-			</fileset>
 			<fileset dir="${testbuild.dir}"/>
 		</jar>
 	</target>
@@ -201,10 +198,10 @@
 		depends="server-jar, client-jar, test-jar"
 		description="Create the test distribution">
 		<copy todir="${dist.test}">
+			<fileset dir="${etc.dir}">
+				<include name="sonar-test.keystore"/>
+			</fileset>
 			<fileset dir="${build.etc}">
-				<include name="slapd-test.conf"/>
-				<include name="sonar-test.ldif"/>
-				<include name="setup_openldap.sh"/>
 				<include name="test_clients.py"/>
 			</fileset>
 			<fileset dir="${lib.dir}">

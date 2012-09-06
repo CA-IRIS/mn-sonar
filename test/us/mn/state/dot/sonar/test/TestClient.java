@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,10 @@ package us.mn.state.dot.sonar.test;
 
 import java.util.Properties;
 import us.mn.state.dot.sched.ExceptionHandler;
+import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Connection;
+import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.TestObj;
 import us.mn.state.dot.sonar.User;
@@ -39,12 +41,16 @@ public class TestClient extends Client {
 
 	static protected Properties createProperties() {
 		Properties p = new Properties();
-		p.setProperty("keystore.file", "/sonar-test.keystore");
+		p.setProperty("keystore.file", "sonar-test.keystore");
 		p.setProperty("keystore.password", "sonar-test");
-		p.setProperty("sonar.host", "151.111.8.101");
+		p.setProperty("sonar.host", "127.0.0.1");
 		p.setProperty("sonar.port", "1037");
 		return p;
 	}
+
+	private final TypeCache<Capability> capabilities;
+
+	private final TypeCache<Privilege> privileges;
 
 	protected final TypeCache<Role> roles;
 
@@ -56,22 +62,39 @@ public class TestClient extends Client {
 
 	public TestClient() throws Exception {
 		super(createProperties(), HANDLER);
+		capabilities = new TypeCache(Capability.class, this);
+		privileges = new TypeCache(Privilege.class, this);
 		roles = new TypeCache<Role>(Role.class, this);
 		users = new TypeCache<User>(User.class, this);
 		connections = new TypeCache<Connection>(Connection.class, this);
 		tests = new TypeCache<TestObj>(TestObj.class, this);
 		login("username", "password");
+		waitLoggedIn();
+		populate(capabilities);
+		populate(privileges);
 		populate(roles);
 		populate(users);
 		populate(connections);
 		populate(tests, true);
 	}
 
+	void waitLoggedIn() throws Exception {
+		for(int i = 0; i < 200; i++) {
+			if(isLoggedIn())
+				return;
+			try {
+				Thread.sleep(100);
+			}
+			catch(InterruptedException e) { }
+		}
+		throw new Exception("timed out");
+	}
+
 	void createProxyListener() {
 		roles.addProxyListener(new ProxyListener<Role>() {
 			public void proxyAdded(Role proxy) {
 				System.err.println("ROLE " + proxy.getName() +
-					": " + proxy.getPattern());
+					": " + proxy.getEnabled());
 			}
 			public void enumerationComplete() {
 				System.err.println("All roles enumerated");
@@ -91,7 +114,9 @@ public class TestClient extends Client {
 		roles.findObject(new Checker<Role>() {
 			public boolean check(Role r) {
 				System.err.println("ROLE " + r.getName() +
-					": " + r.getPattern());
+					": " + r.getEnabled());
+				for(Capability c: r.getCapabilities())
+					System.err.println("  CAP " + c);
 				return false;
 			}
 		});
@@ -101,11 +126,7 @@ public class TestClient extends Client {
 		users.findObject(new Checker<User>() {
 			public boolean check(User u) {
 				System.err.println(u.getName() + ": " +
-					u.getDn());
-				for(Role r: u.getRoles()) {
-					System.err.println("\trole: " +
-						r.getName());
-				}
+					u.getDn() + ", role: " + u.getRole());
 				return false;
 			}
 		});

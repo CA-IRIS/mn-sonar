@@ -54,6 +54,12 @@ public class PrivilegeImpl implements Privilege {
 		name = n;
 	}
 
+	/** Create a new privilege */
+	public PrivilegeImpl(String n, Capability c) {
+		name = n;
+		capability = c;
+	}
+
 	/** Capability */
 	protected Capability capability;
 
