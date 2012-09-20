@@ -34,7 +34,7 @@ public class Main {
 				c.join();
 			} else {
 				TestServer s = new TestServer();
-				s.join();
+				s.server.join();
 			}
 		}
 		catch(SonarException e) {

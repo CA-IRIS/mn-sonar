@@ -117,8 +117,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 		return sessionId;
 	}
 
-	/** Server for the connection */
-	protected final Server server;
+	/** Task processor */
+	private final TaskProcessor processor;
 
 	/** SONAR namepsace */
 	protected final ServerNamespace namespace;
@@ -140,14 +140,14 @@ public class ConnectionImpl extends Conduit implements Connection {
 	protected SonarObject phantom;
 
 	/** Create a new connection */
-	public ConnectionImpl(Server s, SelectionKey k, SocketChannel c)
+	public ConnectionImpl(TaskProcessor p, SelectionKey k, SocketChannel c)
 		throws SSLException, IOException
 	{
-		server = s;
-		namespace = server.getNamespace();
+		processor = p;
+		namespace = processor.getNamespace();
 		key = k;
 		channel = c;
-		state = new SSLState(this, server.createSSLEngine());
+		state = new SSLState(this, processor.createSSLEngine());
 		StringBuilder h = new StringBuilder();
 		h.append(c.socket().getInetAddress().getHostAddress());
 		h.append(':');
@@ -203,7 +203,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		synchronized(watching) {
 			watching.clear();
 		}
-		server.disconnect(key);
+		processor.disconnect(key);
 		try {
 			channel.close();
 		}
@@ -231,7 +231,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			nbytes = channel.read(net_in);
 		}
 		if(nbytes > 0)
-			server.processMessages(this);
+			processor.processMessages(this);
 		else if(nbytes < 0)
 			throw new EOFException();
 	}
@@ -247,7 +247,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 				disableWrite();
 			net_out.compact();
 		}
-		server.flush(this);
+		processor.flush(this);
 	}
 
 	/** Enable writing data back to the client */
@@ -259,6 +259,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Disable writing data back to the client */
 	public void disableWrite() {
 		key.interestOps(SelectionKey.OP_READ);
+		key.selector().wakeup();
 	}
 
 	/** Notify the client of a new object being added.
@@ -397,7 +398,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		else {
 			phantom = namespace.setAttribute(name, v);
 			if(phantom == null)
-				server.notifyAttribute(name, v);
+				processor.notifyAttribute(name, v);
 		}
 	}
 
@@ -439,7 +440,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Login a user.
 	 * This may only be called on the Task Processor thread */
 	protected void doLogin(String name, String password) {
-		server.authenticate(this, name, password);
+		processor.authenticate(this, name, password);
 	}
 
 	/** Finish a LOGIN after user has been authenticated.
@@ -528,7 +529,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	 * This may only be called on the Task Processor thread. */
 	protected void createObject(Name name) throws SonarException {
 		SonarObject o = getObject(name);
-		server.createObject(o);
+		processor.doStoreObject(o);
 		phantom = null;
 	}
 
@@ -561,7 +562,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		SonarObject obj = namespace.lookupObject(name);
 		if(obj != null) {
 			namespace.removeObject(obj);
-			server.notifyRemove(name);
+			processor.notifyRemove(name);
 		} else
 			throw NamespaceError.NAME_INVALID;
 	}

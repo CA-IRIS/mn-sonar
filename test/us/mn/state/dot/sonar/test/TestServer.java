@@ -25,7 +25,7 @@ import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.UserImpl;
 
-public class TestServer extends Server {
+public class TestServer {
 
 	static protected Properties createProperties() {
 		Properties p = new Properties();
@@ -67,8 +67,10 @@ public class TestServer extends Server {
 		return n;
 	}
 
+	public final Server server;
+
 	public TestServer() throws Exception {
-		super(createNamespace(), createProperties(),
+		server = new Server(createNamespace(), createProperties(),
 			new AccessMonitor()
 		{
 			public void connect(String hostport) {
