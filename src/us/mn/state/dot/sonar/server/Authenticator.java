@@ -26,7 +26,7 @@ import javax.naming.directory.InitialDirContext;
  *
  * @author Douglas Lau
  */
-public class LDAPAuthenticator {
+public class Authenticator {
 
 	/** Check that a DN is sane */
 	static protected boolean isDnSane(String dn) {
@@ -109,8 +109,8 @@ public class LDAPAuthenticator {
 	protected final LinkedList<Provider> providers =
 		new LinkedList<Provider>();
 
-	/** Create a new LDAP authenticator */
-	public LDAPAuthenticator(String urls) {
+	/** Create a new user authenticator */
+	public Authenticator(String urls) {
 		for(String url: urls.split("[ \t]+"))
 			providers.add(createProvider(url));
 	}

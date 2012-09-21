@@ -83,8 +83,8 @@ public class TaskProcessor {
 		}
 	});
 
-	/** LDAP authenticator for user credentials */
-	private final LDAPAuthenticator authenticator;
+	/** Authenticator for user credentials */
+	private final Authenticator authenticator;
 
 	/** Authentication thread */
 	private final Scheduler auth_sched = new Scheduler("LDAP Auth",
@@ -116,7 +116,7 @@ public class TaskProcessor {
 		String ldap_urls = props.getProperty("sonar.ldap.urls");
 		if(ldap_urls == null)
 			throw new ConfigurationError("LDAP urls not specified");
-		authenticator = new LDAPAuthenticator(ldap_urls);
+		authenticator = new Authenticator(ldap_urls);
 		session_file = props.getProperty("sonar.session.file");
 	}
 
