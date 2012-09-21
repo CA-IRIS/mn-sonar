@@ -41,19 +41,13 @@ public class Authenticator {
 		return pwd != null && pwd.length > 0;
 	}
 
-	/** Authentication provider */
-	public interface Provider {
-		void authenticate(UserImpl user, char[] pwd)
-			throws AuthenticationException, NamingException;
-	}
-
 	/** Bypass provider (for debugging) */
-	static protected class BypassProvider implements Provider {
+	static protected class BypassProvider implements AuthProvider {
 		public void authenticate(UserImpl user, char[] pwd) { }
 	}
 
 	/** LDAP provider */
-	static protected class LDAPProvider implements Provider {
+	static protected class LDAPProvider implements AuthProvider {
 
 		/** Environment for creating a directory context */
 		protected final Hashtable<String, Object> env =
@@ -104,7 +98,7 @@ public class Authenticator {
 	}
 
 	/** Create an authentication provider */
-	static private Provider createProvider(String url) {
+	static private AuthProvider createProvider(String url) {
 		if(url.equals("bypass_authentication"))
 			return new BypassProvider();
 		else
@@ -127,8 +121,8 @@ public class Authenticator {
 	private final TaskProcessor processor;
 
 	/** List of authentication providers */
-	private final LinkedList<Provider> providers =
-		new LinkedList<Provider>();
+	private final LinkedList<AuthProvider> providers =
+		new LinkedList<AuthProvider>();
 
 	/** Create a new user authenticator */
 	public Authenticator(TaskProcessor tp, String urls) {
@@ -173,7 +167,7 @@ public class Authenticator {
 		throws PermissionDenied
 	{
 		if(isPasswordSane(pwd)) {
-			for(Provider p: providers) {
+			for(AuthProvider p: providers) {
 				try {
 					p.authenticate(user, pwd);
 					return;
