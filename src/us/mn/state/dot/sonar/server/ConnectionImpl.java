@@ -61,8 +61,9 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Define the set of valid messages from a client connection */
 	static protected final EnumSet<Message> MESSAGES = EnumSet.of(
-		Message.LOGIN, Message.QUIT, Message.ENUMERATE, Message.IGNORE,
-		Message.OBJECT, Message.REMOVE, Message.ATTRIBUTE);
+		Message.LOGIN, Message.PASSWORD, Message.QUIT,
+		Message.ENUMERATE, Message.IGNORE, Message.OBJECT,
+		Message.REMOVE, Message.ATTRIBUTE);
 
 	/** Lookup a message from the specified message code */
 	static protected Message lookupMessage(char code) throws ProtocolError {
