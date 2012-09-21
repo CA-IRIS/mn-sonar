@@ -43,13 +43,13 @@ public class Authenticator {
 
 	/** Authentication provider */
 	public interface Provider {
-		void authenticate(String dn, char[] pwd)
+		void authenticate(UserImpl user, char[] pwd)
 			throws AuthenticationException, NamingException;
 	}
 
 	/** Bypass provider (for debugging) */
 	static protected class BypassProvider implements Provider {
-		public void authenticate(String dn, char[] pwd) { }
+		public void authenticate(UserImpl user, char[] pwd) { }
 	}
 
 	/** LDAP provider */
@@ -82,9 +82,12 @@ public class Authenticator {
 		}
 
 		/** Authenticate a user's credentials */
-		public void authenticate(String dn, char[] pwd)
+		public void authenticate(UserImpl user, char[] pwd)
 			throws AuthenticationException, NamingException
 		{
+			String dn = user.getDn();
+			if(!isDnSane(dn))
+				throw new AuthenticationException("Invalid dn");
 			env.put(Context.SECURITY_PRINCIPAL, dn);
 			env.put(Context.SECURITY_CREDENTIALS, pwd);
 			try {
@@ -146,13 +149,13 @@ public class Authenticator {
 	}
 
 	/** Perform a user authentication */
-	private void doAuthenticate(ConnectionImpl c, UserImpl u, String name,
-		String password)
+	private void doAuthenticate(ConnectionImpl c, UserImpl user,
+		String name, String password)
 	{
 		try {
-			checkUserEnabled(u);
-			authenticate(u.getDn(), password.toCharArray());
-			processor.finishLogin(c, u);
+			checkUserEnabled(user);
+			authenticate(user, password.toCharArray());
+			processor.finishLogin(c, user);
 		}
 		catch(PermissionDenied e) {
 			processor.failLogin(c, name);
@@ -166,12 +169,13 @@ public class Authenticator {
 	}
 
 	/** Authenticate a user's credentials */
-	private void authenticate(String dn, char[] pwd) throws PermissionDenied
+	private void authenticate(UserImpl user, char[] pwd)
+		throws PermissionDenied
 	{
-		if(isDnSane(dn) && isPasswordSane(pwd)) {
+		if(isPasswordSane(pwd)) {
 			for(Provider p: providers) {
 				try {
-					p.authenticate(dn, pwd);
+					p.authenticate(user, pwd);
 					return;
 				}
 				catch(AuthenticationException e) {
