@@ -243,7 +243,7 @@ public class TaskProcessor {
 	}
 
 	/** Authenticate a user connection */
-	void authenticate(ConnectionImpl c, String name, String password) {
+	void authenticate(ConnectionImpl c, String name, char[] password) {
 		authenticator.authenticate(c, lookupUser(name), name, password);
 	}
 

@@ -434,12 +434,11 @@ public class ConnectionImpl extends Conduit implements Connection {
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		String name = params.get(1);
 		String password = params.get(2);
-		doLogin(name, password);
+		doLogin(name, password.toCharArray());
 	}
 
-	/** Login a user.
-	 * This may only be called on the Task Processor thread */
-	protected void doLogin(String name, String password) {
+	/** Login a user */
+	private void doLogin(String name, char[] password) {
 		processor.authenticate(this, name, password);
 	}
 

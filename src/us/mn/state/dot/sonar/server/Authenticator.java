@@ -79,7 +79,7 @@ public class Authenticator {
 
 	/** Authenticate a user connection */
 	void authenticate(final ConnectionImpl c, final UserImpl u,
-		final String name, final String password)
+		final String name, final char[] password)
 	{
 		auth_sched.addJob(new Job() {
 			public void perform() {
@@ -90,12 +90,19 @@ public class Authenticator {
 
 	/** Perform a user authentication */
 	private void doAuthenticate(ConnectionImpl c, UserImpl user,
-		String name, String password)
+		String name, char[] pwd)
 	{
-		if(authenticate(user, password.toCharArray()))
-			processor.finishLogin(c, user);
-		else
-			processor.failLogin(c, name);
+		try {
+			if(authenticate(user, pwd))
+				processor.finishLogin(c, user);
+			else
+				processor.failLogin(c, name);
+		}
+		finally {
+			// Clear password in memory
+			for(int i = 0; i < pwd.length; i++)
+				pwd[i] = '\0';
+		}
 	}
 
 	/** Authenticate a user's credentials */
