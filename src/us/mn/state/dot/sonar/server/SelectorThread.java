@@ -75,6 +75,8 @@ public final class SelectorThread extends Thread {
 			_doSelect();
 		}
 		catch(Exception e) {
+			System.err.println("SONAR: selector error " +
+				e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -103,6 +105,8 @@ public final class SelectorThread extends Thread {
 			processor.scheduleDisconnect(key);
 		}
 		catch(IOException e) {
+			System.err.println("SONAR: selector I/O error " +
+				e.getMessage());
 			e.printStackTrace();
 		}
 		return true;
