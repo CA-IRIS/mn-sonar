@@ -303,7 +303,6 @@ public class TaskProcessor {
 				DEBUG_TASK.log("Finishing PASSWORD for " +
 					u.getName());
 				u.doSetPassword(pwd);
-				scheduleSetAttribute(u, "passwordHash");
 			}
 		});
 	}

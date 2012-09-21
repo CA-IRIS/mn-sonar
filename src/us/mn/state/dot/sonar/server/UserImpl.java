@@ -62,23 +62,17 @@ public class UserImpl implements User {
 	}
 
 	/** Password hash */
-	protected String passwordHash;
+	protected String password;
 
 	/** Set the password */
 	public void setPassword(String pwd) {
-		passwordHash = pwd;
+		password = pwd;
 	}
 
 	/** Set the password */
 	public void doSetPassword(String pwd) throws Exception {
-		// Subclasses should implement hashing and notify
-		// clients of changes to passwordHash attribute
+		// Subclasses should implement hashing
 		setPassword(pwd);
-	}
-
-	/** Get the password hash */
-	public String getPasswordHash() {
-		return passwordHash;
 	}
 
 	/** LDAP Distinguished Name */

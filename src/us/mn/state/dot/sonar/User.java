@@ -33,9 +33,6 @@ public interface User extends SonarObject {
 	/** Set the password */
 	void setPassword(String pwd);
 
-	/** Get the password hash */
-	String getPasswordHash();
-
 	/** Set the LDAP Distinguished Name */
 	void setDn(String d);
 
