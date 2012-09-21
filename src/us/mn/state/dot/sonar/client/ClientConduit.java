@@ -340,6 +340,15 @@ class ClientConduit extends Conduit {
 		flush();
 	}
 
+	/** Send a change password request */
+	void changePassword(String pwd_current, String pwd_new)
+		throws IOException
+	{
+		state.encoder.encode(Message.PASSWORD, pwd_current,
+			new String[] {pwd_new});
+		flush();
+	}
+
 	/** Quit the SONAR session */
 	void quit() throws IOException {
 		state.encoder.encode(Message.QUIT);
