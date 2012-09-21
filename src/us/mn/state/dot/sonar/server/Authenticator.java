@@ -70,6 +70,17 @@ public class Authenticator {
 	private final LinkedList<AuthProvider> providers =
 		new LinkedList<AuthProvider>();
 
+	/** Add an authentication provider */
+	public void addProvider(final AuthProvider ap) {
+		auth_sched.addJob(new Job() {
+			public void perform() {
+				// Add to beginning of list, so that it will
+				// be checked before any LDAP providers
+				providers.addFirst(ap);
+			}
+		});
+	}
+
 	/** Create a new user authenticator */
 	public Authenticator(TaskProcessor tp, String urls) {
 		processor = tp;

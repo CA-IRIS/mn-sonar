@@ -108,6 +108,11 @@ public class TaskProcessor {
 		session_file = props.getProperty("sonar.session.file");
 	}
 
+	/** Add an authentication provider */
+	public void addProvider(AuthProvider ap) {
+		authenticator.addProvider(ap);
+	}
+
 	/** Get the SONAR namespace */
 	public ServerNamespace getNamespace() {
 		return namespace;

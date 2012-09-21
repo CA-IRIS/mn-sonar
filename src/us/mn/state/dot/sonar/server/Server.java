@@ -52,6 +52,11 @@ public final class Server {
 		thread = new SelectorThread(processor, port);
 	}
 
+	/** Add an authentication provider */
+	public void addProvider(AuthProvider ap) {
+		processor.addProvider(ap);
+	}
+
 	/** Join the selector thread */
 	public void join() throws InterruptedException {
 		thread.join();
