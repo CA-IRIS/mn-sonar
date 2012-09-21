@@ -15,7 +15,6 @@
 package us.mn.state.dot.sonar.server;
 
 import java.util.LinkedList;
-import javax.naming.AuthenticationException;
 import javax.naming.NamingException;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Job;
@@ -35,7 +34,9 @@ public class Authenticator {
 
 	/** Bypass provider (for debugging) */
 	static protected class BypassProvider implements AuthProvider {
-		public void authenticate(UserImpl user, char[] pwd) { }
+		public boolean authenticate(UserImpl user, char[] pwd) {
+			return true;
+		}
 	}
 
 	/** Create an authentication provider */
@@ -109,26 +110,10 @@ public class Authenticator {
 	{
 		if(isPasswordSane(pwd)) {
 			for(AuthProvider p: providers) {
-				try {
-					p.authenticate(user, pwd);
+				if(p.authenticate(user, pwd))
 					return;
-				}
-				catch(AuthenticationException e) {
-					// Try next provider
-				}
-				catch(NamingException e) {
-					System.err.println("SONAR: " +
-						namingMessage(e) + " on " + p);
-					// Try next provider
-				}
 			}
 		}
 		throw PermissionDenied.AUTHENTICATION_FAILED;
-	}
-
-	/** Get a useful message string from a naming exception */
-	static private String namingMessage(NamingException e) {
-		Throwable c = e.getCause();
-		return c != null ? c.getMessage() :e.getClass().getSimpleName();
 	}
 }

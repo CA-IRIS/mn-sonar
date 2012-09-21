@@ -14,9 +14,6 @@
  */
 package us.mn.state.dot.sonar.server;
 
-import javax.naming.AuthenticationException;
-import javax.naming.NamingException;
-
 /**
  * User authentication provider interface.
  *
@@ -27,9 +24,6 @@ public interface AuthProvider {
 	/** Authenticate a user.
 	 * @param user User to be authenticated.
 	 * @param pwd Password to check for user.
-	 * @throws AuthenticationException if user/password could not be
-	 *                                 authenticated.
-	 * @throws NamingException if there was some other error. */
-	void authenticate(UserImpl user, char[] pwd)
-		throws AuthenticationException, NamingException;
+	 * @return true if user was authenticated, otherwise false. */
+	boolean authenticate(UserImpl user, char[] pwd);
 }

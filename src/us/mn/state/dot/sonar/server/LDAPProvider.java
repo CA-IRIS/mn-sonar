@@ -32,6 +32,12 @@ public class LDAPProvider implements AuthProvider {
 		return dn != null && dn.length() > 0;
 	}
 
+	/** Get a useful message string from a naming exception */
+	static private String namingMessage(NamingException e) {
+		Throwable c = e.getCause();
+		return c != null ? c.getMessage() :e.getClass().getSimpleName();
+	}
+
 	/** Environment for creating a directory context */
 	private final Hashtable<String, Object> env =
 		new Hashtable<String, Object>();
@@ -58,13 +64,31 @@ public class LDAPProvider implements AuthProvider {
 			return "";
 	}
 
-	/** Authenticate a user's credentials */
-	public void authenticate(UserImpl user, char[] pwd)
+	/** Authenticate a user with an LDAP server.
+	 * @param user User to be authenticated.
+	 * @param pwd Password to check for user.
+	 * @return true if user was authenticated, otherwise false. */
+	public boolean authenticate(UserImpl user, char[] pwd) {
+		String dn = user.getDn();
+		if(isDnSane(dn)) {
+			try {
+				authenticate(dn, pwd);
+				return true;
+			}
+			catch(AuthenticationException e) { }
+			catch(NamingException e) {
+				System.err.println("SONAR: " +
+					namingMessage(e) + " on " + toString());
+			}
+		}
+		// Failed to authenticate
+		return false;
+	}
+
+	/** Authenticate a dn and password */
+	private void authenticate(String dn, char[] pwd)
 		throws AuthenticationException, NamingException
 	{
-		String dn = user.getDn();
-		if(!isDnSane(dn))
-			throw new AuthenticationException("Invalid dn");
 		env.put(Context.SECURITY_PRINCIPAL, dn);
 		env.put(Context.SECURITY_CREDENTIALS, pwd);
 		try {
