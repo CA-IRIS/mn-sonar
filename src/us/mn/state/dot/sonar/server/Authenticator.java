@@ -15,7 +15,6 @@
 package us.mn.state.dot.sonar.server;
 
 import java.util.LinkedList;
-import javax.naming.NamingException;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
@@ -26,6 +25,11 @@ import us.mn.state.dot.sched.Scheduler;
  * @author Douglas Lau
  */
 public class Authenticator {
+
+	/** Check that a user is enabled */
+	static private boolean isUserEnabled(UserImpl u) {
+		return u != null && u.getEnabled();
+	}
 
 	/** Check that a password is sane */
 	static protected boolean isPasswordSane(char[] pwd) {
@@ -88,32 +92,20 @@ public class Authenticator {
 	private void doAuthenticate(ConnectionImpl c, UserImpl user,
 		String name, String password)
 	{
-		try {
-			checkUserEnabled(user);
-			authenticate(user, password.toCharArray());
+		if(authenticate(user, password.toCharArray()))
 			processor.finishLogin(c, user);
-		}
-		catch(PermissionDenied e) {
+		else
 			processor.failLogin(c, name);
-		}
-	}
-
-	/** Check that a user is enabled */
-	private void checkUserEnabled(UserImpl u) throws PermissionDenied {
-		if(u == null || !u.getEnabled())
-			throw PermissionDenied.AUTHENTICATION_FAILED;
 	}
 
 	/** Authenticate a user's credentials */
-	private void authenticate(UserImpl user, char[] pwd)
-		throws PermissionDenied
-	{
-		if(isPasswordSane(pwd)) {
+	private boolean authenticate(UserImpl user, char[] pwd) {
+		if(isUserEnabled(user) && isPasswordSane(pwd)) {
 			for(AuthProvider p: providers) {
 				if(p.authenticate(user, pwd))
-					return;
+					return true;
 			}
 		}
-		throw PermissionDenied.AUTHENTICATION_FAILED;
+		return false;
 	}
 }
