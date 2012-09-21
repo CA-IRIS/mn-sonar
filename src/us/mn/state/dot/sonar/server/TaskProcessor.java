@@ -86,18 +86,6 @@ public class TaskProcessor {
 	/** Authenticator for user credentials */
 	private final Authenticator authenticator;
 
-	/** Authentication thread */
-	private final Scheduler auth_sched = new Scheduler("LDAP Auth",
-		new ExceptionHandler()
-	{
-		public boolean handle(Exception e) {
-			System.err.println("SONAR: auth_sched error " +
-				e.getMessage());
-			e.printStackTrace();
-			return true;
-		}
-	});
-
 	/** Map of active client connections */
 	private final Map<SelectionKey, ConnectionImpl> clients =
 		new HashMap<SelectionKey, ConnectionImpl>();
@@ -116,7 +104,7 @@ public class TaskProcessor {
 		String ldap_urls = props.getProperty("sonar.ldap.urls");
 		if(ldap_urls == null)
 			throw new ConfigurationError("LDAP urls not specified");
-		authenticator = new Authenticator(ldap_urls);
+		authenticator = new Authenticator(this, ldap_urls);
 		session_file = props.getProperty("sonar.session.file");
 	}
 
@@ -254,16 +242,9 @@ public class TaskProcessor {
 		});
 	}
 
-	/** Authenticate a user connection. */
-	void authenticate(final ConnectionImpl c, final String name,
-		final String password)
-	{
-		final UserImpl u = lookupUser(name);
-		auth_sched.addJob(new Job() {
-			public void perform() {
-				doAuthenticate(c, u, name, password);
-			}
-		});
+	/** Authenticate a user connection */
+	void authenticate(ConnectionImpl c, String name, String password) {
+		authenticator.authenticate(c, lookupUser(name), name, password);
 	}
 
 	/** Lookup a user by name. */
@@ -271,38 +252,8 @@ public class TaskProcessor {
 		return (UserImpl)namespace.lookupObject(User.SONAR_TYPE, n);
 	}
 
-	/** Perform a user authentication.
-	 * This may only be called on the authentication thread. */
-	private void doAuthenticate(final ConnectionImpl c, final UserImpl u,
-		final String name, String password)
-	{
-		try {
-			checkUserEnabled(u);
-			authenticator.authenticate(u.getDn(),
-				password.toCharArray());
-			finishLogin(c, u);
-		}
-		catch(PermissionDenied e) {
-			processor.addJob(new Job() {
-				public void perform() {
-					DEBUG_TASK.log("Failing LOGIN for " +
-						name);
-					access_monitor.failAuthentication(
-						c.getName(), name);
-					c.failLogin();
-				}
-			});
-		}
-	}
-
-	/** Check that a user is enabled */
-	private void checkUserEnabled(UserImpl u) throws PermissionDenied {
-		if(u == null || !u.getEnabled())
-			throw PermissionDenied.AUTHENTICATION_FAILED;
-	}
-
 	/** Finish a LOGIN */
-	private void finishLogin(final ConnectionImpl c, final UserImpl u) {
+	void finishLogin(final ConnectionImpl c, final UserImpl u) {
 		processor.addJob(new Job() {
 			public void perform() {
 				DEBUG_TASK.log("Finishing LOGIN for " +
@@ -311,6 +262,18 @@ public class TaskProcessor {
 					u.getName());
 				scheduleSetAttribute(c, "user");
 				c.finishLogin(u);
+			}
+		});
+	}
+
+	/** Fail a LOGIN */
+	void failLogin(final ConnectionImpl c, final String name) {
+		processor.addJob(new Job() {
+			public void perform() {
+				DEBUG_TASK.log("Failing LOGIN for " + name);
+				access_monitor.failAuthentication(c.getName(),
+					name);
+				c.failLogin();
 			}
 		});
 	}

@@ -20,6 +20,9 @@ import javax.naming.AuthenticationException;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.InitialDirContext;
+import us.mn.state.dot.sched.ExceptionHandler;
+import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sched.Scheduler;
 
 /**
  * Simple class to authenticate a user with an LDAP server.
@@ -105,18 +108,65 @@ public class Authenticator {
 			return new LDAPProvider(url);
 	}
 
-	/** List of LDAP providers */
-	protected final LinkedList<Provider> providers =
+	/** Authentication thread */
+	private final Scheduler auth_sched = new Scheduler("Authenticator",
+		new ExceptionHandler()
+	{
+		public boolean handle(Exception e) {
+			System.err.println("SONAR: auth_sched error " +
+				e.getMessage());
+			e.printStackTrace();
+			return true;
+		}
+	});
+
+	/** Task processor */
+	private final TaskProcessor processor;
+
+	/** List of authentication providers */
+	private final LinkedList<Provider> providers =
 		new LinkedList<Provider>();
 
 	/** Create a new user authenticator */
-	public Authenticator(String urls) {
+	public Authenticator(TaskProcessor tp, String urls) {
+		processor = tp;
 		for(String url: urls.split("[ \t]+"))
 			providers.add(createProvider(url));
 	}
 
+	/** Authenticate a user connection */
+	void authenticate(final ConnectionImpl c, final UserImpl u,
+		final String name, final String password)
+	{
+		auth_sched.addJob(new Job() {
+			public void perform() {
+				doAuthenticate(c, u, name, password);
+			}
+		});
+	}
+
+	/** Perform a user authentication */
+	private void doAuthenticate(ConnectionImpl c, UserImpl u, String name,
+		String password)
+	{
+		try {
+			checkUserEnabled(u);
+			authenticate(u.getDn(), password.toCharArray());
+			processor.finishLogin(c, u);
+		}
+		catch(PermissionDenied e) {
+			processor.failLogin(c, name);
+		}
+	}
+
+	/** Check that a user is enabled */
+	private void checkUserEnabled(UserImpl u) throws PermissionDenied {
+		if(u == null || !u.getEnabled())
+			throw PermissionDenied.AUTHENTICATION_FAILED;
+	}
+
 	/** Authenticate a user's credentials */
-	public void authenticate(String dn, char[] pwd) throws PermissionDenied
+	private void authenticate(String dn, char[] pwd) throws PermissionDenied
 	{
 		if(isDnSane(dn) && isPasswordSane(pwd)) {
 			for(Provider p: providers) {
