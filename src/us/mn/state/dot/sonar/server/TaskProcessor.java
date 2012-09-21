@@ -299,10 +299,10 @@ public class TaskProcessor {
 		// Need to copy password, since authenticator will clear it
 		final String pwd = new String(pwd_new);
 		processor.addJob(new Job() {
-			public void perform() {
+			public void perform() throws Exception {
 				DEBUG_TASK.log("Finishing PASSWORD for " +
 					u.getName());
-				u.setPassword(pwd);
+				u.doSetPassword(pwd);
 				scheduleSetAttribute(u, "passwordHash");
 			}
 		});

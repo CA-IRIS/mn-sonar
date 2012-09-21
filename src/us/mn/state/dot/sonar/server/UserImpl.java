@@ -66,9 +66,14 @@ public class UserImpl implements User {
 
 	/** Set the password */
 	public void setPassword(String pwd) {
+		passwordHash = pwd;
+	}
+
+	/** Set the password */
+	public void doSetPassword(String pwd) throws Exception {
 		// Subclasses should implement hashing and notify
 		// clients of changes to passwordHash attribute
-		passwordHash = pwd;
+		setPassword(pwd);
 	}
 
 	/** Get the password hash */
