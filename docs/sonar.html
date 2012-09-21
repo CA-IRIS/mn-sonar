@@ -31,22 +31,22 @@
 <dl>
 	<dt>Simplicity</dt>
 	<dd>
-		There are only 9 messages defined in the SONAR
+		There are only 10 messages defined in the SONAR
 		<a href="#wire">wire protocol</a>. These messages all apply to
 		one simple <a href="#namespace">namespace</a>. Also, there are
 		only a few basic attribute types. These facts are a
 		<em>feature</em>, because simple software is much easier to
 		audit for correctness. The full SONAR Java package is less than
-		5000 lines of code, even with plenty of comments.
+		6000 lines of code, even with plenty of comments.
 	</dd>
 	<dt>Security</dt>
 	<dd>
 		All communication between client and server is encrypted using
 		the industry-standard SSL (aka TLS) protocol. This prevents
 		man-in-the-middle attacks, while keeping passwords secure as
-		well. Actual user <a href="#auth">authentication</a> is passed
-		on to a separate LDAP server, so users do not need to remember
-		multiple passwords, or keep different accounts in sync.
+		well. Actual user <a href="#auth">authentication</a> can be
+		passed on to a separate LDAP server, so users do not need to
+		remember multiple passwords, or keep different accounts in sync.
 	</dd>
 	<dt>Notification</dt>
 	<dd>
@@ -233,6 +233,12 @@
 		A name with only the type, or the type and object name is
 		always a positive entry. A name with a type and attribute is
 		always a negative entry.
+	</dd>
+	<dt>p [current-password] [new-password]</dt>
+	<dd>
+		Update the password for the currently logged-in user. First,
+		the [current-password] is authenticated, and if successful,
+		it is replaced with [new-password].
 	</dd>
 </dl>
 </li>

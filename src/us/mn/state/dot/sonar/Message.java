@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,13 @@ public enum Message {
 		throws SonarException
 	{
 		c.doLogin(p);
+	}},
+
+	/** Change the user's password */
+	PASSWORD('p') { public void handle(Conduit c, List<String> p)
+		throws SonarException
+	{
+		c.doPassword(p);
 	}},
 
 	/** Quit the client connection */

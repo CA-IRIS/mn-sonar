@@ -285,6 +285,40 @@ public class TaskProcessor {
 		});
 	}
 
+	/** Change a user password */
+	void changePassword(ConnectionImpl c, UserImpl u, char[] pwd_current,
+		char[] pwd_new)
+	{
+		authenticator.changePassword(c, u, pwd_current, pwd_new);
+	}
+
+	/** Finish a PASSWORD */
+	void finishPassword(final ConnectionImpl c, final UserImpl u,
+		char[] pwd_new)
+	{
+		// Need to copy password, since authenticator will clear it
+		final String pwd = new String(pwd_new);
+		processor.addJob(new Job() {
+			public void perform() {
+				DEBUG_TASK.log("Finishing PASSWORD for " +
+					u.getName());
+				u.setPassword(pwd);
+				scheduleSetAttribute(u, "passwordHash");
+			}
+		});
+	}
+
+	/** Fail a PASSWORD */
+	void failPassword(final ConnectionImpl c) {
+		processor.addJob(new Job() {
+			public void perform() {
+				DEBUG_TASK.log("Failing PASSWORD for " +
+					c.getUser().getName());
+				c.failPassword();
+			}
+		});
+	}
+
 	/** Get an array of cipher suites which should be enabled */
 	private String[] getCipherSuites(SSLEngine engine) {
 		LinkedList<String> enabled = new LinkedList<String>();

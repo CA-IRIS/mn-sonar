@@ -53,6 +53,11 @@ abstract public class Conduit {
 		throw ProtocolError.INVALID_MESSAGE_CODE;
 	}
 
+	/** Handle a PASSWORD message */
+	public void doPassword(List<String> p) throws SonarException {
+		throw ProtocolError.INVALID_MESSAGE_CODE;
+	}
+
 	/** Handle a QUIT message */
 	abstract public void doQuit(List<String> p) throws SonarException;
 

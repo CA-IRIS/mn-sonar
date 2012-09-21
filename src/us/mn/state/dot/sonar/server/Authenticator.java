@@ -36,6 +36,12 @@ public class Authenticator {
 		return pwd != null && pwd.length > 0;
 	}
 
+	/** Clear a password in memory */
+	static private void clearPassword(char[] pwd) {
+		for(int i = 0; i < pwd.length; i++)
+			pwd[i] = '\0';
+	}
+
 	/** Authentication thread */
 	private final Scheduler auth_sched = new Scheduler("Authenticator",
 		new ExceptionHandler()
@@ -93,9 +99,7 @@ public class Authenticator {
 				processor.failLogin(c, name);
 		}
 		finally {
-			// Clear password in memory
-			for(int i = 0; i < pwd.length; i++)
-				pwd[i] = '\0';
+			clearPassword(pwd);
 		}
 	}
 
@@ -108,5 +112,32 @@ public class Authenticator {
 			}
 		}
 		return false;
+	}
+
+	/** Change a user password */
+	void changePassword(final ConnectionImpl c, final UserImpl u,
+		final char[] pwd_current, final char[] pwd_new)
+	{
+		auth_sched.addJob(new Job() {
+			public void perform() {
+				doChangePassword(c, u, pwd_current, pwd_new);
+			}
+		});
+	}
+
+	/** Perform a user password change */
+	private void doChangePassword(ConnectionImpl c, UserImpl user,
+		char[] pwd_current, char[] pwd_new)
+	{
+		try {
+			if(authenticate(user, pwd_current))
+				processor.finishPassword(c, user, pwd_new);
+			else
+				processor.failPassword(c);
+		}
+		finally {
+			clearPassword(pwd_current);
+			clearPassword(pwd_new);
+		}
 	}
 }

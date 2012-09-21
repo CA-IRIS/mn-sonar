@@ -471,6 +471,28 @@ public class ConnectionImpl extends Conduit implements Connection {
 		}
 	}
 
+	/** Respond to a PASSWORD message */
+	public void doPassword(List<String> params) throws SonarException {
+		checkLoggedIn();
+		if(params.size() != 3)
+			throw ProtocolError.WRONG_PARAMETER_COUNT;
+		char[] pwd_current = params.get(1).toCharArray();
+		char[] pwd_new = params.get(2).toCharArray();
+		processor.changePassword(this, user, pwd_current, pwd_new);
+	}
+
+	/** Fail a PASSWORD change attempt */
+	public void failPassword() {
+		try {
+			state.encoder.encode(Message.SHOW, PermissionDenied.
+				AUTHENTICATION_FAILED.getMessage());
+			flush();
+		}
+		catch(IOException e) {
+			disconnect("I/O error: failPassword " + e.getMessage());
+		}
+	}
+
 	/** Respond to a QUIT message.
 	 * This may only be called on the Task Processor thread. */
 	public void doQuit(List<String> params) {
