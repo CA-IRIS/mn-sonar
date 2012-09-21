@@ -99,12 +99,14 @@ public class TaskProcessor {
 	{
 		namespace = n;
 		access_monitor = am;
+		authenticator = new Authenticator(this);
 		context = Security.createContext(props);
 		LDAPSocketFactory.FACTORY = context.getSocketFactory();
 		String ldap_urls = props.getProperty("sonar.ldap.urls");
-		if(ldap_urls == null)
-			throw new ConfigurationError("LDAP urls not specified");
-		authenticator = new Authenticator(this, ldap_urls);
+		if(ldap_urls != null) {
+			for(String url: ldap_urls.split("[ \t]+"))
+				addProvider(new LDAPProvider(url));
+		}
 		session_file = props.getProperty("sonar.session.file");
 	}
 

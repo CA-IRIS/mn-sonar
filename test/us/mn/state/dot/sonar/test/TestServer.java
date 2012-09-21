@@ -18,6 +18,7 @@ import java.util.Properties;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.TestObjImpl;
 import us.mn.state.dot.sonar.server.AccessMonitor;
+import us.mn.state.dot.sonar.server.AuthProvider;
 import us.mn.state.dot.sonar.server.CapabilityImpl;
 import us.mn.state.dot.sonar.server.PrivilegeImpl;
 import us.mn.state.dot.sonar.server.RoleImpl;
@@ -31,7 +32,6 @@ public class TestServer {
 		Properties p = new Properties();
 		p.setProperty("keystore.file", "sonar-test.keystore");
 		p.setProperty("keystore.password", "sonar-test");
-		p.setProperty("sonar.ldap.urls", "bypass_authentication");
 		p.setProperty("sonar.port", "1037");
 		return p;
 	}
@@ -89,6 +89,11 @@ public class TestServer {
 			public void disconnect(String hostport, String user) {
 				System.err.println("DISCONNECT: " + hostport +
 					", USER: " + user);
+			}
+		});
+		server.addProvider(new AuthProvider() {
+			public boolean authenticate(UserImpl u, char[] pwd) {
+				return true;
 			}
 		});
 	}

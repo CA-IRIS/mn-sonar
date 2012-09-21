@@ -36,21 +36,6 @@ public class Authenticator {
 		return pwd != null && pwd.length > 0;
 	}
 
-	/** Bypass provider (for debugging) */
-	static protected class BypassProvider implements AuthProvider {
-		public boolean authenticate(UserImpl user, char[] pwd) {
-			return true;
-		}
-	}
-
-	/** Create an authentication provider */
-	static private AuthProvider createProvider(String url) {
-		if(url.equals("bypass_authentication"))
-			return new BypassProvider();
-		else
-			return new LDAPProvider(url);
-	}
-
 	/** Authentication thread */
 	private final Scheduler auth_sched = new Scheduler("Authenticator",
 		new ExceptionHandler()
@@ -74,18 +59,16 @@ public class Authenticator {
 	public void addProvider(final AuthProvider ap) {
 		auth_sched.addJob(new Job() {
 			public void perform() {
-				// Add to beginning of list, so that it will
-				// be checked before any LDAP providers
+				// Add to beginning of list, so that LDAP
+				// providers will be checked last
 				providers.addFirst(ap);
 			}
 		});
 	}
 
 	/** Create a new user authenticator */
-	public Authenticator(TaskProcessor tp, String urls) {
+	public Authenticator(TaskProcessor tp) {
 		processor = tp;
-		for(String url: urls.split("[ \t]+"))
-			providers.add(createProvider(url));
 	}
 
 	/** Authenticate a user connection */
