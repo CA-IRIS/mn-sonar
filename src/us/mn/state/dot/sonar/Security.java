@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,8 +47,11 @@ public class Security {
 
 	/** Create a URL for the specified keystore */
 	static protected URL createURL(String keystore) throws IOException {
+		File file = new File(keystore);
+		if(file.exists())
+			return file.toURI().toURL();
 		String cwd = System.getProperty("user.dir");
-		File file = new File(cwd, keystore);
+		file = new File(cwd, keystore);
 		if(file.exists())
 			return file.toURI().toURL();
 		else
