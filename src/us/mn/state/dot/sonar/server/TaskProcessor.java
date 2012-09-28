@@ -299,21 +299,28 @@ public class TaskProcessor {
 		// Need to copy password, since authenticator will clear it
 		final String pwd = new String(pwd_new);
 		processor.addJob(new Job() {
-			public void perform() throws Exception {
-				DEBUG_TASK.log("Finishing PASSWORD for " +
-					u.getName());
-				u.doSetPassword(pwd);
+			public void perform() {
+				try {
+					u.doSetPassword(pwd);
+					DEBUG_TASK.log("Finishing PASSWORD for "
+						+ u.getName());
+				}
+				catch(Exception e) {
+					failPassword(c, e.getMessage());
+					DEBUG_TASK.log("Exception PASSWORD "
+						+ e.getMessage());
+				}
 			}
 		});
 	}
 
 	/** Fail a PASSWORD */
-	void failPassword(final ConnectionImpl c) {
+	void failPassword(final ConnectionImpl c, final String msg) {
 		processor.addJob(new Job() {
 			public void perform() {
+				c.failPassword(msg);
 				DEBUG_TASK.log("Failing PASSWORD for " +
 					c.getUser().getName());
-				c.failPassword();
 			}
 		});
 	}

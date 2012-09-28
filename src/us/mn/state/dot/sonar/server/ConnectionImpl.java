@@ -483,10 +483,9 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Fail a PASSWORD change attempt */
-	public void failPassword() {
+	public void failPassword(String msg) {
 		try {
-			state.encoder.encode(Message.SHOW, PermissionDenied.
-				AUTHENTICATION_FAILED.getMessage());
+			state.encoder.encode(Message.SHOW, msg);
 			flush();
 		}
 		catch(IOException e) {

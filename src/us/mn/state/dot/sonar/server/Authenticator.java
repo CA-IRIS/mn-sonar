@@ -132,8 +132,10 @@ public class Authenticator {
 		try {
 			if(authenticate(user, pwd_current))
 				processor.finishPassword(c, user, pwd_new);
-			else
-				processor.failPassword(c);
+			else {
+				processor.failPassword(c, PermissionDenied.
+					AUTHENTICATION_FAILED.getMessage());
+			}
 		}
 		finally {
 			clearPassword(pwd_current);
