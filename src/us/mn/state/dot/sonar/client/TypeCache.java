@@ -211,6 +211,7 @@ public class TypeCache<T extends SonarObject> {
 		if(amap == null) {
 			// This can happen if a proxy has been removed, but
 			// references still exist in other data structures.
+			System.err.println("SONAR: lookupAttribute failed: "+a);
 			return new Attribute(Object.class);
 		}
 		Attribute attr = amap.get(a);
