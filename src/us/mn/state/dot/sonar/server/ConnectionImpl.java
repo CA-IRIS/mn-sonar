@@ -209,7 +209,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			channel.close();
 		}
 		catch(IOException e) {
-			System.err.println("SONAR: Close error: " +
+			TaskProcessor.DEBUG.log("Close error: " +
 				e.getMessage() + " on " + getName());
 		}
 	}
@@ -217,9 +217,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Disconnect the client connection.
 	 * This may only be called on the Task Processor thread. */
 	protected void disconnect(String msg) {
-		System.err.println("SONAR: " + msg + " on " + getName() + 
-			", " + getUserName() + ", " +
-			TimeSteward.getDateInstance() + ".");
+		TaskProcessor.DEBUG.log(msg + " on " + getName() + ", " +
+			getUserName());
 		disconnect();
 	}
 

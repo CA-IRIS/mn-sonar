@@ -50,6 +50,9 @@ public class TaskProcessor {
 	/** Directory to store IRIS log files FIXME */
 	static private final String LOG_FILE_DIR = "/var/log/iris/";
 
+	/** SONAR debug log */
+	static public final DebugLog DEBUG = new DebugLog(LOG_FILE_DIR+"sonar");
+
 	/** SONAR task debug log */
 	static private final DebugLog DEBUG_TASK = new DebugLog(LOG_FILE_DIR +
 		"sonar_task");
@@ -68,13 +71,11 @@ public class TaskProcessor {
  		new ExceptionHandler()
 	{
 		public boolean handle(Exception e) {
-			if(e instanceof CancelledKeyException) {
-				System.err.println(
-					"SONAR: Key already cancelled");
-			} else if(e instanceof SSLException) {
-				System.err.println("SONAR: SSL error " +
-					e.getMessage());
-			} else {
+			if(e instanceof CancelledKeyException)
+				DEBUG.log("Key already cancelled");
+			else if(e instanceof SSLException)
+				DEBUG.log("SSL error " + e.getMessage());
+			else {
 				System.err.println("SONAR: error " +
 					e.getMessage());
 				e.printStackTrace();
@@ -222,9 +223,8 @@ public class TaskProcessor {
 			}
 		}
 		catch(IOException e) {
-			System.err.println("SONAR: Error writing session " +
-				"file: " + session_file + " (" +
-				e.getMessage() + ")");
+			DEBUG.log("Error writing session file: " +
+				session_file + " (" + e.getMessage() + ")");
 		}
 	}
 

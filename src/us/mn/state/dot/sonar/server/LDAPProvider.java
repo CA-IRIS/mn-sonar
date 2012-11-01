@@ -75,10 +75,12 @@ public class LDAPProvider implements AuthProvider {
 				authenticate(dn, pwd);
 				return true;
 			}
-			catch(AuthenticationException e) { }
+			catch(AuthenticationException e) {
+				// fall to end of method
+			}
 			catch(NamingException e) {
-				System.err.println("SONAR: " +
-					namingMessage(e) + " on " + toString());
+				TaskProcessor.DEBUG.log(namingMessage(e) +
+					" on " + toString());
 			}
 		}
 		// Failed to authenticate
