@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import java.lang.reflect.Proxy;
 import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
@@ -36,14 +37,6 @@ public class TypeCache<T extends SonarObject> {
 	/** Class loader needed to create proxy objects */
 	static protected final ClassLoader LOADER =
 		TypeCache.class.getClassLoader();
-
-	/** Get the hash code of a proxy object */
-	static protected int hashCode(SonarObject o) {
-		return System.identityHashCode(o);
-	}
-
-	/** Number of entries in the removed proxy cache */
-	static protected final int REMOVED_CACHE_ENTRIES = 16;
 
 	/** Type name */
 	public final String tname;
@@ -64,8 +57,10 @@ public class TypeCache<T extends SonarObject> {
 	 * All access must be synchronized on the "children" lock. */
 	private final HashMap<String, T> children = new HashMap<String, T>();
 
-	/** All removed SONAR objects of this type are put here */
-	private final LinkedList<Integer> removed = new LinkedList<Integer>();
+	/** Weak mapping from proxy object to attribute map.
+	 * All access must be synchronized on the "children" lock. */
+	private final WeakHashMap<T, AttributeMap> attributes =
+		new WeakHashMap<T, AttributeMap>();
 
 	/** Flag to indicate enumeration from server is complete */
 	private boolean enumerated = false;
@@ -73,11 +68,6 @@ public class TypeCache<T extends SonarObject> {
 	/** A phantom is a new object which has had attributes set, but not
 	 * been declared with Message.OBJECT ("o") */
 	private T phantom;
-
-	/** Mapping from object identity to attribute hash.
-	 * All access must be synchronized on the "children" lock. */
-	private final HashMap<Integer, HashMap<String, Attribute>> attributes =
-		new HashMap<Integer, HashMap<String, Attribute>>();
 
 	/** Proxy listener list */
 	private final LinkedList<ProxyListener<T>> listeners =
@@ -126,12 +116,11 @@ public class TypeCache<T extends SonarObject> {
 	/** Create a proxy in the type cache */
 	T createProxy(String name) {
 		T o = (T)Proxy.newProxyInstance(LOADER, ifaces, invoker);
-		HashMap<String,Attribute> amap = invoker.createAttributes(name);
-		// NOTE: after this point, the amap is considered immutable.
-		//       If only there were a way to enforce this...
+		AttributeMap amap = new AttributeMap(
+			invoker.createAttributes(name));
 		synchronized(children) {
 			children.put(name, o);
-			attributes.put(hashCode(o), amap);
+			attributes.put(o, amap);
 			phantom = o;
 		}
 		return o;
@@ -168,14 +157,12 @@ public class TypeCache<T extends SonarObject> {
 	/** Remove a proxy from the type cache */
 	T remove(String name) throws NamespaceError {
 		synchronized(children) {
-			if(!children.containsKey(name))
-				throw NamespaceError.nameUnknown(name);
 			T proxy = children.remove(name);
-			removed.addLast(hashCode(proxy));
-			while(removed.size() > REMOVED_CACHE_ENTRIES) {
-				Integer hc = removed.pollFirst();
-				attributes.remove(hc);
-			}
+			if(proxy == null)
+				throw NamespaceError.nameUnknown(name);
+			AttributeMap amap = attributes.get(proxy);
+			if(amap != null)
+				amap.zombie = true;
 			notifyProxyRemoved(proxy);
 			return proxy;
 		}
@@ -195,10 +182,18 @@ public class TypeCache<T extends SonarObject> {
 		}
 	}
 
-	/** Lookup the attribute map for the given object id */
-	protected HashMap<String, Attribute> lookupAttributeMap(int i) {
+	/** Check if a proxy object is a zombie */
+	private boolean isZombie(T o) {
 		synchronized(children) {
-			return attributes.get(i);
+			AttributeMap amap = attributes.get(o);
+			return amap != null && amap.zombie;
+		}
+	}
+
+	/** Lookup the attribute map for the given object */
+	private Map<String, Attribute> lookupAttributeMap(T o) {
+		synchronized(children) {
+			return attributes.get(o).attrs;
 		}
 	}
 
@@ -206,14 +201,7 @@ public class TypeCache<T extends SonarObject> {
 	protected Attribute lookupAttribute(T o, String a)
 		throws NamespaceError
 	{
-		int i = System.identityHashCode(o);
-		HashMap<String, Attribute> amap = lookupAttributeMap(i);
-		if(amap == null) {
-			// This can happen if a proxy has been removed, but
-			// references still exist in other data structures.
-			System.err.println("SONAR: lookupAttribute failed: "+a);
-			return new Attribute(Object.class);
-		}
+		Map<String, Attribute> amap = lookupAttributeMap(o);
 		Attribute attr = amap.get(a);
 		if(attr == null)
 			throw NamespaceError.nameUnknown(a);
@@ -248,7 +236,8 @@ public class TypeCache<T extends SonarObject> {
 		if(check && attr.valueEquals(args))
 			return;
 		String[] values = namespace.marshall(attr.type, args);
-		client.setAttribute(new Name(o, a), values);
+		if(!isZombie(o))
+			client.setAttribute(new Name(o, a), values);
 	}
 
 	/** Update an attribute value into the given proxy */
@@ -265,7 +254,8 @@ public class TypeCache<T extends SonarObject> {
 
 	/** Remove the specified object */
 	void removeObject(T o) {
-		client.removeObject(new Name(o));
+		if(!isZombie(o))
+			client.removeObject(new Name(o));
 	}
 
 	/** Create the specified object name */
@@ -315,14 +305,16 @@ public class TypeCache<T extends SonarObject> {
 
 	/** Watch for all attributes of the specified object */
 	public void watchObject(T proxy) {
-		client.enumerateName(new Name(tname, proxy.getName()));
+		if(!isZombie(proxy))
+			client.enumerateName(new Name(tname, proxy.getName()));
 	}
 
 	/** Ignore attributes of the specified object.  This just removes an
 	 * object watch -- it does not prevent the type watch from causing
 	 * the object to be watched.  */
 	public void ignoreObject(T proxy) {
-		client.ignoreName(new Name(tname, proxy.getName()));
+		if(!isZombie(proxy))
+			client.ignoreName(new Name(tname, proxy.getName()));
 	}
 
 	/** Find an object using the supplied checker callback */

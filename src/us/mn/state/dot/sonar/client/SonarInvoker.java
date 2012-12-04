@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.sonar.client;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.NamespaceError;
@@ -115,7 +116,7 @@ class SonarInvoker implements InvocationHandler {
 	}
 
 	/** Create attributes for one proxy instance */
-	public HashMap<String, Attribute> createAttributes(String name) {
+	public Map<String, Attribute> createAttributes(String name) {
 		HashMap<String, Attribute> amap =
 			new HashMap<String, Attribute>();
 		for(Map.Entry<Method, String> e: getters.entrySet()) {
@@ -135,6 +136,6 @@ class SonarInvoker implements InvocationHandler {
 		}
 		amap.put("typeName", typeName);
 		amap.put("name", new Attribute(name));
-		return amap;
+		return Collections.unmodifiableMap(amap);
 	}
 }
