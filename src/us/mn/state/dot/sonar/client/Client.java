@@ -53,7 +53,7 @@ public class Client extends Thread {
 	protected final ClientConduit conduit;
 
 	/** Task processor thread */
-	protected final Scheduler processor = new Scheduler("Task Processor");
+	protected final Scheduler processor = new Scheduler("sonar_proc");
 
 	/** Message processor task */
 	protected final MessageProcessor m_proc = new MessageProcessor();

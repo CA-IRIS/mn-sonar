@@ -43,7 +43,7 @@ public class Authenticator {
 	}
 
 	/** Authentication thread */
-	private final Scheduler auth_sched = new Scheduler("Authenticator",
+	private final Scheduler auth_sched = new Scheduler("sonar_auth",
 		new ExceptionHandler()
 	{
 		public boolean handle(Exception e) {

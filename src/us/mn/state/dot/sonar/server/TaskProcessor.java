@@ -63,7 +63,7 @@ public class TaskProcessor {
 	private final SSLContext context;
 
 	/** Task processor scheduler */
-	private final Scheduler processor = new Scheduler("Task Processor",
+	private final Scheduler processor = new Scheduler("sonar_proc",
  		new ExceptionHandler()
 	{
 		public boolean handle(Exception e) {
