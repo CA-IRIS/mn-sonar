@@ -47,15 +47,11 @@ import us.mn.state.dot.sonar.User;
  */
 public class TaskProcessor {
 
-	/** Directory to store IRIS log files FIXME */
-	static private final String LOG_FILE_DIR = "/var/log/iris/";
-
 	/** SONAR debug log */
-	static public final DebugLog DEBUG = new DebugLog(LOG_FILE_DIR+"sonar");
+	static public final DebugLog DEBUG = new DebugLog("sonar");
 
 	/** SONAR task debug log */
-	static private final DebugLog DEBUG_TASK = new DebugLog(LOG_FILE_DIR +
-		"sonar_task");
+	static private final DebugLog DEBUG_TASK = new DebugLog("sonar_task");
 
 	/** SONAR namespace being served */
 	private final ServerNamespace namespace;
