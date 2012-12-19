@@ -16,9 +16,9 @@ package us.mn.state.dot.sonar.client;
 
 import java.lang.reflect.Proxy;
 import java.util.LinkedList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
@@ -33,6 +33,9 @@ import us.mn.state.dot.sonar.SonarObject;
  * @author Douglas Lau
  */
 public class TypeCache<T extends SonarObject> {
+
+	/** Initial capacity of type hash */
+	static private final int INITIAL_CAPACITY = 256;
 
 	/** Class loader needed to create proxy objects */
 	static protected final ClassLoader LOADER =
@@ -55,7 +58,8 @@ public class TypeCache<T extends SonarObject> {
 
 	/** All SONAR objects of this type are put here.
 	 * All access must be synchronized on the "children" lock. */
-	private final HashMap<String, T> children = new HashMap<String, T>();
+	private final ConcurrentHashMap<String, T> children =
+		new ConcurrentHashMap<String, T>(INITIAL_CAPACITY, 0.75f, 1);
 
 	/** Weak mapping from proxy object to attribute map.
 	 * All access must be synchronized on the "children" lock. */
@@ -170,16 +174,12 @@ public class TypeCache<T extends SonarObject> {
 
 	/** Lookup a proxy from the given name */
 	public T lookupObject(String n) {
-		synchronized(children) {
-			return children.get(n);
-		}
+		return children.get(n);
 	}
 
 	/** Get the size of the cache */
 	public int size() {
-		synchronized(children) {
-			return children.size();
-		}
+		return children.size();
 	}
 
 	/** Check if a proxy object is a zombie */
@@ -319,11 +319,9 @@ public class TypeCache<T extends SonarObject> {
 
 	/** Find an object using the supplied checker callback */
 	public T findObject(Checker<T> c) {
-		synchronized(children) {
-			for(T proxy: children.values()) {
-				if(c.check(proxy))
-					return proxy;
-			}
+		for(T proxy: children.values()) {
+			if(c.check(proxy))
+				return proxy;
 		}
 		return null;
 	}

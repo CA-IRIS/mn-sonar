@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 package us.mn.state.dot.sonar.server;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Message;
 import us.mn.state.dot.sonar.MessageEncoder;
@@ -33,12 +33,18 @@ import us.mn.state.dot.sonar.SonarObject;
  */
 public class TypeNode {
 
+	/** Initial capacity of type hash */
+	static private final int INITIAL_CAPACITY = 256;
+
 	/** Type name */
 	public final String name;
 
-	/** All child objects of this type are put here */
-	private final HashMap<String, SonarObject> children =
-		new HashMap<String, SonarObject>();
+	/** All child objects of this type are put here.  Note: we still
+	 * synchronize on updates to this hash map to prevent inconsistency.
+	 * Synchronization is not needed to read or iterate over the map. */
+	private final ConcurrentHashMap<String, SonarObject> children =
+		new ConcurrentHashMap<String, SonarObject>(INITIAL_CAPACITY,
+		0.75f, 1);
 
 	/** An attribute dispatcher can set and get attributes on objects */
 	private final AttributeDispatcher dispatcher;
@@ -51,10 +57,8 @@ public class TypeNode {
 
 	/** Create a new object in the type node */
 	public SonarObject createObject(String name) throws SonarException {
-		synchronized(children) {
-			if(children.containsKey(name))
-				throw NamespaceError.NAME_EXISTS;
-		}
+		if(children.containsKey(name))
+			throw NamespaceError.NAME_EXISTS;
 		return dispatcher.createObject(name);
 	}
 
@@ -101,9 +105,7 @@ public class TypeNode {
 
 	/** Lookup an object from the given name */
 	public SonarObject lookupObject(String n) {
-		synchronized(children) {
-			return children.get(n);
-		}
+		return children.get(n);
 	}
 
 	/** Get the value of an attribute */
@@ -136,6 +138,8 @@ public class TypeNode {
 	public void enumerateObjects(MessageEncoder enc) throws SonarException,
 		IOException
 	{
+		// We must synchronize here to ensure that no objects are
+		// added or removed while enumerating
 		synchronized(children) {
 			for(SonarObject o: children.values())
 				enumerateObject(enc, o);
@@ -146,6 +150,8 @@ public class TypeNode {
 	public void enumerateAttribute(MessageEncoder enc, String aname)
 		throws SonarException, IOException
 	{
+		// We must synchronize here to ensure that no objects are
+		// added or removed while enumerating
 		synchronized(children) {
 			for(SonarObject o: children.values()) {
 				String a = new Name(o, aname).toString();
@@ -164,16 +170,14 @@ public class TypeNode {
 	{
 		String oname = name.getObjectPart();
 		String aname = name.getAttributePart();
-		synchronized(children) {
-			SonarObject o = children.get(oname);
-			if(o != null) {
-				dispatcher.setValue(o, aname, v);
-				return null;
-			} else {
-				o = dispatcher.createObject(oname);
-				setField(o, aname, v);
-				return o;
-			}
+		SonarObject o = children.get(oname);
+		if(o != null) {
+			dispatcher.setValue(o, aname, v);
+			return null;
+		} else {
+			o = dispatcher.createObject(oname);
+			setField(o, aname, v);
+			return o;
 		}
 	}
 
@@ -186,19 +190,15 @@ public class TypeNode {
 
 	/** Find an object using the supplied checker callback */
 	public SonarObject findObject(Checker c) {
-		synchronized(children) {
-			for(SonarObject o: children.values()) {
-				if(c.check(o))
-					return o;
-			}
+		for(SonarObject o: children.values()) {
+			if(c.check(o))
+				return o;
 		}
 		return null;
 	}
 
 	/** Get the number of objects of this type */
 	public int size() {
-		synchronized(children) {
-			return children.size();
-		}
+		return children.size();
 	}
 }
