@@ -37,7 +37,7 @@ public class ClientNamespace extends Namespace {
 	}
 
 	/** Map of all types in the cache */
-	protected final HashMap<String, TypeCache> types =
+	private final HashMap<String, TypeCache> types =
 		new HashMap<String, TypeCache>();
 
 	/** Add a new SonarObject type */
@@ -46,13 +46,13 @@ public class ClientNamespace extends Namespace {
 	}
 
 	/** Current type */
-	protected TypeCache cur_type = null;
+	private TypeCache cur_type = null;
 
 	/** Current object */
 	protected SonarObject cur_obj = null;
 
 	/** Get the TypeCache for the specified name */
-	protected TypeCache getTypeCache() throws NamespaceError {
+	private TypeCache getTypeCache() throws NamespaceError {
 		if(cur_type != null)
 			return cur_type;
 		else
@@ -60,7 +60,7 @@ public class ClientNamespace extends Namespace {
 	}
 
 	/** Get the TypeCache for the specified name */
-	protected TypeCache getTypeCache(Name name) throws NamespaceError {
+	private TypeCache getTypeCache(Name name) throws NamespaceError {
 		String tname = name.getTypePart();
 		if(types.containsKey(tname)) {
 			cur_type = types.get(tname);
@@ -106,7 +106,8 @@ public class ClientNamespace extends Namespace {
 	}
 
 	/** Update an object attribute */
-	protected void updateAttribute(TypeCache t, SonarObject o, String a,
+	@SuppressWarnings("unchecked")
+	private void updateAttribute(TypeCache t, SonarObject o, String a,
 		String[] v) throws SonarException
 	{
 		if(o == null)
@@ -142,6 +143,7 @@ public class ClientNamespace extends Namespace {
 	 * @param tname Sonar type name
 	 * @param c Checker callback
 	 * @return First object which Checker returns true */
+	@SuppressWarnings("unchecked")
 	public SonarObject findObject(String tname, Checker c) {
 		TypeCache t = types.get(tname);
 		if(t != null)
@@ -153,6 +155,7 @@ public class ClientNamespace extends Namespace {
 	/** Get an iterator for all objects of a type.
 	 * @param tname Sonar type name.
 	 * @return Iterator of all objects of the type. */
+	@SuppressWarnings("unchecked")
 	public Iterator<SonarObject> iterator(String tname) {
 		TypeCache t = types.get(tname);
 		if(t != null)

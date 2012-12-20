@@ -191,6 +191,7 @@ public class TypeNode {
 	}
 
 	/** Find an object using the supplied checker callback */
+	@SuppressWarnings("unchecked")
 	public SonarObject findObject(Checker c) {
 		for(SonarObject o: children.values()) {
 			if(c.check(o))

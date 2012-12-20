@@ -120,6 +120,7 @@ public class TypeCache<T extends SonarObject> {
 	}
 
 	/** Create a proxy in the type cache */
+	@SuppressWarnings("unchecked")
 	T createProxy(String name) {
 		T o = (T)Proxy.newProxyInstance(LOADER, ifaces, invoker);
 		AttributeMap amap = new AttributeMap(

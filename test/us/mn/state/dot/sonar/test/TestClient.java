@@ -62,8 +62,8 @@ public class TestClient extends Client {
 
 	public TestClient() throws Exception {
 		super(createProperties(), HANDLER);
-		capabilities = new TypeCache(Capability.class, this);
-		privileges = new TypeCache(Privilege.class, this);
+		capabilities = new TypeCache<Capability>(Capability.class,this);
+		privileges = new TypeCache<Privilege>(Privilege.class, this);
 		roles = new TypeCache<Role>(Role.class, this);
 		users = new TypeCache<User>(User.class, this);
 		connections = new TypeCache<Connection>(Connection.class, this);

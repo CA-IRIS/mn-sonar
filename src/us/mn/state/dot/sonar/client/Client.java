@@ -132,9 +132,11 @@ public class Client extends Thread {
 	}
 
 	/** Populate the specified type cache */
+	@SuppressWarnings("unchecked")
 	public void populate(TypeCache tc, boolean wait) {
 		if(wait) {
-			EnumerationWaiter ew = new EnumerationWaiter();
+			EnumerationWaiter<SonarObject> ew =
+				new EnumerationWaiter<SonarObject>();
 			tc.addProxyListener(ew);
 			populate(tc);
 			while(!ew.complete) {
@@ -151,14 +153,16 @@ public class Client extends Thread {
 	}
 
 	/** Simple class to wait for enumeration of a type to complete */
-	protected class EnumerationWaiter implements ProxyListener {
+	private class EnumerationWaiter<T extends SonarObject>
+		implements ProxyListener<T>
+	{
 		protected boolean complete = false;
-		public void proxyAdded(SonarObject proxy) { }
+		public void proxyAdded(T proxy) { }
 		public void enumerationComplete() {
 			complete = true;
 		}
-		public void proxyRemoved(SonarObject proxy) { }
-		public void proxyChanged(SonarObject proxy, String a) { }
+		public void proxyRemoved(T proxy) { }
+		public void proxyChanged(T proxy, String a) { }
 	}
 
 	/** Login to the SONAR server */
