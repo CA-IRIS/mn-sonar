@@ -34,7 +34,7 @@ import us.mn.state.dot.sonar.SonarObject;
  *
  * @author Douglas Lau
  */
-public class TypeCache<T extends SonarObject> {
+public class TypeCache<T extends SonarObject> implements Iterable<T> {
 
 	/** Initial capacity of type hash */
 	static private final int INITIAL_CAPACITY = 256;
