@@ -15,6 +15,8 @@
 package us.mn.state.dot.sonar.server;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Message;
@@ -195,6 +197,12 @@ public class TypeNode {
 				return o;
 		}
 		return null;
+	}
+
+	/** Get an iterator of all objects of the type */
+	public Iterator<SonarObject> iterator() {
+		return Collections.unmodifiableCollection(
+			children.values()).iterator();
 	}
 
 	/** Get the number of objects of this type */

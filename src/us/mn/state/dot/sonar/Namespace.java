@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.sonar;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.util.Iterator;
 
 /**
  * A namespace is a mapping of names to objects.
@@ -313,6 +314,11 @@ abstract public class Namespace {
 	 * @param c Checker callback
 	 * @return First object which Checker returns true */
 	abstract public SonarObject findObject(String tname, Checker c);
+
+	/** Get an iterator for all objects of a type.
+	 * @param tname Sonar type name.
+	 * @return Iterator of all objects of the type. */
+	abstract public Iterator<SonarObject> iterator(String tname);
 
 	/** Get a count of the number of objects of the specified type.
 	 * @param tname Sonar type name

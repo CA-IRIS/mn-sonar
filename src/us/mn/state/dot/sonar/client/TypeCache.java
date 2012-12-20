@@ -15,6 +15,8 @@
 package us.mn.state.dot.sonar.client;
 
 import java.lang.reflect.Proxy;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -324,5 +326,11 @@ public class TypeCache<T extends SonarObject> {
 				return proxy;
 		}
 		return null;
+	}
+
+	/** Get an iterator of all objects of the type */
+	public Iterator<T> iterator() {
+		return Collections.unmodifiableCollection(
+			children.values()).iterator();
 	}
 }

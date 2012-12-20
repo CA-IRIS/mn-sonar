@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2012  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.sonar.server;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.HashMap;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Message;
@@ -221,6 +222,17 @@ public class ServerNamespace extends Namespace {
 		TypeNode t = _getTypeNode(tname);
 		if(t != null)
 			return t.findObject(c);
+		else
+			return null;
+	}
+
+	/** Get an iterator for all objects of a type.
+	 * @param tname Sonar type name.
+	 * @return Iterator of all objects of the type. */
+	public Iterator<SonarObject> iterator(String tname) {
+		TypeNode t = _getTypeNode(tname);
+		if(t != null)
+			return t.iterator();
 		else
 			return null;
 	}
