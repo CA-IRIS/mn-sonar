@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Message;
 import us.mn.state.dot.sonar.MessageEncoder;
 import us.mn.state.dot.sonar.Name;
@@ -188,16 +187,6 @@ public class TypeNode {
 		throws SonarException
 	{
 		dispatcher.setField(o, a, v);
-	}
-
-	/** Find an object using the supplied checker callback */
-	@SuppressWarnings("unchecked")
-	public SonarObject findObject(Checker c) {
-		for(SonarObject o: children.values()) {
-			if(c.check(o))
-				return o;
-		}
-		return null;
 	}
 
 	/** Get an iterator of all objects of the type */

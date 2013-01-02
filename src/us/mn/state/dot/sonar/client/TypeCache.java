@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
@@ -318,15 +317,6 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 	public void ignoreObject(T proxy) {
 		if(!isZombie(proxy))
 			client.ignoreName(new Name(tname, proxy.getName()));
-	}
-
-	/** Find an object using the supplied checker callback */
-	public T findObject(Checker<T> c) {
-		for(T proxy: children.values()) {
-			if(c.check(proxy))
-				return proxy;
-		}
-		return null;
 	}
 
 	/** Get an iterator of all objects of the type */

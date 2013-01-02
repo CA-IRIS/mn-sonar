@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -185,23 +185,35 @@ abstract public class Namespace {
 	/** Check if a set of capabilites has read privileges for a name */
 	protected boolean canRead(Capability[] caps, Name n) {
 		for(Capability c: caps) {
-			if(canRead(c, n))
+			if(c.getEnabled() && canRead(c, n))
 				return true;
 		}
 		return false;
 	}
 
-	/** Check if a capability has read privileges for a name */
-	protected boolean canRead(final Capability c, final Name n) {
-		return c.getEnabled() && null != findObject(
-		       Privilege.SONAR_TYPE, new Checker<Privilege>()
-		{
-			public boolean check(Privilege p) {
-				return p.getCapability() == c &&
-				       p.getPrivR() &&
-				       n.matches(p);
+	/** Check if a capability has read privileges for a name.
+	 * @param c Capability to check.
+	 * @param n Name to check.
+	 * @return true If name can be read according to capability. */
+	private boolean canRead(Capability c, Name n) {
+		Iterator<SonarObject> it = iterator(Privilege.SONAR_TYPE);
+		while(it.hasNext()) {
+			SonarObject so = it.next();
+			if(so instanceof Privilege) {
+				if(canRead((Privilege)so, c, n))
+					return true;
 			}
-		});
+		}
+		return false;
+	}
+
+	/** Check if a privilege/capability has read privileges for a name.
+	 * @param p Privilege to check.
+	 * @param c Capability to check.
+	 * @param n Name to check.
+	 * @return true If name can be read according to priv/cap. */
+	private boolean canRead(Privilege p, Capability c, Name n) {
+		return p.getCapability() == c && p.getPrivR() && n.matches(p);
 	}
 
 	/** Check if a user has update privileges for a name */
@@ -218,23 +230,35 @@ abstract public class Namespace {
 	/** Check if a set of capabilites has update privileges for a name */
 	protected boolean canUpdate(Capability[] caps, Name n) {
 		for(Capability c: caps) {
-			if(canUpdate(c, n))
+			if(c.getEnabled() && canUpdate(c, n))
 				return true;
 		}
 		return false;
 	}
 
-	/** Check if a capability has update privileges for a name */
-	protected boolean canUpdate(final Capability c, final Name n) {
-		return c.getEnabled() && null != findObject(
-		       Privilege.SONAR_TYPE, new Checker<Privilege>()
-		{
-			public boolean check(Privilege p) {
-				return p.getCapability() == c &&
-				       p.getPrivW() &&
-				       n.matches(p);
+	/** Check if a capability has update privileges for a name.
+	 * @param c Capability to check.
+	 * @param n Name to check.
+	 * @return true If name can be updated according to capability. */
+	private boolean canUpdate(Capability c, Name n) {
+		Iterator<SonarObject> it = iterator(Privilege.SONAR_TYPE);
+		while(it.hasNext()) {
+			SonarObject so = it.next();
+			if(so instanceof Privilege) {
+				if(canUpdate((Privilege)so, c, n))
+					return true;
 			}
-		});
+		}
+		return false;
+	}
+
+	/** Check if a privilege/capability has update privileges for a name.
+	 * @param p Privilege to check.
+	 * @param c Capability to check.
+	 * @param n Name to check.
+	 * @return true If name can be updated according to priv/cap. */
+	private boolean canUpdate(Privilege p, Capability c, Name n) {
+		return p.getCapability() == c && p.getPrivW() && n.matches(p);
 	}
 
 	/** Check if a user has add privileges for a name */
@@ -251,23 +275,35 @@ abstract public class Namespace {
 	/** Check if a set of capabilites has add privileges for a name */
 	protected boolean canAdd(Capability[] caps, Name n) {
 		for(Capability c: caps) {
-			if(canAdd(c, n))
+			if(c.getEnabled() && canAdd(c, n))
 				return true;
 		}
 		return false;
 	}
 
-	/** Check if a capability has add privileges for a name */
-	protected boolean canAdd(final Capability c, final Name n) {
-		return c.getEnabled() && null != findObject(
-		       Privilege.SONAR_TYPE, new Checker<Privilege>()
-		{
-			public boolean check(Privilege p) {
-				return p.getCapability() == c &&
-				       p.getPrivC() &&
-				       n.matches(p);
+	/** Check if a capability has add privileges for a name.
+	 * @param c Capability to check.
+	 * @param n Name to check.
+	 * @return true If name can be added according to capability. */
+	private boolean canAdd(Capability c, Name n) {
+		Iterator<SonarObject> it = iterator(Privilege.SONAR_TYPE);
+		while(it.hasNext()) {
+			SonarObject so = it.next();
+			if(so instanceof Privilege) {
+				if(canAdd((Privilege)so, c, n))
+					return true;
 			}
-		});
+		}
+		return false;
+	}
+
+	/** Check if a privilege/capability has add privileges for a name.
+	 * @param p Privilege to check.
+	 * @param c Capability to check.
+	 * @param n Name to check.
+	 * @return true If name can be added according to priv/cap. */
+	private boolean canAdd(Privilege p, Capability c, Name n) {
+		return p.getCapability() == c && p.getPrivC() && n.matches(p);
 	}
 
 	/** Check if a user has remove privileges for a name */
@@ -284,23 +320,35 @@ abstract public class Namespace {
 	/** Check if a set of capabilites has remove privileges for a name */
 	protected boolean canRemove(Capability[] caps, Name n) {
 		for(Capability c: caps) {
-			if(canRemove(c, n))
+			if(c.getEnabled() && canRemove(c, n))
 				return true;
 		}
 		return false;
 	}
 
-	/** Check if a capability has remove privileges for a name */
-	protected boolean canRemove(final Capability c, final Name n) {
-		return c.getEnabled() && null != findObject(
-		       Privilege.SONAR_TYPE, new Checker<Privilege>()
-		{
-			public boolean check(Privilege p) {
-				return p.getCapability() == c &&
-				       p.getPrivD() &&
-				       n.matches(p);
+	/** Check if a capability has remove privileges for a name.
+	 * @param c Capability to check.
+	 * @param n Name to check.
+	 * @return true If name can be removed according to capability. */
+	private boolean canRemove(Capability c, Name n) {
+		Iterator<SonarObject> it = iterator(Privilege.SONAR_TYPE);
+		while(it.hasNext()) {
+			SonarObject so = it.next();
+			if(so instanceof Privilege) {
+				if(canRemove((Privilege)so, c, n))
+					return true;
 			}
-		});
+		}
+		return false;
+	}
+
+	/** Check if a privilege/capability has remove privileges for a name.
+	 * @param p Privilege to check.
+	 * @param c Capability to check.
+	 * @param n Name to check.
+	 * @return true If name can be removed according to priv/cap. */
+	private boolean canRemove(Privilege p, Capability c, Name n) {
+		return p.getCapability() == c && p.getPrivD() && n.matches(p);
 	}
 
 	/** Lookup an object in the SONAR namespace.
@@ -308,12 +356,6 @@ abstract public class Namespace {
 	 * @param oname Sonar object name
 	 * @return Object from namespace or null if name does not exist */
 	abstract public SonarObject lookupObject(String tname, String oname);
-
-	/** Find an object by calling a checker for each object of a type.
-	 * @param tname Sonar type name
-	 * @param c Checker callback
-	 * @return First object which Checker returns true */
-	abstract public SonarObject findObject(String tname, Checker c);
 
 	/** Get an iterator for all objects of a type.
 	 * @param tname Sonar type name.

@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.sonar.client;
 
 import java.util.Iterator;
 import java.util.HashMap;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
@@ -135,19 +134,6 @@ public class ClientNamespace extends Namespace {
 		TypeCache t = types.get(tname);
 		if(t != null)
 			return t.lookupObject(oname);
-		else
-			return null;
-	}
-
-	/** Find an object by calling a checker for each object of a type.
-	 * @param tname Sonar type name
-	 * @param c Checker callback
-	 * @return First object which Checker returns true */
-	@SuppressWarnings("unchecked")
-	public SonarObject findObject(String tname, Checker c) {
-		TypeCache t = types.get(tname);
-		if(t != null)
-			return t.findObject(c);
 		else
 			return null;
 	}
