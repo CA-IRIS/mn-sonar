@@ -16,6 +16,7 @@ package us.mn.state.dot.sonar.client;
 
 import java.util.Iterator;
 import java.util.HashMap;
+import us.mn.state.dot.sonar.EmptyIterator;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
@@ -147,7 +148,7 @@ public class ClientNamespace extends Namespace {
 		if(t != null)
 			return t.iterator();
 		else
-			return null;
+			return new EmptyIterator();
 	}
 
 	/** Get a count of the number of objects of the specified type.

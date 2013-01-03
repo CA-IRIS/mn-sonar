@@ -17,6 +17,7 @@ package us.mn.state.dot.sonar.server;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.HashMap;
+import us.mn.state.dot.sonar.EmptyIterator;
 import us.mn.state.dot.sonar.Message;
 import us.mn.state.dot.sonar.MessageEncoder;
 import us.mn.state.dot.sonar.Name;
@@ -221,7 +222,7 @@ public class ServerNamespace extends Namespace {
 		if(t != null)
 			return t.iterator();
 		else
-			return null;
+			return new EmptyIterator();
 	}
 
 	/** Get a count of the number of objects of the specified type.
