@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -212,6 +212,14 @@ class ClientConduit extends Conduit {
 	protected void disconnect(String msg) {
 		super.disconnect();
 		System.err.println("SONAR: " + msg);
+		closeChannel();
+		closeSelector();
+		loggedIn = false;
+		handler.handle(new SonarException("Disconnected from server"));
+	}
+
+	/** Close the channel */
+	private void closeChannel() {
 		try {
 			channel.close();
 		}
@@ -219,8 +227,17 @@ class ClientConduit extends Conduit {
 			System.err.println("SONAR: Close error: " +
 				e.getMessage());
 		}
-		loggedIn = false;
-		handler.handle(new SonarException("Disconnected from server"));
+	}
+
+	/** Close the selector */
+	private void closeSelector() {
+		try {
+			key.selector().close();
+		}
+		catch(IOException e) {
+			System.err.println("SONAR: Close error: " +
+				e.getMessage());
+		}
 	}
 
 	/** Process any incoming messages */

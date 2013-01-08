@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,7 +95,7 @@ public class Client extends Thread {
 
 	/** Client loop to perfrom socket I/O */
 	public void run() {
-		while(true) {
+		while(selector.isOpen()) {
 			try {
 				doSelect();
 			}
@@ -105,6 +105,7 @@ public class Client extends Thread {
 				break;
 			}
 		}
+		processor.dispose();
 	}
 
 	/** Select and perform I/O on ready channels */
