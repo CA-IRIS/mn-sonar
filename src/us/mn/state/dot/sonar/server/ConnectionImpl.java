@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -287,7 +287,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Notify the client of an attribute change.
 	 * This may only be called on the Task Processor thread. */
 	void notifyAttribute(Name name, String[] params) {
-		if(isWatching(name))
+		if(namespace.canRead(user, name) && isWatching(name))
 			notifyAttribute(name.toString(), params);
 	}
 
