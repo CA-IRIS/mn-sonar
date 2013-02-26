@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -134,6 +134,11 @@ public class AttributeDispatcher {
 	/** Get an array of readable attributes */
 	public String[] getReadableAttributes() {
 		return getters.keySet().toArray(EMPTY_STRING);
+	}
+
+	/** Test if an attribute is readable */
+	public boolean isReadable(String a) {
+		return getters.containsKey(a);
 	}
 
 	/** Lookup all the attributes of the specified class */

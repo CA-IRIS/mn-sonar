@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -356,9 +356,11 @@ public class TaskProcessor {
 
 	/** Notify all connections watching a name of an attribute change. */
 	void notifyAttribute(Name name, String[] params) {
-		List<ConnectionImpl> clist = getConnectionList();
-		for(ConnectionImpl c: clist)
-			c.notifyAttribute(name, params);
+		if(namespace.isReadable(name)) {
+			List<ConnectionImpl> clist = getConnectionList();
+			for(ConnectionImpl c: clist)
+				c.notifyAttribute(name, params);
+		}
 	}
 
 	/** Notify all connections watching a name of an object remove. */

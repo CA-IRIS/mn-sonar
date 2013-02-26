@@ -88,6 +88,18 @@ public class ServerNamespace extends Namespace {
 		t.setField(phantom, name.getAttributePart(), v);
 	}
 
+	/** Test if an attribute is readable */
+	boolean isReadable(Name name) {
+		try {
+			TypeNode t = getTypeNode(name);
+			return t.isReadable(name.getAttributePart());
+		}
+		catch(NamespaceError e) {
+			// Unregistered type
+			return false;
+		}
+	}
+
 	/** Get the value of an attribute */
 	String[] getAttribute(Name name) throws SonarException {
 		TypeNode t = getTypeNode(name);

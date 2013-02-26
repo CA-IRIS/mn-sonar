@@ -109,6 +109,11 @@ public class TypeNode {
 		return children.get(n);
 	}
 
+	/** Test if an attribute is readable */
+	public boolean isReadable(String a) {
+		return dispatcher.isReadable(a);
+	}
+
 	/** Get the value of an attribute */
 	public String[] getValue(SonarObject o, String a)
 		throws SonarException
