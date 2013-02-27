@@ -63,6 +63,11 @@ public class AttributeDispatcher {
 			(paramTypes[0] == String.class);
 	}
 
+	/** Get an attribute name from a setter/getter */
+	static private String attribute_name(String n) {
+		return n.substring(3, 4).toLowerCase() + n.substring(4);
+	}
+
 	/** Lookup the constructor */
 	static protected Constructor lookup_constructor(Class c) {
 		for(Constructor con: c.getConstructors()) {
@@ -97,12 +102,12 @@ public class AttributeDispatcher {
 			return lookup_method(c, DESTROY_METHOD);
 	}
 
-	/** Lookup all attribute setter or getter methods */
-	protected HashMap<String, Method> lookup_methods(String prefix,
-		Class c)
+	/** Lookup attribute setter or getter methods */
+	private HashMap<String, Method> lookup_methods(String prefix,
+		TreeSet<String> attrs, Class c)
 	{
 		HashMap<String, Method> map = new HashMap<String, Method>();
-		for(String a: attributes) {
+		for(String a: attrs) {
 			Method m = lookup_method(c, prefix + a);
 			if(m != null)
 				map.put(a, m);
@@ -113,8 +118,11 @@ public class AttributeDispatcher {
 	/** SONAR namespace */
 	protected final Namespace namespace;
 
-	/** Attributes which can be dispatched */
-	protected final TreeSet<String> attributes = new TreeSet<String>();
+	/** Attributes which can be written (set) */
+	private final TreeSet<String> w_attrs = new TreeSet<String>();
+
+	/** Attributes which can be read (get) */
+	private final TreeSet<String> r_attrs = new TreeSet<String>();
 
 	/** Constructor to create a new object */
 	protected final Constructor constructor;
@@ -158,11 +166,10 @@ public class AttributeDispatcher {
 	protected void lookup_iface_attributes(Class iface) {
 		for(Method m: iface.getDeclaredMethods()) {
 			String n = m.getName();
-			if(n.startsWith("get") || n.startsWith("set")) {
-				String a = n.substring(3, 4).toLowerCase() +
-					n.substring(4);
-				attributes.add(a);
-			}
+			if(n.startsWith("get"))
+				r_attrs.add(attribute_name(n));
+			if(n.startsWith("set"))
+				w_attrs.add(attribute_name(n));
 		}
 	}
 
@@ -173,13 +180,13 @@ public class AttributeDispatcher {
 		constructor = lookup_constructor(c);
 		storer = lookup_storer(c);
 		destroyer = lookup_destroyer(c);
-		setters = lookup_methods("set", c);
-		getters = lookup_methods("get", c);
+		setters = lookup_methods("set", w_attrs, c);
+		getters = lookup_methods("get", r_attrs, c);
 		// Accessor methods with a "do" prefix are required for
 		// methods which can throw exceptions not declared
 		// in the interface specification.
-		setters.putAll(lookup_methods("doSet", c));
-		getters.putAll(lookup_methods("doGet", c));
+		setters.putAll(lookup_methods("doSet", w_attrs, c));
+		getters.putAll(lookup_methods("doGet", r_attrs, c));
 	}
 
 	/** Create a new object with the given name */
