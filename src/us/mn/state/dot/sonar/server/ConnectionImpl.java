@@ -287,7 +287,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Notify the client of an attribute change.
 	 * This may only be called on the Task Processor thread. */
 	void notifyAttribute(Name name, String[] params) {
-		if(namespace.canRead(user, name) && isWatching(name))
+		User u = user;
+		if(u != null && namespace.canRead(u, name) && isWatching(name))
 			notifyAttribute(name.toString(), params);
 	}
 
