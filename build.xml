@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!-- ant build file for sonar project
-     Copyright (C) 2007-2012  Minnesota Department of Transportation
+     Copyright (C) 2007-2013  Minnesota Department of Transportation
 
      This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -100,8 +100,7 @@
 	</target>
 
 	<!-- Prepare the build directory -->
-	<target name="prepare"
-	        description="Prepare the build directory">
+	<target name="prepare">
 
 		<copy todir="${build.src}" filtering="true">
 			<fileset dir="${src.dir}"/>
@@ -126,13 +125,14 @@
 	<!-- Compile the source code -->
 	<target name="compile"
 	        depends="check,prepare"
-	        description="Compile all of the source files for the project">
+	        description="Compile the source code">
 		<javac srcdir="${build.src}"
 		       destdir="${build.classes}"
 		       debug="${debug}"
 		       deprecation="on"
-		       source="1.5"
-		       target="1.5">
+		       includeantruntime="false"
+		       source="1.6"
+		       target="1.6">
 			<classpath refid="classpath"/>
 			<compilerarg value="-Xlint:unchecked"/>
 		</javac>
@@ -246,7 +246,7 @@
 
 	<!-- Clean up generated stuff -->
 	<target name="clean"
-	        description="Remove the build and distribution directories">
+	        description="Clean up the created directories">
 		<delete dir="${build.dir}"/>
 		<delete dir="${dist.client}"/>
 		<delete dir="${dist.server}"/>
@@ -255,8 +255,7 @@
 
        <!-- init junit dirs-->
        <target name="init-junit"
-	       depends="prepare"
-	       description="Init junit test cases">
+	       depends="prepare">
 	       <delete dir="${testdata.dir}"/>
 	       <delete dir="${testreports.dir}"/>
 	       <mkdir dir="${testbuild.dir}" />
@@ -266,14 +265,16 @@
 
        <!-- compile junit test cases -->
        <target name="compile-junit"
-	       depends="compile, init-junit"
-	       description="Compile junit test cases">
-	       <javac srcdir="${testsrc.dir}"
-		       includeAntRuntime="true"
+	       depends="compile, init-junit">
+		<javac srcdir="${testsrc.dir}"
 		       destdir="${testbuild.dir}"
-		       debug="true">
-		       <classpath refid="junit.classpath"/>
-	       </javac>
+		       debug="true"
+		       deprecation="on"
+		       includeantruntime="true"
+		       source="1.6"
+		       target="1.6">
+			<classpath refid="junit.classpath"/>
+		</javac>
        </target>
 
        <!-- run junit test cases -->
