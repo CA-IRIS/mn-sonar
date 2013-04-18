@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,10 +14,10 @@
  */
 package us.mn.state.dot.sonar.test;
 
+import java.util.Iterator;
 import java.util.Properties;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sonar.Capability;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.sonar.Role;
@@ -111,36 +111,26 @@ public class TestClient extends Client {
 	}
 
 	void printRoles() {
-		roles.findObject(new Checker<Role>() {
-			public boolean check(Role r) {
-				System.err.println("ROLE " + r.getName() +
-					": " + r.getEnabled());
-				for(Capability c: r.getCapabilities())
-					System.err.println("  CAP " + c);
-				return false;
-			}
-		});
+		for(Role r: roles) {
+			System.err.println("ROLE " + r.getName() +
+				": " + r.getEnabled());
+			for(Capability c: r.getCapabilities())
+				System.err.println("  CAP " + c);
+		}
 	}
 
 	void printUsers() {
-		users.findObject(new Checker<User>() {
-			public boolean check(User u) {
-				System.err.println(u.getName() + ": " +
-					u.getDn() + ", role: " + u.getRole());
-				return false;
-			}
-		});
+		for(User u: users) {
+			System.err.println(u.getName() + ": " +
+				u.getDn() + ", role: " + u.getRole());
+		}
 	}
 
 	void printConnections() {
-		connections.findObject(new Checker<Connection>() {
-			public boolean check(Connection cx) {
-				User u = cx.getUser();
-				System.err.println(cx.getName() + ": " +
-					u.getName() + " (" + u.getFullName() +
-					")");
-				return false;
-			}
-		});
+		for(Connection cx: connections) {
+			User u = cx.getUser();
+			System.err.println(cx.getName() + ": " +
+				u.getName() + " (" + u.getFullName() + ")");
+		}
 	}
 }
