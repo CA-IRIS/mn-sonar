@@ -241,7 +241,9 @@
 			 windowtitle="${name} version ${version} API"
 			 doctitle="${name} version ${version}"
 		         bottom="Copyright &#169; Minnesota Department of
-		                 Transportation. All Rights Reserved."/>
+		                 Transportation. All Rights Reserved.">
+			<classpath refid="classpath"/>
+		</javadoc>
 	</target>
 
 	<!-- Clean up generated stuff -->
