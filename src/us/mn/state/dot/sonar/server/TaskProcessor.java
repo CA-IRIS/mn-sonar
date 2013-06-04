@@ -24,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeoutException;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
@@ -400,7 +401,13 @@ public class TaskProcessor {
 			}
 		};
 		processor.addJob(job);
-		job.waitForCompletion();
+		try {
+			// Only wait for 30 seconds before giving up
+			job.waitForCompletion(30000);
+		}
+		catch(TimeoutException e) {
+			throw new SonarException(e);
+		}
 	}
 
 	/** Store an object in the server's namespace. */
