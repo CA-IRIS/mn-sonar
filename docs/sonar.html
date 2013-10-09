@@ -190,11 +190,14 @@
 <h2 id="wire">Wire Protocol</h2>
 <h3>Messages</h3>
 <p>
-	Messages are simple strings of UTF-8 characters. Each message is
-	terminated with a null character (0). There are only a few messages,
-	each starting with its code (letter). After the code, there may be
-	additional parameters, depending on the message. Each parameter is
-	separated by a vertical tab character (11).
+	Messages are simple strings of UTF-8 characters.
+	Each message is terminated with an ASCII RS (record separator) character
+	(0x1E).
+	There are only a few messages, each starting with its code (letter).
+	After the code, there may be additional parameters, depending on the
+	message.
+	Each parameter is separated by an ASCII US (unit separator) character
+	(0x1F).
 </p>
 <ul>
 <li><em>CLIENT only</em>
