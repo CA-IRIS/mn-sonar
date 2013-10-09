@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,11 +23,14 @@ import java.util.List;
  */
 public enum Message {
 
-	/** Delimiter between message parameters (vertical tab) */
-	DELIMITER('\u000b'),
+	/** Separator between messages (ASCII record separator) */
+	RECORD_SEP('\u001e'),
 
-	/** Message terminator code point (null character) */
-	TERMINATOR('\u0000'),
+	/** Separator between message parameters (ASCII unit separator) */
+	UNIT_SEP('\u001f'),
+
+	/** Null reference code point (ASCII NUL) */
+	NULL_REF('\u0000'),
 
 	/** Login and authenticate a user */
 	LOGIN('l') { public void handle(Conduit c, List<String> p)

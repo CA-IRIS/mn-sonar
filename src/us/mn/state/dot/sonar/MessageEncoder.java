@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,8 +32,8 @@ public class MessageEncoder {
 
 	/** Strip message delimiters and terminators from a string */
 	static protected String stripString(String s) {
-		s = s.replace(Message.DELIMITER.code, ' ');
-		return s.replace(Message.TERMINATOR.code, ' ');
+		s = s.replace(Message.UNIT_SEP.code, ' ');
+		return s.replace(Message.RECORD_SEP.code, ' ');
 	}
 
 	/** Byte buffer output stream */
@@ -67,16 +67,16 @@ public class MessageEncoder {
 	{
 		writer.write(m.code);
 		if(name != null) {
-			writer.write(Message.DELIMITER.code);
+			writer.write(Message.UNIT_SEP.code);
 			writer.write(name);
 			if(params != null) {
 				for(String p: params) {
-					writer.write(Message.DELIMITER.code);
+					writer.write(Message.UNIT_SEP.code);
 					writer.write(stripString(p));
 				}
 			}
 		}
-		writer.write(Message.TERMINATOR.code);
+		writer.write(Message.RECORD_SEP.code);
 	}
 
 	/** Flush the encoded data */

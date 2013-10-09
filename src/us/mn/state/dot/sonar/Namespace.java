@@ -25,6 +25,9 @@ import java.util.Iterator;
  */
 abstract public class Namespace {
 
+	/** NULL REF string */
+	static private String NULL_STR = String.valueOf(Message.NULL_REF.code);
+
 	/** Get the name of a SONAR type */
 	static public String typeName(Class t)
 		throws NoSuchFieldException, IllegalAccessException
@@ -56,7 +59,7 @@ abstract public class Namespace {
 		} else if(v != null)
 			return v.toString();
 		else
-			return "";
+			return NULL_STR;
 	}
 
 	/** Marshall java parameters into a parameter value string */
@@ -71,10 +74,10 @@ abstract public class Namespace {
 
 	/** Unmarshall a parameter value string into a java object */
 	public Object unmarshall(Class t, String p) throws ProtocolError {
+		if(NULL_STR.equals(p))
+			return null;
 		if(t == String.class)
 			return p;
-		if("".equals(p))
-			return null;
 		try {
 			if(t == Integer.TYPE || t == Integer.class)
 				return Integer.valueOf(p);

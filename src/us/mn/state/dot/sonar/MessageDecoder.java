@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2013  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,12 +78,12 @@ public class MessageDecoder {
 			if(ch < 0)
 				break;
 			char c = (char)ch;
-			if(c == Message.TERMINATOR.code) {
+			if(c == Message.RECORD_SEP.code) {
 				completeParameter();
 				List<String> p = params;
 				params = new LinkedList<String>();
 				return p;
-			} else if(c == Message.DELIMITER.code)
+			} else if(c == Message.UNIT_SEP.code)
 				completeParameter();
 			else
 				m_buf.append(c);

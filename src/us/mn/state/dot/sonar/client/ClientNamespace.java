@@ -132,11 +132,12 @@ public class ClientNamespace extends Namespace {
 	 * @param oname Sonar object name
 	 * @return Object from namespace or null if name does not exist */
 	public SonarObject lookupObject(String tname, String oname) {
-		TypeCache t = types.get(tname);
-		if(t != null)
-			return t.lookupObject(oname);
-		else
-			return null;
+		if(oname != null) {
+			TypeCache t = types.get(tname);
+			if(t != null)
+				return t.lookupObject(oname);
+		}
+		return null;
 	}
 
 	/** Get an iterator for all objects of a type.
