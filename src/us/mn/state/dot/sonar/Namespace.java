@@ -47,7 +47,7 @@ abstract public class Namespace {
 	}
 
 	/** Make an array of the given class and size */
-	static protected Object[] makeArray(Class t, int size) {
+	static private Object[] makeArray(Class t, int size) {
 		return (Object [])Array.newInstance(t, size);
 	}
 
@@ -102,7 +102,7 @@ abstract public class Namespace {
 	}
 
 	/** Unmarshall a SONAR object reference */
-	protected Object unmarshallObject(Class t, String p)
+	private Object unmarshallObject(Class t, String p)
 		throws ProtocolError
 	{
 		try {
@@ -121,7 +121,7 @@ abstract public class Namespace {
 	}
 
 	/** Unmarshall a SONAR object reference */
-	protected Object unmarshallObjectB(Class t, String p)
+	private Object unmarshallObjectB(Class t, String p)
 		throws NoSuchFieldException, IllegalAccessException
 	{
 		try {
@@ -149,7 +149,7 @@ abstract public class Namespace {
 	}
 
 	/** Unmarshall parameter strings into a java array parameter */
-	protected Object[] unmarshallArray(Class t, String[] v)
+	private Object[] unmarshallArray(Class t, String[] v)
 		throws ProtocolError
 	{
 		Object[] values = makeArray(t, v.length);
@@ -180,13 +180,13 @@ abstract public class Namespace {
 	}
 
 	/** Check if a role has read privileges for a name */
-	protected boolean canRead(Role r, Name n) {
+	private boolean canRead(Role r, Name n) {
 		return r != null && r.getEnabled() &&
 		       canRead(r.getCapabilities(), n);
 	}
 
 	/** Check if a set of capabilites has read privileges for a name */
-	protected boolean canRead(Capability[] caps, Name n) {
+	private boolean canRead(Capability[] caps, Name n) {
 		for(Capability c: caps) {
 			if(c.getEnabled() && canRead(c, n))
 				return true;
@@ -225,13 +225,13 @@ abstract public class Namespace {
 	}
 
 	/** Check if a role has update privileges for a name */
-	protected boolean canUpdate(Role r, Name n) {
+	private boolean canUpdate(Role r, Name n) {
 		return r != null && r.getEnabled() &&
 		       canUpdate(r.getCapabilities(), n);
 	}
 
 	/** Check if a set of capabilites has update privileges for a name */
-	protected boolean canUpdate(Capability[] caps, Name n) {
+	private boolean canUpdate(Capability[] caps, Name n) {
 		for(Capability c: caps) {
 			if(c.getEnabled() && canUpdate(c, n))
 				return true;
@@ -270,13 +270,13 @@ abstract public class Namespace {
 	}
 
 	/** Check if a role has add privileges for a name */
-	protected boolean canAdd(Role r, Name n) {
+	private boolean canAdd(Role r, Name n) {
 		return r != null && r.getEnabled() &&
 		       canAdd(r.getCapabilities(), n);
 	}
 
 	/** Check if a set of capabilites has add privileges for a name */
-	protected boolean canAdd(Capability[] caps, Name n) {
+	private boolean canAdd(Capability[] caps, Name n) {
 		for(Capability c: caps) {
 			if(c.getEnabled() && canAdd(c, n))
 				return true;
@@ -315,13 +315,13 @@ abstract public class Namespace {
 	}
 
 	/** Check if a role has remove privileges for a name */
-	protected boolean canRemove(Role r, Name n) {
+	private boolean canRemove(Role r, Name n) {
 		return r != null && r.getEnabled() &&
 		       canRemove(r.getCapabilities(), n);
 	}
 
 	/** Check if a set of capabilites has remove privileges for a name */
-	protected boolean canRemove(Capability[] caps, Name n) {
+	private boolean canRemove(Capability[] caps, Name n) {
 		for(Capability c: caps) {
 			if(c.getEnabled() && canRemove(c, n))
 				return true;
