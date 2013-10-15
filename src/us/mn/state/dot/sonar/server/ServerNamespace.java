@@ -35,23 +35,23 @@ import us.mn.state.dot.sonar.SonarObject;
 public class ServerNamespace extends Namespace {
 
 	/** All SONAR types are stored in the root of the namespace */
-	protected final HashMap<String, TypeNode> root =
+	private final HashMap<String, TypeNode> root =
 		new HashMap<String, TypeNode>();
 
 	/** Register a new type in the namespace */
-	protected TypeNode registerType(SonarObject o) {
+	private TypeNode registerType(SonarObject o) {
 		return registerType(o.getTypeName(), o.getClass());
 	}
 
 	/** Get a type node from the namespace */
-	protected TypeNode _getTypeNode(String t) {
+	private TypeNode _getTypeNode(String t) {
 		synchronized(root) {
 			return root.get(t);
 		}
 	}
 
 	/** Get a type node from the namespace */
-	protected TypeNode getTypeNode(SonarObject o) {
+	private TypeNode getTypeNode(SonarObject o) {
 		TypeNode n = _getTypeNode(o.getTypeName());
 		if(n == null)
 			return registerType(o);
@@ -60,7 +60,7 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Get a type node from the namespace by name */
-	protected TypeNode getTypeNode(Name name) throws NamespaceError {
+	private TypeNode getTypeNode(Name name) throws NamespaceError {
 		TypeNode t = _getTypeNode(name.getTypePart());
 		if(t == null)
 			throw NamespaceError.nameUnknown(name.toString());
@@ -127,7 +127,7 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Enumerate the root of the namespace */
-	protected void enumerateRoot(MessageEncoder enc) throws IOException {
+	private void enumerateRoot(MessageEncoder enc) throws IOException {
 		synchronized(root) {
 			for(TypeNode t: root.values())
 				enc.encode(Message.TYPE, t.name);
@@ -136,7 +136,7 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Enumerate all objects of the named type */
-	protected void enumerateType(MessageEncoder enc, Name name)
+	private void enumerateType(MessageEncoder enc, Name name)
 		throws SonarException, IOException
 	{
 		TypeNode t = getTypeNode(name);
@@ -146,7 +146,7 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Enumerate all attributes of the named object */
-	protected void enumerateObject(MessageEncoder enc, SonarObject o)
+	void enumerateObject(MessageEncoder enc, SonarObject o)
 		throws SonarException, IOException
 	{
 		TypeNode t = getTypeNode(o);
@@ -154,7 +154,7 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Enumerate all attributes of the named object */
-	protected void enumerateObject(MessageEncoder enc, Name name)
+	private void enumerateObject(MessageEncoder enc, Name name)
 		throws SonarException, IOException
 	{
 		SonarObject o = lookupObject(name);
@@ -165,7 +165,7 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Enumerate a named attribute */
-	protected void enumerateAttribute(MessageEncoder enc, Name name)
+	private void enumerateAttribute(MessageEncoder enc, Name name)
 		throws SonarException, IOException
 	{
 		if(name.getObjectPart().equals("")) {
@@ -178,7 +178,7 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Enumerate everything contained by a name in the namespace */
-	void enumerate(Name name, MessageEncoder enc) throws SonarException,
+	void enumerate(MessageEncoder enc, Name name) throws SonarException,
 		IOException
 	{
 		if(name.isRoot())

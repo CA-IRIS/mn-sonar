@@ -386,23 +386,6 @@ public class ConnectionImpl extends Conduit implements Connection {
 		m.handle(this, params);
 	}
 
-	/** Set the value of an attribute.
-	 * This may only be called on the Task Processor thread. */
-	protected void setAttribute(Name name, List<String> params)
-		throws SonarException
-	{
-		String[] v = new String[params.size() - 2];
-		for(int i = 0; i < v.length; i++)
-			v[i] =  params.get(i + 2);
-		if(isPhantom(name))
-			namespace.setAttribute(name, v, phantom);
-		else {
-			phantom = namespace.setAttribute(name, v);
-			if(phantom == null)
-				processor.notifyAttribute(name, v);
-		}
-	}
-
 	/** Start writing data to client.
 	 * This may only be called on the Task Processor thread. */
 	protected void startWrite() throws IOException {
@@ -514,7 +497,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			throw PermissionDenied.create(name);
 		startWatching(name);
 		try {
-			namespace.enumerate(name, state.encoder);
+			namespace.enumerate(state.encoder, name);
 		}
 		catch(IOException e) {
 			throw new SonarException(e.getMessage());
@@ -601,5 +584,22 @@ public class ConnectionImpl extends Conduit implements Connection {
 			setAttribute(name, params);
 		} else
 			throw NamespaceError.NAME_INVALID;
+	}
+
+	/** Set the value of an attribute.
+	 * This may only be called on the Task Processor thread. */
+	private void setAttribute(Name name, List<String> params)
+		throws SonarException
+	{
+		String[] v = new String[params.size() - 2];
+		for(int i = 0; i < v.length; i++)
+			v[i] =  params.get(i + 2);
+		if(isPhantom(name))
+			namespace.setAttribute(name, v, phantom);
+		else {
+			phantom = namespace.setAttribute(name, v);
+			if(phantom == null)
+				processor.notifyAttribute(name, v);
+		}
 	}
 }
