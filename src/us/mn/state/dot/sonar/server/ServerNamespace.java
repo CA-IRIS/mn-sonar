@@ -15,6 +15,7 @@
 package us.mn.state.dot.sonar.server;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.Iterator;
 import java.util.HashMap;
 import us.mn.state.dot.sonar.EmptyIterator;
@@ -25,6 +26,7 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.sonar.User;
 
 /**
  * A SONAR namespace is a mapping from all SONAR names to types, objects and
@@ -246,5 +248,45 @@ public class ServerNamespace extends Namespace {
 			return t.size();
 		else
 			return 0;
+	}
+
+	/** Check if a user has read privileges for a name.  This can be
+	 * overridden by a subclass to check a whitelist of addresses.
+	 * @param n Name to check.
+	 * @param u User to check.
+	 * @param a Inet address of connection.
+	 * @return true if read is allowed; false otherwise. */
+	public boolean canRead(Name n, User u, InetAddress a) {
+		return canRead(n, u);
+	}
+
+	/** Check if a user has update privileges for a name.  This can be
+	 * overridden by a subclass to check a whitelist of addresses.
+	 * @param n Name to check.
+	 * @param u User to check.
+	 * @param a Inet address of connection.
+	 * @return true if update is allowed; false otherwise. */
+	public boolean canUpdate(Name n, User u, InetAddress a) {
+		return canUpdate(n, u);
+	}
+
+	/** Check if a user has add privileges for a name.  This can be
+	 * overridden by a subclass to check a whitelist of addresses.
+	 * @param n Name to check.
+	 * @param u User to check.
+	 * @param a Inet address of connection.
+	 * @return true if add is allowed; false otherwise. */
+	public boolean canAdd(Name n, User u, InetAddress a) {
+		return canAdd(n, u);
+	}
+
+	/** Check if a user has remove privileges for a name.  This can be
+	 * overridden by a subclass to check a whitelist of addresses.
+	 * @param n Name to check.
+	 * @param u User to check.
+	 * @param a Inet address of connection.
+	 * @return true if remove is allowed; false otherwise. */
+	public boolean canRemove(Name n, User u, InetAddress a) {
+		return canRemove(n, u);
 	}
 }

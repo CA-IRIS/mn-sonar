@@ -16,6 +16,7 @@ package us.mn.state.dot.sonar.server;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.BufferOverflowException;
 import java.nio.channels.SelectionKey;
@@ -130,6 +131,9 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Channel to client */
 	protected final SocketChannel channel;
 
+	/** Inet address of client */
+	private final InetAddress address;
+
 	/** SSL state for encrypting network data */
 	protected final SSLState state;
 
@@ -149,8 +153,9 @@ public class ConnectionImpl extends Conduit implements Connection {
 		key = k;
 		channel = c;
 		state = new SSLState(this, processor.createSSLEngine());
+		address = c.socket().getInetAddress();
 		StringBuilder h = new StringBuilder();
-		h.append(c.socket().getInetAddress().getHostAddress());
+		h.append(address.getHostAddress());
 		h.append(':');
 		h.append(c.socket().getPort());
 		hostport = h.toString();
@@ -288,8 +293,12 @@ public class ConnectionImpl extends Conduit implements Connection {
 	 * This may only be called on the Task Processor thread. */
 	void notifyAttribute(Name name, String[] params) {
 		User u = user;
-		if(u != null && namespace.canRead(u, name) && isWatching(name))
+		if(u != null &&
+		   namespace.canRead(name, u, address) &&
+		   isWatching(name))
+		{
 			notifyAttribute(name.toString(), params);
+		}
 	}
 
 	/** Notify the client of an attribute change.
@@ -488,12 +497,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 		checkLoggedIn();
 		if(params.size() > 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
-		Name name;
-		if(params.size() > 1)
-			name = new Name(params.get(1));
-		else
-			name = new Name("");
-		if(!namespace.canRead(user, name))
+		Name name = createName(params);
+		if(!namespace.canRead(name, user, address))
 			throw PermissionDenied.create(name);
 		startWatching(name);
 		try {
@@ -502,6 +507,13 @@ public class ConnectionImpl extends Conduit implements Connection {
 		catch(IOException e) {
 			throw new SonarException(e.getMessage());
 		}
+	}
+
+	/** Create a name */
+	private Name createName(List<String> params) {
+		return (params.size() > 1)
+		      ? new Name(params.get(1))
+		      : new Name("");
 	}
 
 	/** Respond to an IGNORE message.
@@ -522,7 +534,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		Name name = new Name(params.get(1));
 		if(name.isObject()) {
-			if(!namespace.canAdd(user, name))
+			if(!namespace.canAdd(name, user, address))
 				throw PermissionDenied.create(name);
 			createObject(name);
 		} else
@@ -561,7 +573,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		if(params.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		Name name = new Name(params.get(1));
-		if(!namespace.canRemove(user, name))
+		if(!namespace.canRemove(name, user, address))
 			throw PermissionDenied.create(name);
 		SonarObject obj = namespace.lookupObject(name);
 		if(obj != null) {
@@ -579,7 +591,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		Name name = new Name(params.get(1));
 		if(name.isAttribute()) {
-			if(!namespace.canUpdate(user, name))
+			if(!namespace.canUpdate(name, user, address))
 				throw PermissionDenied.create(name);
 			setAttribute(name, params);
 		} else
