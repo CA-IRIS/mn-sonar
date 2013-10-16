@@ -380,6 +380,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 		}
 		catch(SonarException e) {
 			state.encoder.encode(Message.SHOW, e.getMessage());
+			TaskProcessor.DEBUG.log("Message error: " +
+				e.getMessage());
 		}
 	}
 
