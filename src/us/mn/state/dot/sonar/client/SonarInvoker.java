@@ -88,6 +88,7 @@ class SonarInvoker implements InvocationHandler {
 
 	/** Invoke a method call on a proxy instance */
 	@SuppressWarnings("unchecked")
+	@Override
 	public Object invoke(Object proxy, Method method, Object[] args)
 		throws SonarException
 	{
