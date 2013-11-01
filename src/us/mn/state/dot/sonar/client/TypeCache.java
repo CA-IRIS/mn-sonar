@@ -195,7 +195,8 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 	/** Lookup the attribute map for the given object */
 	private Map<String, Attribute> lookupAttributeMap(T o) {
 		synchronized(children) {
-			return attributes.get(o).attrs;
+			AttributeMap amap = attributes.get(o);
+			return amap != null ? amap.attrs : null;
 		}
 	}
 
@@ -204,11 +205,14 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 		throws NamespaceError
 	{
 		Map<String, Attribute> amap = lookupAttributeMap(o);
-		Attribute attr = amap.get(a);
-		if(attr == null)
-			throw NamespaceError.nameUnknown(a);
-		else
-			return attr;
+		if(amap != null) {
+			Attribute attr = amap.get(a);
+			if(attr != null)
+				return attr;
+			else
+				throw NamespaceError.nameUnknown(a);
+		} else
+			throw NamespaceError.nameUnknown("o:" + a);
 	}
 
 	/** Get the value of an attribute from the named proxy */
