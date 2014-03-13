@@ -38,28 +38,36 @@ import us.mn.state.dot.sonar.SonarObject;
  *
  * @author Douglas Lau
  */
-public class Client extends Thread {
+public class Client {
 
 	/** Exception handler */
-	protected final ExceptionHandler handler;
+	private final ExceptionHandler handler;
 
 	/** Selector for non-blocking I/O */
-	protected final Selector selector;
+	private final Selector selector;
 
 	/** SSL context */
-	protected final SSLContext context;
+	private final SSLContext context;
 
 	/** Client conduit */
-	protected final ClientConduit conduit;
+	private final ClientConduit conduit;
 
 	/** Task processor thread */
-	protected final Scheduler processor = new Scheduler("sonar_proc");
+	private final Scheduler processor = new Scheduler("sonar_proc");
 
 	/** Message processor task */
-	protected final MessageProcessor m_proc = new MessageProcessor();
+	private final MessageProcessor m_proc = new MessageProcessor();
 
 	/** Flag to indicate the client is quitting */
-	protected boolean quitting = false;
+	private boolean quitting = false;
+
+	/** Client selector thread */
+	private final Thread thread = new Thread("SONAR Client") {
+		@Override
+		public void run() {
+			selectLoop();
+		}
+	};
 
 	/** Get the connection name */
 	public String getConnection() {
@@ -75,26 +83,24 @@ public class Client extends Thread {
 	public Client(Properties props, ExceptionHandler h) throws IOException,
 		ConfigurationError
 	{
-		super("SONAR Client");
 		handler = h;
 		selector = Selector.open();
 		context = Security.createContext(props);
 		conduit = new ClientConduit(props, this, selector,
 			createSSLEngine(), handler);
-		setDaemon(true);
-		setPriority(Thread.MAX_PRIORITY);
-		start();
+		thread.setDaemon(true);
+		thread.setPriority(Thread.MAX_PRIORITY);
 	}
 
 	/** Create an SSL engine in the client context */
-	protected SSLEngine createSSLEngine() {
+	private SSLEngine createSSLEngine() {
 		SSLEngine engine = context.createSSLEngine();
 		engine.setUseClientMode(true);
 		return engine;
 	}
 
 	/** Client loop to perfrom socket I/O */
-	public void run() {
+	private void selectLoop() {
 		while(selector.isOpen()) {
 			try {
 				doSelect();
@@ -109,7 +115,7 @@ public class Client extends Thread {
 	}
 
 	/** Select and perform I/O on ready channels */
-	protected void doSelect() throws IOException {
+	private void doSelect() throws IOException {
 		selector.select();
 		Set<SelectionKey> ready = selector.selectedKeys();
 		for(SelectionKey key: ready) {
@@ -157,7 +163,7 @@ public class Client extends Thread {
 	private class EnumerationWaiter<T extends SonarObject>
 		implements ProxyListener<T>
 	{
-		protected boolean complete = false;
+		private boolean complete = false;
 		public void proxyAdded(T proxy) { }
 		public void enumerationComplete() {
 			complete = true;
@@ -173,6 +179,7 @@ public class Client extends Thread {
 	public void login(final String user, final String password)
 		throws SonarException
 	{
+		thread.start();
 		processor.addJob(new Job() {
 			public void perform() throws IOException {
 				conduit.login(user, password);
@@ -202,7 +209,7 @@ public class Client extends Thread {
 	}
 
 	/** Message processor for handling incoming messages */
-	protected class MessageProcessor extends Job {
+	private class MessageProcessor extends Job {
 		public void perform() throws IOException {
 			try {
 				conduit.processMessages();
