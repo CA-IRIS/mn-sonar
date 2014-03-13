@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -166,7 +166,10 @@ public class Client extends Thread {
 		public void proxyChanged(T proxy, String a) { }
 	}
 
-	/** Login to the SONAR server */
+	/** Login to the SONAR server.
+	 * @param user Name of user.
+	 * @param password Password of user.
+	 * @throws SonarException Thrown on error (needed by subclasses). */
 	public void login(final String user, final String password)
 		throws SonarException
 	{
