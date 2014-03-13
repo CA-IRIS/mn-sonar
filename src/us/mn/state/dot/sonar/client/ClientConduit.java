@@ -45,6 +45,9 @@ import us.mn.state.dot.sonar.SSLState;
  */
 class ClientConduit extends Conduit {
 
+	/** Wait up to 20 seconds for login */
+	static private final long LOGIN_MS = 20000;
+
 	/** Define the set of valid messages from the server */
 	static protected final EnumSet<Message> MESSAGES = EnumSet.of(
 		Message.QUIT, Message.OBJECT, Message.REMOVE, Message.ATTRIBUTE,
@@ -124,7 +127,7 @@ class ClientConduit extends Conduit {
 	protected final ExceptionHandler handler;
 
 	/** Flag to determine if login was accepted */
-	protected boolean loggedIn = false;
+	private boolean loggedIn = false;
 
 	/** Name of connection */
 	protected String connection = null;
@@ -215,8 +218,11 @@ class ClientConduit extends Conduit {
 		System.err.println("SONAR: " + msg);
 		closeChannel();
 		closeSelector();
+		if(loggedIn) {
+			handler.handle(new SonarException(
+				"Disconnected from server"));
+		}
 		loggedIn = false;
-		handler.handle(new SonarException("Disconnected from server"));
 	}
 
 	/** Close the channel */
@@ -337,9 +343,40 @@ class ClientConduit extends Conduit {
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		if(p.size() > 1)
 			namespace.setCurrentType(p.get(1));
-		else
+		else {
 			namespace.setCurrentType("");
-		loggedIn = true;
+			loggedIn = true;
+			notifyLogin();
+		}
+	}
+
+	/** Notify login success or failure */
+	private synchronized void notifyLogin() {
+		notify();
+	}
+
+	/** Wait for login success or failure.  This method is called from
+	 * a different thread than the task processor. */
+	void waitLogin() throws SonarException {
+		long start = System.currentTimeMillis();
+		doWaitLogin();
+		long elapsed = System.currentTimeMillis() - start;
+		if(elapsed >= LOGIN_MS) {
+			client.disconnect("Login timed out");
+			throw new SonarException("Login timed out");
+		}
+		if(!loggedIn)
+			client.disconnect("Login failed");
+	}
+
+	/** Wait for login */
+	private synchronized void doWaitLogin() {
+		try {
+			wait(LOGIN_MS);
+		}
+		catch(InterruptedException e) {
+			// nothing to do here
+		}
 	}
 
 	/** Process a SHOW message from the server */
@@ -347,6 +384,8 @@ class ClientConduit extends Conduit {
 	public void doShow(List<String> p) throws SonarException {
 		if(p.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
+		if(!loggedIn)
+			notifyLogin();
 		String m = p.get(1);
 		// First SHOW message after login is the connection name
 		if(loggedIn && connection == null)

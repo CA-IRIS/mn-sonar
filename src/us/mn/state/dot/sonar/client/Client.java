@@ -175,8 +175,9 @@ public class Client {
 	/** Login to the SONAR server.
 	 * @param user Name of user.
 	 * @param password Password of user.
-	 * @throws SonarException Thrown on error (needed by subclasses). */
-	public void login(final String user, final String password)
+	 * @return true on success, false on failure.
+	 * @throws SonarException Thrown on error. */
+	public boolean login(final String user, final String password)
 		throws SonarException
 	{
 		thread.start();
@@ -185,10 +186,7 @@ public class Client {
 				conduit.login(user, password);
 			}
 		});
-	}
-
-	/** Check if the client is logged in */
-	public boolean isLoggedIn() {
+		conduit.waitLogin();
 		return conduit.isLoggedIn();
 	}
 
@@ -231,6 +229,16 @@ public class Client {
 		processor.addJob(new Job(500) {
 			public void perform() {
 				conduit.flush();
+			}
+		});
+	}
+
+	/** Disconnect the client conduit */
+	public void disconnect(final String msg) {
+		quitting = true;
+		processor.addJob(new Job() {
+			public void perform() throws IOException {
+				conduit.disconnect(msg);
 			}
 		});
 	}
