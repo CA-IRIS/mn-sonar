@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -196,6 +196,7 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Flush out all outgoing data in the conduit */
+	@Override
 	public void flush() {
 		try {
 			state.encoder.flush();
@@ -283,17 +284,20 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Enable writing data back to the client */
+	@Override
 	protected void enableWrite() {
 		key.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
 		key.selector().wakeup();
 	}
 
 	/** Disable writing data back to the client */
+	@Override
 	protected void disableWrite() {
 		key.interestOps(SelectionKey.OP_READ);
 	}
 
 	/** Process a QUIT message from the server */
+	@Override
 	public void doQuit(List<String> p) throws SonarException {
 		if(p.size() != 1)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
@@ -301,6 +305,7 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Process an OBJECT message from the server */
+	@Override
 	public void doObject(List<String> p) throws SonarException {
 		if(p.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
@@ -308,6 +313,7 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Process a REMOVE message from the server */
+	@Override
 	public void doRemove(List<String> p) throws SonarException {
 		if(p.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
@@ -315,6 +321,7 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Process an ATTRIBUTE message from the server */
+	@Override
 	public void doAttribute(List<String> p) throws SonarException {
 		if(p.size() < 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
@@ -324,6 +331,7 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Process a TYPE message from the server */
+	@Override
 	public void doType(List<String> p) throws SonarException {
 		if(p.size() > 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
@@ -335,6 +343,7 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Process a SHOW message from the server */
+	@Override
 	public void doShow(List<String> p) throws SonarException {
 		if(p.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
