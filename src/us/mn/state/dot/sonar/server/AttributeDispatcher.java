@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.sonar.server;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -22,7 +21,6 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashMap;
 import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.ProtocolError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
 
@@ -75,8 +73,8 @@ public class AttributeDispatcher {
 
 	/** Lookup the constructor */
 	static private Constructor lookup_constructor(Class c) {
-		for(Constructor con: c.getConstructors()) {
-			if(is_valid_constructor(con))
+		for (Constructor con: c.getConstructors()) {
+			if (is_valid_constructor(con))
 				return con;
 		}
 		return null;
@@ -87,9 +85,9 @@ public class AttributeDispatcher {
 	 * @param method Name of method to lookup.
 	 * @return Matching method, or null if not found. */
 	static private Method lookup_method(Class c, String method) {
-		for(Method m: c.getMethods()) {
-			if(method.equalsIgnoreCase(m.getName())) {
-				if(!Modifier.isStatic(m.getModifiers()))
+		for (Method m: c.getMethods()) {
+			if (method.equalsIgnoreCase(m.getName())) {
+				if (!Modifier.isStatic(m.getModifiers()))
 					return m;
 			}
 		}
@@ -104,7 +102,7 @@ public class AttributeDispatcher {
 	/** Lookup a method to destroy objects */
 	static private Method lookup_destroyer(Class c) {
 		Method m = lookup_method(c, DO_DESTROY_METHOD);
-		if(m != null)
+		if (m != null)
 			return m;
 		else
 			return lookup_method(c, DESTROY_METHOD);
@@ -205,18 +203,14 @@ public class AttributeDispatcher {
 		String do_name = prepend_do(im.getName());
 		for (Method m: the_class.getMethods()) {
 			String n = m.getName();
-			if (n.equals(do_name)) {
-				if (compare_methods(im, m))
-					return m;
-			}
+			if (n.equals(do_name) && compare_methods(im, m))
+				return m;
 		}
 		// "do..." method not found
 		for (Method m: the_class.getMethods()) {
 			String n = m.getName();
-			if (n.equals(im.getName())) {
-				if (compare_methods(im, m))
-					return m;
-			}
+			if (n.equals(im.getName()) && compare_methods(im, m))
+				return m;
 		}
 		return null;
 	}
@@ -234,13 +228,13 @@ public class AttributeDispatcher {
 
 	/** Create a new object with the given name */
 	public SonarObject createObject(String name) throws SonarException {
-		if(constructor == null)
+		if (constructor == null)
 			throw PermissionDenied.CANNOT_ADD;
 		Object[] params = { name };
 		try {
 			return (SonarObject)constructor.newInstance(params);
 		}
-		catch(Exception e) {
+		catch (Exception e) {
 			throw new SonarException(e);
 		}
 	}
@@ -252,7 +246,7 @@ public class AttributeDispatcher {
 		try {
 			return method.invoke(o, params);
 		}
-		catch(Exception e) {
+		catch (Exception e) {
 			throw new SonarException(e);
 		}
 	}
@@ -268,14 +262,14 @@ public class AttributeDispatcher {
 
 	/** Store the given object */
 	public void storeObject(SonarObject o) throws SonarException {
-		if(storer == null)
+		if (storer == null)
 			throw PermissionDenied.CANNOT_ADD;
 		invoke(o, storer, EMPTY_STRING);
 	}
 
 	/** Destroy the given object */
 	public void destroyObject(SonarObject o) throws SonarException {
-		if(destroyer == null)
+		if (destroyer == null)
 			throw PermissionDenied.CANNOT_REMOVE;
 		invoke(o, destroyer, EMPTY_STRING);
 	}
@@ -285,7 +279,7 @@ public class AttributeDispatcher {
 		throws SonarException
 	{
 		Method m = (Method)setters.get(a);
-		if(m == null)
+		if (m == null)
 			throw PermissionDenied.CANNOT_WRITE;
 		invoke(o, m, v);
 	}
@@ -299,14 +293,14 @@ public class AttributeDispatcher {
 			f.setAccessible(true);
 			return f;
 		}
-		catch(NoSuchFieldException e) {
+		catch (NoSuchFieldException e) {
 			c = c.getSuperclass();
-			if(c != null)
+			if (c != null)
 				return lookupField(c, a);
 			else
 				throw new SonarException("No such field: " + a);
 		}
-		catch(Exception e) {
+		catch (Exception e) {
 			throw new SonarException(e);
 		}
 	}
@@ -320,7 +314,7 @@ public class AttributeDispatcher {
 		try {
 			f.set(o, param);
 		}
-		catch(Exception e) {
+		catch (Exception e) {
 			throw new SonarException(e);
 		}
 	}
@@ -330,13 +324,13 @@ public class AttributeDispatcher {
 		throws SonarException
 	{
 		Method m = (Method)getters.get(a);
-		if(m == null)
+		if (m == null)
 			throw PermissionDenied.CANNOT_READ;
 		Object result = _invoke(o, m, NO_PARAMS);
-		if(result instanceof Object[]) {
+		if (result instanceof Object[]) {
 			Object[] r = (Object [])result;
 			String[] res = new String[r.length];
-			for(int i = 0; i < r.length; i++)
+			for (int i = 0; i < r.length; i++)
 				res[i] = namespace.marshall(r[i]);
 			return res;
 		} else
