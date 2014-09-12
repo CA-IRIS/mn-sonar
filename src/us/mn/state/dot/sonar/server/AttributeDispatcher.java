@@ -278,7 +278,7 @@ public class AttributeDispatcher {
 	public void setValue(SonarObject o, String a, String[] v)
 		throws SonarException
 	{
-		Method m = (Method)setters.get(a);
+		Method m = setters.get(a);
 		if (m == null)
 			throw PermissionDenied.CANNOT_WRITE;
 		invoke(o, m, v);
@@ -323,7 +323,7 @@ public class AttributeDispatcher {
 	public String[] getValue(SonarObject o, String a)
 		throws SonarException
 	{
-		Method m = (Method)getters.get(a);
+		Method m = getters.get(a);
 		if (m == null)
 			throw PermissionDenied.CANNOT_READ;
 		Object result = _invoke(o, m, NO_PARAMS);
