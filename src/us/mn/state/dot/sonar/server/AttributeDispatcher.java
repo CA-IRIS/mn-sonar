@@ -35,29 +35,29 @@ import us.mn.state.dot.sonar.SonarObject;
 public class AttributeDispatcher {
 
 	/** Method name to store an object */
-	static protected final String DO_STORE_METHOD = "doStore";
+	static private final String DO_STORE_METHOD = "doStore";
 
 	/** Method name to destroy an object */
-	static protected final String DESTROY_METHOD = "destroy";
+	static private final String DESTROY_METHOD = "destroy";
 
 	/** Alternate method name to destroy an object */
-	static protected final String DO_DESTROY_METHOD = "doDestroy";
+	static private final String DO_DESTROY_METHOD = "doDestroy";
 
 	/** Empty array of parameters */
-	static protected final Object[] NO_PARAMS = new Object[0];
+	static private final Object[] NO_PARAMS = new Object[0];
 
 	/** Empty array of strings */
-	static protected final String[] EMPTY_STRING = new String[0];
+	static private final String[] EMPTY_STRING = new String[0];
 
 	/** Test if a class is an interface extending SonarObject */
-	static protected boolean is_sonar_iface(Class iface) {
+	static private boolean is_sonar_iface(Class iface) {
 		return iface.isInterface() &&
 		       SonarObject.class.isAssignableFrom(iface) &&
 		       (iface != SonarObject.class);
 	}
 
 	/** Check for a valid constructor */
-	static protected boolean is_valid_constructor(Constructor c) {
+	static private boolean is_valid_constructor(Constructor c) {
 		Class[] paramTypes = c.getParameterTypes();
 		return (paramTypes.length == 1) &&
 			(paramTypes[0] == String.class);
@@ -74,7 +74,7 @@ public class AttributeDispatcher {
 	}
 
 	/** Lookup the constructor */
-	static protected Constructor lookup_constructor(Class c) {
+	static private Constructor lookup_constructor(Class c) {
 		for(Constructor con: c.getConstructors()) {
 			if(is_valid_constructor(con))
 				return con;
@@ -97,12 +97,12 @@ public class AttributeDispatcher {
 	}
 
 	/** Lookup a method to store new objects */
-	static protected Method lookup_storer(Class c) {
+	static private Method lookup_storer(Class c) {
 		return lookup_method(c, DO_STORE_METHOD);
 	}
 
 	/** Lookup a method to destroy objects */
-	static protected Method lookup_destroyer(Class c) {
+	static private Method lookup_destroyer(Class c) {
 		Method m = lookup_method(c, DO_DESTROY_METHOD);
 		if(m != null)
 			return m;
@@ -114,16 +114,16 @@ public class AttributeDispatcher {
 	private final Class the_class;
 
 	/** SONAR namespace */
-	protected final Namespace namespace;
+	private final Namespace namespace;
 
 	/** Constructor to create a new object */
-	protected final Constructor constructor;
+	private final Constructor constructor;
 
 	/** Method to store an object */
-	protected final Method storer;
+	private final Method storer;
 
 	/** Method to destroy an object */
-	protected final Method destroyer;
+	private final Method destroyer;
 
 	/** Mapping of attribute names to setter methods */
 	private final HashMap<String, Method> setters =
@@ -246,7 +246,7 @@ public class AttributeDispatcher {
 	}
 
 	/** Invoke a method on the given SONAR object */
-	protected Object _invoke(SonarObject o, Method method, Object[] params)
+	private Object _invoke(SonarObject o, Method method, Object[] params)
 		throws SonarException
 	{
 		try {
@@ -258,7 +258,7 @@ public class AttributeDispatcher {
 	}
 
 	/** Invoke a method on the given SONAR object */
-	protected Object invoke(SonarObject o, Method method, String[] v)
+	private Object invoke(SonarObject o, Method method, String[] v)
 		throws SonarException
 	{
 		Class[] p_types = method.getParameterTypes();
@@ -291,7 +291,7 @@ public class AttributeDispatcher {
 	}
 
 	/** Lookup the named field from the given class */
-	static protected Field lookupField(Class c, String a)
+	static private Field lookupField(Class c, String a)
 		throws SonarException
 	{
 		try {
