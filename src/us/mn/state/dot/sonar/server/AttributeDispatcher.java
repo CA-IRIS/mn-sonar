@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.TreeSet;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.ProtocolError;
 import us.mn.state.dot.sonar.SonarException;
@@ -68,6 +68,11 @@ public class AttributeDispatcher {
 		return n.substring(3, 4).toLowerCase() + n.substring(4);
 	}
 
+	/** Prepend "do" to a method name */
+	static private String prepend_do(String n) {
+		return "do" + n.substring(0, 1).toUpperCase() + n.substring(1);
+	}
+
 	/** Lookup the constructor */
 	static protected Constructor lookup_constructor(Class c) {
 		for(Constructor con: c.getConstructors()) {
@@ -77,8 +82,11 @@ public class AttributeDispatcher {
 		return null;
 	}
 
-	/** Lookup a method on the specified class */
-	static protected Method lookup_method(Class c, String method) {
+	/** Lookup a method on the specified class.
+	 * @param c Class to inspect.
+	 * @param method Name of method to lookup.
+	 * @return Matching method, or null if not found. */
+	static private Method lookup_method(Class c, String method) {
 		for(Method m: c.getMethods()) {
 			if(method.equalsIgnoreCase(m.getName())) {
 				if(!Modifier.isStatic(m.getModifiers()))
@@ -102,27 +110,11 @@ public class AttributeDispatcher {
 			return lookup_method(c, DESTROY_METHOD);
 	}
 
-	/** Lookup attribute setter or getter methods */
-	private HashMap<String, Method> lookup_methods(String prefix,
-		TreeSet<String> attrs, Class c)
-	{
-		HashMap<String, Method> map = new HashMap<String, Method>();
-		for(String a: attrs) {
-			Method m = lookup_method(c, prefix + a);
-			if(m != null)
-				map.put(a, m);
-		}
-		return map;
-	}
+	/** The implementation class */
+	private final Class the_class;
 
 	/** SONAR namespace */
 	protected final Namespace namespace;
-
-	/** Attributes which can be written (set) */
-	private final TreeSet<String> w_attrs = new TreeSet<String>();
-
-	/** Attributes which can be read (get) */
-	private final TreeSet<String> r_attrs = new TreeSet<String>();
 
 	/** Constructor to create a new object */
 	protected final Constructor constructor;
@@ -134,10 +126,12 @@ public class AttributeDispatcher {
 	protected final Method destroyer;
 
 	/** Mapping of attribute names to setter methods */
-	protected final HashMap<String, Method> setters;
+	private final HashMap<String, Method> setters =
+		new HashMap<String, Method>();
 
 	/** Mapping of attribute names to getter methods */
-	protected final HashMap<String, Method> getters;
+	private final HashMap<String, Method> getters =
+		new HashMap<String, Method>();
 
 	/** Get an array of readable attributes */
 	public String[] getReadableAttributes() {
@@ -149,11 +143,23 @@ public class AttributeDispatcher {
 		return getters.containsKey(a);
 	}
 
+	/** Create a new attribute dispatcher for the given object's type.
+	 * @param c The implementation class.
+	 * @param ns SONAR namespace. */
+	public AttributeDispatcher(Class c, Namespace ns) {
+		the_class = c;
+		namespace = ns;
+		lookup_attributes(c);
+		constructor = lookup_constructor(c);
+		storer = lookup_storer(c);
+		destroyer = lookup_destroyer(c);
+	}
+
 	/** Lookup all the attributes of the specified class */
-	protected void lookup_attributes(Class c) {
-		while(c != null) {
-			for(Class iface: c.getInterfaces()) {
-				if(is_sonar_iface(iface)) {
+	private void lookup_attributes(Class c) {
+		while (c != null) {
+			for (Class iface: c.getInterfaces()) {
+				if (is_sonar_iface(iface)) {
 					lookup_iface_attributes(iface);
 					lookup_attributes(iface);
 				}
@@ -163,30 +169,67 @@ public class AttributeDispatcher {
 	}
 
 	/** Lookup all the attributes of the specified interface */
-	protected void lookup_iface_attributes(Class iface) {
-		for(Method m: iface.getDeclaredMethods()) {
+	private void lookup_iface_attributes(Class iface) {
+		for (Method m: iface.getDeclaredMethods()) {
 			String n = m.getName();
-			if(n.startsWith("get"))
-				r_attrs.add(attribute_name(n));
-			if(n.startsWith("set"))
-				w_attrs.add(attribute_name(n));
+			if (n.startsWith("set"))
+				lookup_setter(m);
+			if (n.startsWith("get"))
+				lookup_getter(m);
 		}
 	}
 
-	/** Create a new attribute dispatcher for the given object's type */
-	public AttributeDispatcher(Class c, Namespace ns) {
-		namespace = ns;
-		lookup_attributes(c);
-		constructor = lookup_constructor(c);
-		storer = lookup_storer(c);
-		destroyer = lookup_destroyer(c);
-		setters = lookup_methods("set", w_attrs, c);
-		getters = lookup_methods("get", r_attrs, c);
-		// Accessor methods with a "do" prefix are required for
-		// methods which can throw exceptions not declared
-		// in the interface specification.
-		setters.putAll(lookup_methods("doSet", w_attrs, c));
-		getters.putAll(lookup_methods("doGet", r_attrs, c));
+	/** Lookup a setter method.
+	 * @param im Setter method from interface. */
+	private void lookup_setter(Method im) {
+		Method m = lookup__etter(im);
+		if (m != null)
+			setters.put(attribute_name(im.getName()), m);
+	}
+
+	/** Lookup a getter method.
+	 * @param im Getter method from interface. */
+	private void lookup_getter(Method im) {
+		Method m = lookup__etter(im);
+		if (m != null)
+			getters.put(attribute_name(im.getName()), m);
+	}
+
+	/** Lookup a setter or getter method.
+	 * @param im Setter or getter method from interface.
+	 * @return Matching method, or null if not found. */
+	private Method lookup__etter(Method im) {
+		// A "do" prefix is required for methods which can throw
+		// exceptions not declared in the interface specification.
+		// First, check for "do..." methods
+		String do_name = prepend_do(im.getName());
+		for (Method m: the_class.getMethods()) {
+			String n = m.getName();
+			if (n.equals(do_name)) {
+				if (compare_methods(im, m))
+					return m;
+			}
+		}
+		// "do..." method not found
+		for (Method m: the_class.getMethods()) {
+			String n = m.getName();
+			if (n.equals(im.getName())) {
+				if (compare_methods(im, m))
+					return m;
+			}
+		}
+		return null;
+	}
+
+	/** Compare two methods for a signature match. */
+	private boolean compare_methods(Method m0, Method m1) {
+		if (Modifier.isStatic(m0.getModifiers()) !=
+		    Modifier.isStatic(m1.getModifiers()))
+			return false;
+		if (m0.getReturnType() != m1.getReturnType())
+			return false;
+		return Arrays.equals(m0.getParameterTypes(),
+		                     m1.getParameterTypes());
 	}
 
 	/** Create a new object with the given name */
