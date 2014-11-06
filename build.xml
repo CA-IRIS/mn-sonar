@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!-- ant build file for sonar project
-     Copyright (C) 2007-2013  Minnesota Department of Transportation
+     Copyright (C) 2007-2014  Minnesota Department of Transportation
 
      This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -39,9 +39,13 @@
 	<property name="client.jar" value="${name}-client-${version}.jar"/>
 	<property name="server.jar" value="${name}-server-${version}.jar"/>
 	<property name="test.jar" value="${name}-test-${version}.jar"/>
+
+	<!-- Compiler configuration -->
 	<property name="build.compiler.pedantic" value="true"/>
 	<path id="classpath">
-		<fileset dir="${lib.dir}" includes="*.jar"/>
+		<fileset dir="${lib.dir}">
+			<include name="${scheduler.jar}"/>
+		</fileset>
 	</path>
 
 	<!-- junit related -->
