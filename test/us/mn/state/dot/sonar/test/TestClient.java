@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.sonar.test;
 import java.util.Iterator;
 import java.util.Properties;
 import us.mn.state.dot.sched.ExceptionHandler;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.Privilege;
@@ -82,10 +83,7 @@ public class TestClient extends Client {
 		for(int i = 0; i < 200; i++) {
 			if(isLoggedIn())
 				return;
-			try {
-				Thread.sleep(100);
-			}
-			catch(InterruptedException e) { }
+			TimeSteward.sleep_well(100);
 		}
 		throw new Exception("timed out");
 	}

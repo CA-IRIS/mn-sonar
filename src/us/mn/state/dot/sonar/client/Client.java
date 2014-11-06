@@ -25,6 +25,7 @@ import javax.net.ssl.SSLEngine;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Name;
@@ -146,14 +147,8 @@ public class Client {
 				new EnumerationWaiter<SonarObject>();
 			tc.addProxyListener(ew);
 			populate(tc);
-			while(!ew.complete) {
-				try {
-					Thread.sleep(100);
-				}
-				catch(InterruptedException e) {
-					// Ignore
-				}
-			}
+			while (!ew.complete)
+				TimeSteward.sleep_well(100);
 			tc.removeProxyListener(ew);
 		} else
 			populate(tc);
