@@ -54,6 +54,18 @@ public class TaskProcessor {
 	/** SONAR task debug log */
 	static private final DebugLog DEBUG_TASK = new DebugLog("sonar_task");
 
+	/** Debug a task */
+	static private void debugTask(String msg, ConnectionImpl c) {
+		if (DEBUG_TASK.isOpen())
+			DEBUG_TASK.log(msg + ": " + c.getName());
+	}
+
+	/** Debug a task */
+	static private void debugTask(String msg, String n) {
+		if (DEBUG_TASK.isOpen())
+			DEBUG_TASK.log(msg + ": " + n);
+	}
+
 	/** SONAR namespace being served */
 	private final ServerNamespace namespace;
 
@@ -177,7 +189,7 @@ public class TaskProcessor {
 	{
 		processor.addJob(new Job() {
 			public void perform() {
-				DEBUG_TASK.log("Disconnect for " + c.getName());
+				debugTask("Disconnect", c);
 				if(msg != null)
 					c.disconnect(msg);
 				else
@@ -188,12 +200,12 @@ public class TaskProcessor {
 
 	/** Disconnect the client associated with the selection key. */
 	void disconnect(SelectionKey key) {
-		DEBUG_TASK.log("Disconnecting");
 		key.cancel();
 		ConnectionImpl c;
 		synchronized(clients) {
 			c = clients.remove(key);
 		}
+		debugTask("Disconnecting", c);
 		if(c != null) {
 			access_monitor.disconnect(c.getName(), c.getUserName());
 			updateSessionList();
@@ -229,8 +241,7 @@ public class TaskProcessor {
 	void processMessages(final ConnectionImpl c) {
 		processor.addJob(new Job() {
 			public void perform() {
-				DEBUG_TASK.log("Processing messages for " +
-					c.getName());
+				debugTask("Processing messages", c);
 				c.processMessages();
 			}
 		});
@@ -240,7 +251,7 @@ public class TaskProcessor {
 	void flush(final ConnectionImpl c) {
 		processor.addJob(new Job() {
 			public void perform() {
-				DEBUG_TASK.log("Flushing for " + c.getName());
+				debugTask("Flush", c);
 				c.flush();
 			}
 		});
@@ -260,8 +271,7 @@ public class TaskProcessor {
 	void finishLogin(final ConnectionImpl c, final UserImpl u) {
 		processor.addJob(new Job() {
 			public void perform() {
-				DEBUG_TASK.log("Finishing LOGIN for " +
-					u.getName());
+				debugTask("Finishing LOGIN", c);
 				access_monitor.authenticate(c.getName(),
 					u.getName());
 				scheduleSetAttribute(c, "user");
@@ -274,7 +284,7 @@ public class TaskProcessor {
 	void failLogin(final ConnectionImpl c, final String name) {
 		processor.addJob(new Job() {
 			public void perform() {
-				DEBUG_TASK.log("Failing LOGIN for " + name);
+				debugTask("Failing LOGIN", c);
 				access_monitor.failAuthentication(c.getName(),
 					name);
 				c.failLogin();
@@ -299,13 +309,11 @@ public class TaskProcessor {
 			public void perform() {
 				try {
 					u.doSetPassword(pwd);
-					DEBUG_TASK.log("Finishing PASSWORD for "
-						+ u.getName());
+					debugTask("Finishing PASSWORD", c);
 				}
 				catch(Exception e) {
 					failPassword(c, e.getMessage());
-					DEBUG_TASK.log("Exception PASSWORD "
-						+ e.getMessage());
+					debugTask("Exception PASSWORD", c);
 				}
 			}
 		});
@@ -316,8 +324,7 @@ public class TaskProcessor {
 		processor.addJob(new Job() {
 			public void perform() {
 				c.failPassword(msg);
-				DEBUG_TASK.log("Failing PASSWORD for " +
-					c.getUser().getName());
+				debugTask("Failing PASSWORD", c);
 			}
 		});
 	}
@@ -357,7 +364,7 @@ public class TaskProcessor {
 
 	/** Notify all connections watching a name of an attribute change. */
 	void notifyAttribute(Name name, String[] params) {
-		DEBUG_TASK.log("Notify attribute " + name);
+		debugTask("Notify attribute", name.toString());
 		if(namespace.isReadable(name)) {
 			List<ConnectionImpl> clist = getConnectionList();
 			for(ConnectionImpl c: clist)
@@ -376,7 +383,6 @@ public class TaskProcessor {
 	public void scheduleAddObject(final SonarObject o) {
 		processor.addJob(new Job() {
 			public void perform() throws NamespaceError {
-				DEBUG_TASK.log("Adding object " + o.getName());
 				doAddObject(o);
 			}
 		});
@@ -384,6 +390,7 @@ public class TaskProcessor {
 
 	/** Perform an add object task. */
 	private void doAddObject(SonarObject o) throws NamespaceError {
+		debugTask("Adding object", o.getName());
 		namespace.addObject(o);
 		notifyObject(o);
 	}
@@ -413,7 +420,7 @@ public class TaskProcessor {
 
 	/** Store an object in the server's namespace. */
 	void doStoreObject(SonarObject o) throws SonarException {
-		DEBUG_TASK.log("Storing object " + o.getName());
+		debugTask("Storing object", o.getName());
 		namespace.storeObject(o);
 		notifyObject(o);
 	}
@@ -429,7 +436,7 @@ public class TaskProcessor {
 
 	/** Perform a remove object task. */
 	private void doRemoveObject(SonarObject o) throws SonarException {
-		DEBUG_TASK.log("Removing object " +o.getName());
+		debugTask("Removing object", o.getName());
 		notifyRemove(new Name(o));
 		namespace.removeObject(o);
 	}
