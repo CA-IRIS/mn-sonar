@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -357,6 +357,7 @@ public class TaskProcessor {
 
 	/** Notify all connections watching a name of an attribute change. */
 	void notifyAttribute(Name name, String[] params) {
+		DEBUG_TASK.log("Notify attribute " + name);
 		if(namespace.isReadable(name)) {
 			List<ConnectionImpl> clist = getConnectionList();
 			for(ConnectionImpl c: clist)
@@ -446,8 +447,6 @@ public class TaskProcessor {
 	private void doSetAttribute(SonarObject o, String aname)
 		throws SonarException
 	{
-		DEBUG_TASK.log("Setting attribute " + aname + " on " +
-			o.getName());
 		Name name = new Name(o, aname);
 		String[] v = namespace.getAttribute(name);
 		notifyAttribute(name, v);
