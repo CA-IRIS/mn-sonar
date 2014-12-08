@@ -56,8 +56,12 @@ public class TaskProcessor {
 
 	/** Debug a task */
 	static private void debugTask(String msg, ConnectionImpl c) {
-		if (DEBUG_TASK.isOpen())
-			DEBUG_TASK.log(msg + ": " + c.getName());
+		if (DEBUG_TASK.isOpen()) {
+			if (c != null)
+				DEBUG_TASK.log(msg + ": " + c.getName());
+			else
+				DEBUG_TASK.log(msg + ": no connection");
+		}
 	}
 
 	/** Debug a task */
