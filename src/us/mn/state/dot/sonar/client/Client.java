@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2006-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.sonar.client;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -102,17 +103,27 @@ public class Client {
 
 	/** Client loop to perfrom socket I/O */
 	private void selectLoop() {
-		while(selector.isOpen()) {
+		while (selector.isOpen()) {
 			try {
 				doSelect();
 			}
-			catch(IOException e) {
-				if(!quitting)
-					handler.handle(e);
+			catch (EOFException e) {
+				handle(e);
+				break;
+			}
+			catch (IOException e) {
+				handle(e);
+				conduit.disconnect("IO err: " + e.getMessage());
 				break;
 			}
 		}
 		processor.dispose();
+	}
+
+	/** Handle an exception */
+	private void handle(Exception e) {
+		if (!quitting)
+			handler.handle(e);
 	}
 
 	/** Select and perform I/O on ready channels */
@@ -181,8 +192,16 @@ public class Client {
 				conduit.login(user, password);
 			}
 		});
-		conduit.waitLogin();
+		waitLogin();
 		return conduit.isLoggedIn();
+	}
+
+	/** Wait for login success or failure */
+	private void waitLogin() throws SonarException {
+		if (conduit.waitLogin()) {
+			disconnect("Login timed out");
+			throw new SonarException("Login timed out");
+		}
 	}
 
 	/** Send a password change request */

@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2006-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.sonar.client;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -176,7 +177,7 @@ class ClientConduit extends Conduit {
 		if(nbytes > 0)
 			client.processMessages();
 		else if(nbytes < 0)
-			throw new IOException("EOF");
+			throw new EOFException();
 	}
 
 	/** Write pending data to the socket channel */
@@ -223,6 +224,7 @@ class ClientConduit extends Conduit {
 				"Disconnected from server"));
 		}
 		loggedIn = false;
+		notifyLogin();
 	}
 
 	/** Close the channel */
@@ -355,27 +357,17 @@ class ClientConduit extends Conduit {
 		notify();
 	}
 
-	/** Wait for login success or failure.  This method is called from
-	 * a different thread than the task processor. */
-	void waitLogin() throws SonarException {
-		long start = System.currentTimeMillis();
-		doWaitLogin();
-		long elapsed = System.currentTimeMillis() - start;
-		if(elapsed >= LOGIN_MS) {
-			client.disconnect("Login timed out");
-			throw new SonarException("Login timed out");
-		}
-		if(!loggedIn)
-			client.disconnect("Login failed");
-	}
-
-	/** Wait for login */
-	private synchronized void doWaitLogin() {
+	/** Wait for login.
+	 * @return true if timed out. */
+	public synchronized boolean waitLogin() {
 		try {
+			long start = System.currentTimeMillis();
 			wait(LOGIN_MS);
+			long elapsed = System.currentTimeMillis() - start;
+			return elapsed >= LOGIN_MS;
 		}
-		catch(InterruptedException e) {
-			// nothing to do here
+		catch (InterruptedException e) {
+			return false;
 		}
 	}
 
