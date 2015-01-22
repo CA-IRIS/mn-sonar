@@ -158,6 +158,14 @@ class ClientConduit extends Conduit {
 		connected = false;
 	}
 
+	/** Dispose of the conduit */
+	public void dispose() {
+		// Stop waiting for login
+		notifyLogin();
+		closeChannel();
+		closeSelector();
+	}
+
 	/** Complete the connection on the socket channel */
 	void doConnect() throws IOException {
 		if(channel.finishConnect()) {
@@ -167,17 +175,17 @@ class ClientConduit extends Conduit {
 		}
 	}
 
-	/** Read messages from the socket channel */
-	void doRead() throws IOException {
+	/** Read messages from the socket channel.
+	 * @return true if data was successfully read. */
+	boolean doRead() throws IOException {
 		int nbytes;
 		ByteBuffer net_in = state.getNetInBuffer();
-		synchronized(net_in) {
+		synchronized (net_in) {
 			nbytes = channel.read(net_in);
 		}
-		if(nbytes > 0)
-			client.processMessages();
-		else if(nbytes < 0)
+		if (nbytes < 0)
 			throw new EOFException();
+		return (nbytes > 0);
 	}
 
 	/** Write pending data to the socket channel */
@@ -224,7 +232,6 @@ class ClientConduit extends Conduit {
 				"Disconnected from server"));
 		}
 		loggedIn = false;
-		notifyLogin();
 	}
 
 	/** Close the channel */
@@ -250,12 +257,22 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Process any incoming messages */
-	void processMessages() throws IOException {
-		if(!isConnected())
-			return;
-		while(state.doRead()) {
+	public void processMessages() {
+		try {
+			if (isConnected())
+				doProcessMessages();
+		}
+		catch (IOException e) {
+			handler.handle(e);
+			disconnect("I/O error: " + e.getMessage());
+		}
+	}
+
+	/** Process any incoming messages */
+	private void doProcessMessages() throws IOException {
+		while (state.doRead()) {
 			List<String> params = state.decoder.decode();
-			while(params != null) {
+			while (params != null) {
 				processMessage(params);
 				params = state.decoder.decode();
 			}

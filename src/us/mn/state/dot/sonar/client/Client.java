@@ -117,6 +117,7 @@ public class Client {
 				break;
 			}
 		}
+		conduit.dispose();
 		processor.dispose();
 	}
 
@@ -135,10 +136,16 @@ public class Client {
 				conduit.doConnect();
 			if(key.isWritable())
 				conduit.doWrite();
-			if(key.isReadable())
-				conduit.doRead();
+			if (key.isReadable())
+				doRead();
 		}
 		ready.clear();
+	}
+
+	/** Read data from the conduit */
+	private void doRead() throws IOException {
+		if (conduit.doRead())
+			processor.addJob(m_proc);
 	}
 
 	/** Populate the specified type cache */
@@ -215,22 +222,10 @@ public class Client {
 		});
 	}
 
-	/** Process messages on the conduit */
-	void processMessages() {
-		processor.addJob(m_proc);
-	}
-
 	/** Message processor for handling incoming messages */
 	private class MessageProcessor extends Job {
-		public void perform() throws IOException {
-			try {
-				conduit.processMessages();
-			}
-			catch(IOException e) {
-				conduit.disconnect("I/O error: " +
-					e.getMessage());
-				throw e;
-			}
+		public void perform() {
+			conduit.processMessages();
 		}
 	}
 
