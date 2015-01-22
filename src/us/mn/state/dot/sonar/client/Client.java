@@ -135,11 +135,27 @@ public class Client {
 			if(key.isConnectable())
 				conduit.doConnect();
 			if(key.isWritable())
-				conduit.doWrite();
+				doWrite();
 			if (key.isReadable())
 				doRead();
 		}
 		ready.clear();
+	}
+
+	/** Write data to the conduit */
+	private void doWrite() throws IOException {
+		if (conduit.doWrite()) {
+			// NOTE: delay was added as a workaround for a login
+			//       problem on Windows using a slow link.  The
+			//       connection would get "stuck" during SSL
+			//       handshaking, and the login request would never
+			//       get sent to the server.
+			processor.addJob(new Job(500) {
+				public void perform() {
+					conduit.flush();
+				}
+			});
+		}
 	}
 
 	/** Read data from the conduit */
@@ -227,19 +243,6 @@ public class Client {
 		public void perform() {
 			conduit.processMessages();
 		}
-	}
-
-	/** Message processor for handling incoming messages */
-	void flush() {
-		// NOTE: this was added as a workaround for a login problem
-		//       on Windows using a slow link.  The connection would
-		//       get "stuck" during SSL handshaking, and the login
-		//       request would never get sent to the server.
-		processor.addJob(new Job(500) {
-			public void perform() {
-				conduit.flush();
-			}
-		});
 	}
 
 	/** Disconnect the client conduit */

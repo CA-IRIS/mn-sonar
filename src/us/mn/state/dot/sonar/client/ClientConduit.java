@@ -189,7 +189,7 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Write pending data to the socket channel */
-	public void doWrite() throws IOException {
+	public boolean doWrite() throws IOException {
 		ByteBuffer net_out = state.getNetOutBuffer();
 		synchronized(net_out) {
 			net_out.flip();
@@ -198,7 +198,7 @@ class ClientConduit extends Conduit {
 				disableWrite();
 			net_out.compact();
 		}
-		client.flush();
+		return true;
 	}
 
 	/** Start writing data to client */
