@@ -131,6 +131,9 @@ class ClientConduit extends Conduit {
 	/** Flag to determine if login was accepted */
 	private boolean loggedIn = false;
 
+	/** Flag to indicate disposed */
+	private boolean disposed = false;
+
 	/** Name of connection */
 	private String connection = null;
 
@@ -161,10 +164,10 @@ class ClientConduit extends Conduit {
 
 	/** Dispose of the conduit */
 	public void dispose() {
+		disposed = true;
+		disconnect();
 		// Stop waiting for login
 		notifyLogin();
-		closeChannel();
-		closeSelector();
 	}
 
 	/** Complete the connection on the socket channel */
@@ -218,20 +221,16 @@ class ClientConduit extends Conduit {
 		}
 		catch (IOException e) {
 			handler.handle(e);
-			disconnect("I/O error: " + e.getMessage());
+			disconnect();
 		}
 	}
 
 	/** Disconnect the conduit */
-	protected void disconnect(String msg) {
+	@Override
+	protected void disconnect() {
 		super.disconnect();
-		System.err.println("SONAR: " + msg);
 		closeChannel();
 		closeSelector();
-		if (loggedIn) {
-			handler.handle(new SonarException(
-				"Disconnected from server"));
-		}
 		loggedIn = false;
 	}
 
@@ -265,7 +264,7 @@ class ClientConduit extends Conduit {
 		}
 		catch (IOException e) {
 			handler.handle(e);
-			disconnect("I/O error: " + e.getMessage());
+			disconnect();
 		}
 	}
 
@@ -289,12 +288,7 @@ class ClientConduit extends Conduit {
 		}
 		catch (SonarException e) {
 			handler.handle(e);
-			StringBuilder b = new StringBuilder();
-			for (String p: params) {
-				b.append(' ');
-				b.append(p);
-			}
-			disconnect("Message error:" + b.toString());
+			disconnect();
 		}
 	}
 
@@ -327,7 +321,7 @@ class ClientConduit extends Conduit {
 	public void doQuit(List<String> p) throws SonarException {
 		if (p.size() != 1)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
-		disconnect("Received QUIT");
+		disconnect();
 	}
 
 	/** Process an OBJECT message from the server */
@@ -378,6 +372,8 @@ class ClientConduit extends Conduit {
 	/** Wait for login.
 	 * @return true if timed out. */
 	public synchronized boolean waitLogin() {
+		if (disposed)
+			return false;
 		try {
 			long start = System.currentTimeMillis();
 			wait(LOGIN_MS);
