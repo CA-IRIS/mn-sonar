@@ -54,7 +54,7 @@ public class Client {
 	private final ClientConduit conduit;
 
 	/** Task processor thread */
-	private final Scheduler processor = new Scheduler("sonar_proc");
+	private final Scheduler processor;
 
 	/** Message processor task */
 	private final MessageProcessor m_proc = new MessageProcessor();
@@ -81,14 +81,20 @@ public class Client {
 	}
 
 	/** Create a new SONAR client */
-	public Client(Properties props, ExceptionHandler h) throws IOException,
-		ConfigurationError
+	public Client(Properties props, final ExceptionHandler h)
+		throws IOException, ConfigurationError
 	{
-		handler = h;
 		selector = Selector.open();
 		context = Security.createContext(props);
 		conduit = new ClientConduit(props, this, selector,
-			createSSLEngine(), handler);
+			createSSLEngine(), h);
+		handler = new ExceptionHandler() {
+			public boolean handle(Exception e) {
+				conduit.disconnect();
+				return h.handle(e);
+			}
+		};
+		processor = new Scheduler("sonar_proc", handler);
 		thread.setDaemon(true);
 		thread.setPriority(Thread.MAX_PRIORITY);
 	}
@@ -138,7 +144,7 @@ public class Client {
 			//       handshaking, and the login request would never
 			//       get sent to the server.
 			processor.addJob(new Job(500) {
-				public void perform() {
+				public void perform() throws IOException {
 					conduit.flush();
 				}
 			});
@@ -237,7 +243,7 @@ public class Client {
 
 	/** Message processor for handling incoming messages */
 	private class MessageProcessor extends Job {
-		public void perform() {
+		public void perform() throws IOException, SonarException {
 			conduit.processMessages();
 		}
 	}

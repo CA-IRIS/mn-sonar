@@ -213,16 +213,10 @@ class ClientConduit extends Conduit {
 
 	/** Flush out all outgoing data in the conduit */
 	@Override
-	public void flush() {
-		try {
-			state.encoder.flush();
-			if (isConnected())
-				startWrite();
-		}
-		catch (IOException e) {
-			handler.handle(e);
-			disconnect();
-		}
+	public void flush() throws IOException {
+		state.encoder.flush();
+		if (isConnected())
+			startWrite();
 	}
 
 	/** Disconnect the conduit */
@@ -257,23 +251,18 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Process any incoming messages */
-	public void processMessages() {
-		try {
-			if (isConnected())
-				doProcessMessages();
-		}
-		catch (IOException e) {
-			handler.handle(e);
-			disconnect();
-		}
+	public void processMessages() throws IOException, SonarException {
+		if (isConnected())
+			doProcessMessages();
 	}
 
 	/** Process any incoming messages */
-	private void doProcessMessages() throws IOException {
+	private void doProcessMessages() throws IOException, SonarException {
 		while (state.doRead()) {
 			List<String> params = state.decoder.decode();
 			while (params != null) {
-				processMessage(params);
+				if (params.size() > 0)
+					processMessage(params);
 				params = state.decoder.decode();
 			}
 		}
@@ -281,21 +270,7 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Process one message from the client */
-	private void processMessage(List<String> params) {
-		try {
-			if (params.size() > 0)
-				_processMessage(params);
-		}
-		catch (SonarException e) {
-			handler.handle(e);
-			disconnect();
-		}
-	}
-
-	/** Process one message from the client */
-	private void _processMessage(List<String> params)
-		throws SonarException
-	{
+	private void processMessage(List<String> params) throws SonarException {
 		String c = params.get(0);
 		if (c.length() != 1)
 			throw ProtocolError.INVALID_MESSAGE_CODE;
