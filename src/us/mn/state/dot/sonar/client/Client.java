@@ -131,10 +131,10 @@ public class Client {
 	private void doSelect() throws IOException {
 		selector.select();
 		Set<SelectionKey> ready = selector.selectedKeys();
-		for(SelectionKey key: ready) {
-			if(key.isConnectable())
+		for (SelectionKey key: ready) {
+			if (key.isConnectable())
 				conduit.doConnect();
-			if(key.isWritable())
+			if (key.isWritable())
 				doWrite();
 			if (key.isReadable())
 				doRead();
@@ -176,7 +176,7 @@ public class Client {
 	/** Populate the specified type cache */
 	@SuppressWarnings("unchecked")
 	public void populate(TypeCache tc, boolean wait) {
-		if(wait) {
+		if (wait) {
 			EnumerationWaiter<SonarObject> ew =
 				new EnumerationWaiter<SonarObject>();
 			tc.addProxyListener(ew);

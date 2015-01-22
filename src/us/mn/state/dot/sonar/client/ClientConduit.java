@@ -50,20 +50,21 @@ class ClientConduit extends Conduit {
 	static private final long LOGIN_MS = 20000;
 
 	/** Define the set of valid messages from the server */
-	static protected final EnumSet<Message> MESSAGES = EnumSet.of(
+	static private final EnumSet<Message> MESSAGES = EnumSet.of(
 		Message.QUIT, Message.OBJECT, Message.REMOVE, Message.ATTRIBUTE,
 		Message.TYPE, Message.SHOW);
 
 	/** Lookup a message from the specified message code */
-	static protected Message lookupMessage(char code) throws ProtocolError {
-		for(Message m: MESSAGES)
-			if(code == m.code)
+	static private Message lookupMessage(char code) throws ProtocolError {
+		for (Message m: MESSAGES) {
+			if (code == m.code)
 				return m;
+		}
 		throw ProtocolError.INVALID_MESSAGE_CODE;
 	}
 
 	/** Create and configure a socket channel */
-	static protected SocketChannel createChannel(String host, int port)
+	static private SocketChannel createChannel(String host, int port)
 		throws IOException
 	{
 		SocketChannel c = SocketChannel.open();
@@ -73,25 +74,25 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Create and configure a socket channel */
-	static protected SocketChannel createChannel(Properties props)
+	static private SocketChannel createChannel(Properties props)
 		throws ConfigurationError, IOException
 	{
 		int p;
 		String h = props.getProperty("sonar.host");
-		if(h == null)
+		if (h == null)
 			throw new ConfigurationError(
 				"Missing sonar.host property");
 		try {
 			p = Integer.parseInt(props.getProperty("sonar.port"));
 		}
-		catch(NumberFormatException e) {
+		catch (NumberFormatException e) {
 			throw new ConfigurationError("Invalid sonar.port");
 		}
 		return createChannel(h, p);
 	}
 
 	/** Get a string host:port representation */
-	protected String getHostPort() {
+	private String getHostPort() {
 		StringBuilder h = new StringBuilder();
 		h.append(channel.socket().getInetAddress().getHostAddress());
 		h.append(':');
@@ -105,19 +106,19 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Socket channel to communicate with the server */
-	protected final SocketChannel channel;
+	private final SocketChannel channel;
 
 	/** Client thread */
-	protected final Client client;
+	private final Client client;
 
 	/** Key for selecting on the channel */
-	protected final SelectionKey key;
+	private final SelectionKey key;
 
 	/** SSL connection state information */
-	protected final SSLState state;
+	private final SSLState state;
 
 	/** Cache of all proxy objects */
-	protected final ClientNamespace namespace;
+	private final ClientNamespace namespace;
 
 	/** Get the namespace */
 	Namespace getNamespace() {
@@ -125,13 +126,13 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Exception handler */
-	protected final ExceptionHandler handler;
+	private final ExceptionHandler handler;
 
 	/** Flag to determine if login was accepted */
 	private boolean loggedIn = false;
 
 	/** Name of connection */
-	protected String connection = null;
+	private String connection = null;
 
 	/** Get the connection name */
 	public String getConnection() {
@@ -168,7 +169,7 @@ class ClientConduit extends Conduit {
 
 	/** Complete the connection on the socket channel */
 	void doConnect() throws IOException {
-		if(channel.finishConnect()) {
+		if (channel.finishConnect()) {
 			connected = true;
 			disableWrite();
 			flush();
@@ -191,10 +192,10 @@ class ClientConduit extends Conduit {
 	/** Write pending data to the socket channel */
 	public boolean doWrite() throws IOException {
 		ByteBuffer net_out = state.getNetOutBuffer();
-		synchronized(net_out) {
+		synchronized (net_out) {
 			net_out.flip();
 			channel.write(net_out);
-			if(!net_out.hasRemaining())
+			if (!net_out.hasRemaining())
 				disableWrite();
 			net_out.compact();
 		}
@@ -202,8 +203,8 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Start writing data to client */
-	protected void startWrite() throws IOException {
-		if(state.shouldWrite())
+	private void startWrite() throws IOException {
+		if (state.shouldWrite())
 			state.doWrite();
 	}
 
@@ -212,10 +213,10 @@ class ClientConduit extends Conduit {
 	public void flush() {
 		try {
 			state.encoder.flush();
-			if(isConnected())
+			if (isConnected())
 				startWrite();
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			handler.handle(e);
 			disconnect("I/O error: " + e.getMessage());
 		}
@@ -227,7 +228,7 @@ class ClientConduit extends Conduit {
 		System.err.println("SONAR: " + msg);
 		closeChannel();
 		closeSelector();
-		if(loggedIn) {
+		if (loggedIn) {
 			handler.handle(new SonarException(
 				"Disconnected from server"));
 		}
@@ -239,7 +240,7 @@ class ClientConduit extends Conduit {
 		try {
 			channel.close();
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			System.err.println("SONAR: Close error: " +
 				e.getMessage());
 		}
@@ -250,7 +251,7 @@ class ClientConduit extends Conduit {
 		try {
 			key.selector().close();
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			System.err.println("SONAR: Close error: " +
 				e.getMessage());
 		}
@@ -281,15 +282,15 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Process one message from the client */
-	protected void processMessage(List<String> params) {
+	private void processMessage(List<String> params) {
 		try {
-			if(params.size() > 0)
+			if (params.size() > 0)
 				_processMessage(params);
 		}
-		catch(SonarException e) {
+		catch (SonarException e) {
 			handler.handle(e);
 			StringBuilder b = new StringBuilder();
-			for(String p: params) {
+			for (String p: params) {
 				b.append(' ');
 				b.append(p);
 			}
@@ -298,11 +299,11 @@ class ClientConduit extends Conduit {
 	}
 
 	/** Process one message from the client */
-	protected void _processMessage(List<String> params)
+	private void _processMessage(List<String> params)
 		throws SonarException
 	{
 		String c = params.get(0);
-		if(c.length() != 1)
+		if (c.length() != 1)
 			throw ProtocolError.INVALID_MESSAGE_CODE;
 		Message m = lookupMessage(c.charAt(0));
 		m.handle(this, params);
@@ -324,7 +325,7 @@ class ClientConduit extends Conduit {
 	/** Process a QUIT message from the server */
 	@Override
 	public void doQuit(List<String> p) throws SonarException {
-		if(p.size() != 1)
+		if (p.size() != 1)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		disconnect("Received QUIT");
 	}
@@ -332,7 +333,7 @@ class ClientConduit extends Conduit {
 	/** Process an OBJECT message from the server */
 	@Override
 	public void doObject(List<String> p) throws SonarException {
-		if(p.size() != 2)
+		if (p.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		namespace.putObject(p.get(1));
 	}
@@ -340,7 +341,7 @@ class ClientConduit extends Conduit {
 	/** Process a REMOVE message from the server */
 	@Override
 	public void doRemove(List<String> p) throws SonarException {
-		if(p.size() != 2)
+		if (p.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		namespace.removeObject(p.get(1));
 	}
@@ -348,7 +349,7 @@ class ClientConduit extends Conduit {
 	/** Process an ATTRIBUTE message from the server */
 	@Override
 	public void doAttribute(List<String> p) throws SonarException {
-		if(p.size() < 2)
+		if (p.size() < 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		p.remove(0);
 		String name = p.remove(0);
@@ -358,9 +359,9 @@ class ClientConduit extends Conduit {
 	/** Process a TYPE message from the server */
 	@Override
 	public void doType(List<String> p) throws SonarException {
-		if(p.size() > 2)
+		if (p.size() > 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
-		if(p.size() > 1)
+		if (p.size() > 1)
 			namespace.setCurrentType(p.get(1));
 		else {
 			namespace.setCurrentType("");
@@ -391,18 +392,18 @@ class ClientConduit extends Conduit {
 	/** Process a SHOW message from the server */
 	@Override
 	public void doShow(List<String> p) throws SonarException {
-		if(p.size() != 2)
+		if (p.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
-		if(!loggedIn)
+		if (!loggedIn)
 			notifyLogin();
 		String m = p.get(1);
 		// First SHOW message after login is the connection name
-		if(loggedIn && connection == null)
+		if (loggedIn && connection == null)
 			connection = m;
 		// NOTE: this is a bit fragile
-		else if(m.contains("Authentication failed"))
+		else if (m.contains("Authentication failed"))
 			handler.handle(new AuthenticationException(m));
-		else if(m.startsWith("Permission denied"))
+		else if (m.startsWith("Permission denied"))
 			handler.handle(new PermissionException(m));
 		else
 			handler.handle(new SonarShowException(m));
