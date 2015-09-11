@@ -70,6 +70,16 @@ public class TaskProcessor {
 			DEBUG_TASK.log(msg + ": " + n);
 	}
 
+	/** Get an array of protocol versions to enable */
+	static private String[] getProtocols(SSLEngine engine) {
+		LinkedList<String> enabled = new LinkedList<String>();
+		for (String sp: engine.getSupportedProtocols()) {
+			if (sp.startsWith("TLS"))
+				enabled.add(sp);
+		}
+		return enabled.toArray(new String[0]);
+	}
+
 	/** Get an array of cipher suites which should be enabled */
 	static private String[] getCipherSuites(SSLEngine engine) {
 		LinkedList<String> enabled = new LinkedList<String>();
@@ -346,6 +356,7 @@ public class TaskProcessor {
 	/** Create an SSL engine in the server context */
 	public SSLEngine createSSLEngine() {
 		SSLEngine engine = context.createSSLEngine();
+		engine.setEnabledProtocols(getProtocols(engine));
 		engine.setEnabledCipherSuites(getCipherSuites(engine));
 		engine.setUseClientMode(false);
 		return engine;
