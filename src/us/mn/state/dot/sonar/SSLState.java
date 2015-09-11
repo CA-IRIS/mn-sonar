@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,6 +78,8 @@ public class SSLState {
 		decoder = new MessageDecoder(app_in);
 		encoder = new MessageEncoder(a_size);
 		engine.beginHandshake();
+		/* Prevent TLS renegotiation DoS attack. */
+		engine.setEnableSessionCreation(false);
 	}
 
 	/** Get the network out buffer */
