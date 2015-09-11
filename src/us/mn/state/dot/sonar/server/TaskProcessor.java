@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2006-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,6 +68,16 @@ public class TaskProcessor {
 	static private void debugTask(String msg, String n) {
 		if (DEBUG_TASK.isOpen())
 			DEBUG_TASK.log(msg + ": " + n);
+	}
+
+	/** Get an array of cipher suites which should be enabled */
+	static private String[] getCipherSuites(SSLEngine engine) {
+		LinkedList<String> enabled = new LinkedList<String>();
+		for (String cs: engine.getEnabledCipherSuites()) {
+			if (cs.startsWith("TLS_") && cs.contains("AES_128"))
+				enabled.add(cs);
+		}
+		return enabled.toArray(new String[0]);
 	}
 
 	/** SONAR namespace being served */
@@ -331,16 +341,6 @@ public class TaskProcessor {
 				debugTask("Failing PASSWORD", c);
 			}
 		});
-	}
-
-	/** Get an array of cipher suites which should be enabled */
-	private String[] getCipherSuites(SSLEngine engine) {
-		LinkedList<String> enabled = new LinkedList<String>();
-		for(String cs: engine.getEnabledCipherSuites()) {
-			if(cs.startsWith("TLS_") && cs.contains("AES_128"))
-				enabled.add(cs);
-		}
-		return enabled.toArray(new String[0]);
 	}
 
 	/** Create an SSL engine in the server context */
