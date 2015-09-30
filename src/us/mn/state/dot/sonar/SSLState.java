@@ -78,8 +78,6 @@ public class SSLState {
 		decoder = new MessageDecoder(app_in);
 		encoder = new MessageEncoder(a_size);
 		engine.beginHandshake();
-		/* Prevent TLS renegotiation DoS attack. */
-		engine.setEnableSessionCreation(false);
 	}
 
 	/** Get the network out buffer */
