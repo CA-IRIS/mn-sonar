@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2015  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,9 +104,9 @@ public class TaskProcessor {
  		new ExceptionHandler()
 	{
 		public boolean handle(Exception e) {
-			if(e instanceof CancelledKeyException)
+			if (e instanceof CancelledKeyException)
 				DEBUG.log("Key already cancelled");
-			else if(e instanceof SSLException)
+			else if (e instanceof SSLException)
 				DEBUG.log("SSL error " + e.getMessage());
 			else {
 				System.err.println("SONAR: error " +
@@ -137,8 +137,8 @@ public class TaskProcessor {
 		context = Security.createContext(props);
 		LDAPSocketFactory.FACTORY = context.getSocketFactory();
 		String ldap_urls = props.getProperty("sonar.ldap.urls");
-		if(ldap_urls != null) {
-			for(String url: ldap_urls.split("[ \t]+"))
+		if (ldap_urls != null) {
+			for (String url: ldap_urls.split("[ \t]+"))
 				addProvider(new LDAPProvider(url));
 		}
 		session_file = props.getProperty("sonar.session.file");
@@ -158,7 +158,7 @@ public class TaskProcessor {
 	private List<ConnectionImpl> getConnectionList() {
 		LinkedList<ConnectionImpl> clist =
 			new LinkedList<ConnectionImpl>();
-		synchronized(clients) {
+		synchronized (clients) {
 			clist.addAll(clients.values());
 		}
 		return clist;
@@ -173,7 +173,7 @@ public class TaskProcessor {
 				try {
 					doConnect(key, sc);
 				}
-				catch(Exception e) {
+				catch (Exception e) {
 					// Don't leak channels
 					key.cancel();
 					sc.close();
@@ -190,7 +190,7 @@ public class TaskProcessor {
 		ConnectionImpl con = new ConnectionImpl(this, key, sc);
 		doAddObject(con);
 		access_monitor.connect(con.getName());
-		synchronized(clients) {
+		synchronized (clients) {
 			clients.put(key, con);
 		}
 		updateSessionList();
@@ -214,7 +214,7 @@ public class TaskProcessor {
 		processor.addJob(new Job() {
 			public void perform() {
 				debugTask("Disconnect", c);
-				if(msg != null)
+				if (msg != null)
 					c.disconnect(msg);
 				else
 					c.disconnect();
@@ -226,11 +226,11 @@ public class TaskProcessor {
 	void disconnect(SelectionKey key) {
 		key.cancel();
 		ConnectionImpl c;
-		synchronized(clients) {
+		synchronized (clients) {
 			c = clients.remove(key);
 		}
 		debugTask("Disconnecting", c);
-		if(c != null) {
+		if (c != null) {
 			access_monitor.disconnect(c.getName(), c.getUserName());
 			updateSessionList();
 			scheduleRemoveObject(c);
@@ -239,13 +239,13 @@ public class TaskProcessor {
 
 	/** Update list of valid session IDs */
 	private void updateSessionList() {
-		if(session_file == null)
+		if (session_file == null)
 			return;
 		List<ConnectionImpl> clist = getConnectionList();
 		try {
 			FileWriter fw = new FileWriter(session_file);
 			try {
-				for(ConnectionImpl c: clist) {
+				for (ConnectionImpl c: clist) {
 					fw.write(String.valueOf(
 						c.getSessionId()));
 					fw.append('\n');
@@ -255,7 +255,7 @@ public class TaskProcessor {
 				fw.close();
 			}
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			DEBUG.log("Error writing session file: " +
 				session_file + " (" + e.getMessage() + ")");
 		}
@@ -288,7 +288,7 @@ public class TaskProcessor {
 
 	/** Lookup a user by name. */
 	private UserImpl lookupUser(String n) {
-		return (UserImpl)namespace.lookupObject(User.SONAR_TYPE, n);
+		return (UserImpl) namespace.lookupObject(User.SONAR_TYPE, n);
 	}
 
 	/** Finish a LOGIN */
@@ -335,7 +335,7 @@ public class TaskProcessor {
 					u.doSetPassword(pwd);
 					debugTask("Finishing PASSWORD", c);
 				}
-				catch(Exception e) {
+				catch (Exception e) {
 					failPassword(c, e.getMessage());
 					debugTask("Exception PASSWORD", c);
 				}
@@ -364,7 +364,7 @@ public class TaskProcessor {
 
 	/** Lookup the client connection for a selection key */
 	public ConnectionImpl lookupClient(SelectionKey key) {
-		synchronized(clients) {
+		synchronized (clients) {
 			return clients.get(key);
 		}
 	}
@@ -373,16 +373,16 @@ public class TaskProcessor {
 	private void notifyObject(SonarObject o) {
 		Name name = new Name(o);
 		List<ConnectionImpl> clist = getConnectionList();
-		for(ConnectionImpl c: clist)
+		for (ConnectionImpl c: clist)
 			c.notifyObject(name, o);
 	}
 
 	/** Notify all connections watching a name of an attribute change. */
 	void notifyAttribute(Name name, String[] params) {
 		debugTask("Notify attribute", name.toString());
-		if(namespace.isReadable(name)) {
+		if (namespace.isReadable(name)) {
 			List<ConnectionImpl> clist = getConnectionList();
-			for(ConnectionImpl c: clist)
+			for (ConnectionImpl c: clist)
 				c.notifyAttribute(name, params);
 		}
 	}
@@ -390,7 +390,7 @@ public class TaskProcessor {
 	/** Notify all connections watching a name of an object remove. */
 	void notifyRemove(Name name) {
 		List<ConnectionImpl> clist = getConnectionList();
-		for(ConnectionImpl c: clist)
+		for (ConnectionImpl c: clist)
 			c.notifyRemove(name);
 	}
 
@@ -414,7 +414,7 @@ public class TaskProcessor {
 	public void storeObject(final SonarObject o) throws SonarException {
 		// Calling waitForCompletion will hang if we're
 		// running on the task processor thread.
-		if(processor.isCurrentThread()) {
+		if (processor.isCurrentThread()) {
 			doStoreObject(o);
 			return;
 		}
@@ -428,7 +428,7 @@ public class TaskProcessor {
 			// Only wait for 30 seconds before giving up
 			job.waitForCompletion(30000);
 		}
-		catch(TimeoutException e) {
+		catch (TimeoutException e) {
 			throw new SonarException(e);
 		}
 	}
