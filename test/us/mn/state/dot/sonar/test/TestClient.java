@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,22 +70,12 @@ public class TestClient extends Client {
 		connections = new TypeCache<Connection>(Connection.class, this);
 		tests = new TypeCache<TestObj>(TestObj.class, this);
 		login("username", "password");
-		waitLoggedIn();
 		populate(capabilities);
 		populate(privileges);
 		populate(roles);
 		populate(users);
 		populate(connections);
 		populate(tests, true);
-	}
-
-	void waitLoggedIn() throws Exception {
-		for(int i = 0; i < 200; i++) {
-			if(isLoggedIn())
-				return;
-			TimeSteward.sleep_well(100);
-		}
-		throw new Exception("timed out");
 	}
 
 	void createProxyListener() {

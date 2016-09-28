@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2015  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,6 +69,11 @@ public class Client {
 			selectLoop();
 		}
 	};
+
+	/** Join on selector thread */
+	public void join() throws InterruptedException {
+		thread.join();
+	}
 
 	/** Get the connection name */
 	public String getConnection() {
