@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,8 +68,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Lookup a message from the specified message code */
 	static protected Message lookupMessage(char code) throws ProtocolError {
-		for(Message m: MESSAGES)
-			if(code == m.code)
+		for (Message m: MESSAGES)
+			if (code == m.code)
 				return m;
 		throw ProtocolError.INVALID_MESSAGE_CODE;
 	}
@@ -166,30 +166,30 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Start watching the specified name */
 	protected void startWatching(Name name) {
-		synchronized(watching) {
+		synchronized (watching) {
 			watching.remove(name.toString());
-			if(isWatchPositive(name))
+			if (isWatchPositive(name))
 				watching.add(name.toString());
 		}
 	}
 
 	/** Stop watching the specified name */
 	protected void stopWatching(Name name) {
-		synchronized(watching) {
+		synchronized (watching) {
 			watching.remove(name.toString());
-			if(isWatchNegative(name))
+			if (isWatchNegative(name))
 				watching.add(name.toString());
 		}
 	}
 
 	/** Check if the connection is watching a name */
 	protected boolean isWatching(Name name) {
-		synchronized(watching) {
+		synchronized (watching) {
 			// Object watch is highest priority (positive)
-			if(watching.contains(name.getObjectName()))
+			if (watching.contains(name.getObjectName()))
 				return true;
 			// Attribute watch is middle priority (negative)
-			if(watching.contains(name.getAttributeName()))
+			if (watching.contains(name.getAttributeName()))
 				return false;
 			// Type watch is lowest priority (positive)
 			return watching.contains(name.getTypePart());
@@ -198,7 +198,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Destroy the connection */
 	public void destroy() {
-		if(isConnected())
+		if (isConnected())
 			disconnect("Connection destroyed");
 	}
 
@@ -206,14 +206,14 @@ public class ConnectionImpl extends Conduit implements Connection {
 	 * This may only be called on the Task Processor thread. */
 	protected void disconnect() {
 		super.disconnect();
-		synchronized(watching) {
+		synchronized (watching) {
 			watching.clear();
 		}
 		processor.disconnect(key);
 		try {
 			channel.close();
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			TaskProcessor.DEBUG.log("Close error: " +
 				e.getMessage() + " on " + getName());
 		}
@@ -232,12 +232,12 @@ public class ConnectionImpl extends Conduit implements Connection {
 	void doRead() throws IOException {
 		int nbytes;
 		ByteBuffer net_in = state.getNetInBuffer();
-		synchronized(net_in) {
+		synchronized (net_in) {
 			nbytes = channel.read(net_in);
 		}
-		if(nbytes > 0)
+		if (nbytes > 0)
 			processor.processMessages(this);
-		else if(nbytes < 0)
+		else if (nbytes < 0)
 			throw new EOFException();
 	}
 
@@ -245,10 +245,10 @@ public class ConnectionImpl extends Conduit implements Connection {
 	 * This may only be called on the Server thread. */
 	void doWrite() throws IOException {
 		ByteBuffer net_out = state.getNetOutBuffer();
-		synchronized(net_out) {
+		synchronized (net_out) {
 			net_out.flip();
 			channel.write(net_out);
-			if(!net_out.hasRemaining())
+			if (!net_out.hasRemaining())
 				disableWrite();
 			net_out.compact();
 		}
@@ -256,12 +256,14 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Enable writing data back to the client */
+	@Override
 	public void enableWrite() {
 		key.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
 		key.selector().wakeup();
 	}
 
 	/** Disable writing data back to the client */
+	@Override
 	public void disableWrite() {
 		key.interestOps(SelectionKey.OP_READ);
 		key.selector().wakeup();
@@ -274,10 +276,10 @@ public class ConnectionImpl extends Conduit implements Connection {
 			namespace.enumerateObject(state.encoder, o);
 			flush();
 		}
-		catch(SonarException e) {
+		catch (SonarException e) {
 			disconnect("Notify error: " + e.getMessage());
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			disconnect("Notify error: " + e.getMessage());
 		}
 	}
@@ -285,7 +287,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Notify the client of a new object being added.
 	 * This may only be called on the Task Processor thread. */
 	void notifyObject(Name name, SonarObject o) {
-		if(isWatching(name))
+		if (isWatching(name))
 			notifyObject(o);
 	}
 
@@ -293,7 +295,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	 * This may only be called on the Task Processor thread. */
 	void notifyAttribute(Name name, String[] params) {
 		User u = user;
-		if(u != null &&
+		if (u != null &&
 		   namespace.canRead(name, u, address) &&
 		   isWatching(name))
 		{
@@ -308,7 +310,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			state.encoder.encode(Message.ATTRIBUTE, name, params);
 			flush();
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			disconnect("I/O error: notifyAttribute " + name);
 		}
 	}
@@ -316,7 +318,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Notify the client of a name being removed.
 	 * This may only be called on the Task Processor thread. */
 	void notifyRemove(Name name) {
-		if(isWatching(name)) {
+		if (isWatching(name)) {
 			notifyRemove(name.toString());
 			stopWatching(name);
 		}
@@ -329,29 +331,29 @@ public class ConnectionImpl extends Conduit implements Connection {
 			state.encoder.encode(Message.REMOVE, name);
 			flush();
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			disconnect("I/O error: notifyRemove " + name);
 		}
 	}
 
 	/** Check that the client is logged in */
 	protected void checkLoggedIn() throws SonarException {
-		if(user == null)
+		if (user == null)
 			throw ProtocolError.AUTHENTICATION_REQUIRED;
 	}
 
 	/** Process any incoming messages.
 	 * This may only be called on the Task Processor thread. */
 	void processMessages() {
-		if(!isConnected())
+		if (!isConnected())
 			return;
 		try {
 			_processMessages();
 		}
-		catch(SSLException e) {
+		catch (SSLException e) {
 			disconnect("SSL error " + e.getMessage());
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			disconnect("I/O error: processMessages");
 		}
 	}
@@ -359,9 +361,9 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Process any incoming messages.
 	 * This may only be called on the Task Processor thread. */
 	protected void _processMessages() throws SSLException, IOException {
-		while(state.doRead()) {
+		while (state.doRead()) {
 			List<String> params = state.decoder.decode();
-			while(params != null) {
+			while (params != null) {
 				processMessage(params);
 				params = state.decoder.decode();
 			}
@@ -375,10 +377,10 @@ public class ConnectionImpl extends Conduit implements Connection {
 		throws IOException
 	{
 		try {
-			if(params.size() > 0)
+			if (params.size() > 0)
 				_processMessage(params);
 		}
-		catch(SonarException e) {
+		catch (SonarException e) {
 			state.encoder.encode(Message.SHOW, e.getMessage());
 			TaskProcessor.DEBUG.log("Message error: " +
 				e.getMessage());
@@ -391,7 +393,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		throws SonarException
 	{
 		String c = params.get(0);
-		if(c.length() != 1)
+		if (c.length() != 1)
 			throw ProtocolError.INVALID_MESSAGE_CODE;
 		Message m = lookupMessage(c.charAt(0));
 		m.handle(this, params);
@@ -400,32 +402,34 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Start writing data to client.
 	 * This may only be called on the Task Processor thread. */
 	protected void startWrite() throws IOException {
-		if(state.shouldWrite())
+		if (state.shouldWrite())
 			state.doWrite();
 	}
 
 	/** Tell the I/O thread to flush the output buffer.
 	 * This may only be called on the Task Processor thread. */
+	@Override
 	public void flush() {
 		try {
 			state.encoder.flush();
-			if(isConnected())
+			if (isConnected())
 				startWrite();
 		}
-		catch(BufferOverflowException e) {
+		catch (BufferOverflowException e) {
 			disconnect("Buffer overflow error");
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			disconnect("I/O error: " + e.getMessage());
 		}
 	}
 
 	/** Respond to a LOGIN message.
 	 * This may only be called on the Task Processor thread. */
+	@Override
 	public void doLogin(List<String> params) throws SonarException {
-		if(user != null)
+		if (user != null)
 			throw ProtocolError.ALREADY_LOGGED_IN;
-		if(params.size() != 3)
+		if (params.size() != 3)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		String name = params.get(1);
 		String password = params.get(2);
@@ -448,7 +452,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			state.encoder.encode(Message.SHOW, hostport);
 			flush();
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			disconnect("I/O error: finishLogin " + e.getMessage());
 		}
 	}
@@ -461,15 +465,16 @@ public class ConnectionImpl extends Conduit implements Connection {
 				AUTHENTICATION_FAILED.getMessage());
 			flush();
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			disconnect("I/O error: failLogin " + e.getMessage());
 		}
 	}
 
 	/** Respond to a PASSWORD message */
+	@Override
 	public void doPassword(List<String> params) throws SonarException {
 		checkLoggedIn();
-		if(params.size() != 3)
+		if (params.size() != 3)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		char[] pwd_current = params.get(1).toCharArray();
 		char[] pwd_new = params.get(2).toCharArray();
@@ -482,31 +487,33 @@ public class ConnectionImpl extends Conduit implements Connection {
 			state.encoder.encode(Message.SHOW, msg);
 			flush();
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			disconnect("I/O error: failPassword " + e.getMessage());
 		}
 	}
 
 	/** Respond to a QUIT message.
 	 * This may only be called on the Task Processor thread. */
+	@Override
 	public void doQuit(List<String> params) {
 		disconnect();
 	}
 
 	/** Respond to an ENUMERATE message.
 	 * This may only be called on the Task Processor thread. */
+	@Override
 	public void doEnumerate(List<String> params) throws SonarException {
 		checkLoggedIn();
-		if(params.size() > 2)
+		if (params.size() > 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		Name name = createName(params);
-		if(!namespace.canRead(name, user, address))
+		if (!namespace.canRead(name, user, address))
 			throw PermissionDenied.create(name);
 		startWatching(name);
 		try {
 			namespace.enumerate(state.encoder, name);
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			throw new SonarException(e.getMessage());
 		}
 	}
@@ -520,9 +527,10 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Respond to an IGNORE message.
 	 * This may only be called on the Task Processor thread. */
+	@Override
 	public void doIgnore(List<String> params) throws SonarException {
 		checkLoggedIn();
-		if(params.size() != 2)
+		if (params.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		Name name = new Name(params.get(1));
 		stopWatching(name);
@@ -530,13 +538,14 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Respond to an OBJECT message.
 	 * This may only be called on the Task Processor thread. */
+	@Override
 	public void doObject(List<String> params) throws SonarException {
 		checkLoggedIn();
-		if(params.size() != 2)
+		if (params.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		Name name = new Name(params.get(1));
-		if(name.isObject()) {
-			if(!namespace.canAdd(name, user, address))
+		if (name.isObject()) {
+			if (!namespace.canAdd(name, user, address))
 				throw PermissionDenied.create(name);
 			createObject(name);
 		} else
@@ -554,7 +563,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Get the specified object (either phantom or new object).
 	 * This may only be called on the Task Processor thread. */
 	protected SonarObject getObject(Name name) throws SonarException {
-		if(isPhantom(name))
+		if (isPhantom(name))
 			return phantom;
 		else
 			return namespace.createObject(name);
@@ -570,15 +579,16 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Respond to a REMOVE message.
 	 * This may only be called on the Task Processor thread. */
+	@Override
 	public void doRemove(List<String> params) throws SonarException {
 		checkLoggedIn();
-		if(params.size() != 2)
+		if (params.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		Name name = new Name(params.get(1));
-		if(!namespace.canRemove(name, user, address))
+		if (!namespace.canRemove(name, user, address))
 			throw PermissionDenied.create(name);
 		SonarObject obj = namespace.lookupObject(name);
-		if(obj != null) {
+		if (obj != null) {
 			namespace.removeObject(obj);
 			processor.notifyRemove(name);
 		} else
@@ -587,13 +597,14 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Respond to an ATTRIBUTE message.
 	 * This may only be called on the Task Processor thread. */
+	@Override
 	public void doAttribute(List<String> params) throws SonarException {
 		checkLoggedIn();
-		if(params.size() < 2)
+		if (params.size() < 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		Name name = new Name(params.get(1));
-		if(name.isAttribute()) {
-			if(!namespace.canUpdate(name, user, address))
+		if (name.isAttribute()) {
+			if (!namespace.canUpdate(name, user, address))
 				throw PermissionDenied.create(name);
 			setAttribute(name, params);
 		} else
@@ -606,13 +617,13 @@ public class ConnectionImpl extends Conduit implements Connection {
 		throws SonarException
 	{
 		String[] v = new String[params.size() - 2];
-		for(int i = 0; i < v.length; i++)
+		for (int i = 0; i < v.length; i++)
 			v[i] =  params.get(i + 2);
-		if(isPhantom(name))
+		if (isPhantom(name))
 			namespace.setAttribute(name, v, phantom);
 		else {
 			phantom = namespace.setAttribute(name, v);
-			if(phantom == null)
+			if (phantom == null)
 				processor.notifyAttribute(name, v);
 		}
 	}
