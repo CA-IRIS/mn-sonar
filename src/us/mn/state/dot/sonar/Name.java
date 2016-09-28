@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,10 +25,10 @@ public class Name {
 	static public final String SEP = "/";
 
 	/** Name path */
-	protected final String path;
+	private final String path;
 
 	/** Name parts */
-	protected final String[] parts;
+	private final String[] parts;
 
 	/** Create a new name */
 	public Name(String n) {
@@ -37,8 +37,8 @@ public class Name {
 	}
 
 	/** Get the parts of a name */
-	protected String[] getParts() {
-		if(path.length() < 1)
+	private String[] getParts() {
+		if (path.length() < 1)
 			return new String[0];
 		else
 			return path.split(SEP);
@@ -85,13 +85,14 @@ public class Name {
 	}
 
 	/** Get the name as a string */
+	@Override
 	public String toString() {
 		return path;
 	}
 
 	/** Get the type part */
 	public String getTypePart() {
-		if(parts.length > 0)
+		if (parts.length > 0)
 			return parts[0];
 		else
 			return "";
@@ -99,7 +100,7 @@ public class Name {
 
 	/** Get the object part */
 	public String getObjectPart() {
-		if(parts.length > 1)
+		if (parts.length > 1)
 			return parts[1];
 		else
 			return "";
@@ -107,7 +108,7 @@ public class Name {
 
 	/** Get the attribute part */
 	public String getAttributePart() {
-		if(parts.length > 2)
+		if (parts.length > 2)
 			return parts[2];
 		else
 			return "";
