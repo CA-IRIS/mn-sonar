@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@ abstract public class Namespace {
 		throws NoSuchFieldException, IllegalAccessException
 	{
 		assert SonarObject.class.isAssignableFrom(t);
-		Field f = (Field)t.getField("SONAR_TYPE");
-		return (String)f.get(t);
+		Field f = (Field) t.getField("SONAR_TYPE");
+		return (String) f.get(t);
 	}
 
 	/** Get names of possible SONAR types */
@@ -42,21 +42,21 @@ abstract public class Namespace {
 		throws NoSuchFieldException, IllegalAccessException
 	{
 		assert SonarObject.class.isAssignableFrom(t);
-		Field f = (Field)t.getField("SONAR_TYPES");
-		return (String [])f.get(t);
+		Field f = (Field) t.getField("SONAR_TYPES");
+		return (String []) f.get(t);
 	}
 
 	/** Make an array of the given class and size */
 	static private Object[] makeArray(Class t, int size) {
-		return (Object [])Array.newInstance(t, size);
+		return (Object []) Array.newInstance(t, size);
 	}
 
 	/** Marshall a java object into a parameter value string */
 	public String marshall(Object v) {
-		if(v instanceof SonarObject) {
-			SonarObject o = (SonarObject)v;
+		if (v instanceof SonarObject) {
+			SonarObject o = (SonarObject) v;
 			return o.getName();
-		} else if(v != null)
+		} else if (v != null)
 			return v.toString();
 		else
 			return NULL_STR;
@@ -64,38 +64,38 @@ abstract public class Namespace {
 
 	/** Marshall java parameters into a parameter value string */
 	public String[] marshall(Class t, Object[] v) {
-		if(t.isArray())
+		if (t.isArray())
 			v = (Object [])v[0];
 		String[] values = new String[v.length];
-		for(int i = 0; i < v.length; i++)
+		for (int i = 0; i < v.length; i++)
 			values[i] = marshall(v[i]);
 		return values;
 	}
 
 	/** Unmarshall a parameter value string into a java object */
 	public Object unmarshall(Class t, String p) throws ProtocolError {
-		if(NULL_STR.equals(p))
+		if (NULL_STR.equals(p))
 			return null;
-		if(t == String.class)
+		if (t == String.class)
 			return p;
 		try {
-			if(t == Integer.TYPE || t == Integer.class)
+			if (t == Integer.TYPE || t == Integer.class)
 				return Integer.valueOf(p);
-			else if(t == Short.TYPE || t == Short.class)
+			else if (t == Short.TYPE || t == Short.class)
 				return Short.valueOf(p);
-			else if(t == Boolean.TYPE || t == Boolean.class)
+			else if (t == Boolean.TYPE || t == Boolean.class)
 				return Boolean.valueOf(p);
-			else if(t == Float.TYPE || t == Float.class)
+			else if (t == Float.TYPE || t == Float.class)
 				return Float.valueOf(p);
-			else if(t == Long.TYPE || t == Long.class)
+			else if (t == Long.TYPE || t == Long.class)
 				return Long.valueOf(p);
-			else if(t == Double.TYPE || t == Double.class)
+			else if (t == Double.TYPE || t == Double.class)
 				return Double.valueOf(p);
 		}
-		catch(NumberFormatException e) {
+		catch (NumberFormatException e) {
 			throw ProtocolError.INVALID_PARAMETER;
 		}
-		if(SonarObject.class.isAssignableFrom(t))
+		if (SonarObject.class.isAssignableFrom(t))
 			return unmarshallObject(t, p);
 		else
 			throw ProtocolError.INVALID_PARAMETER;
@@ -108,12 +108,12 @@ abstract public class Namespace {
 		try {
 			return unmarshallObjectB(t, p);
 		}
-		catch(NoSuchFieldException e) {
+		catch (NoSuchFieldException e) {
 			System.err.println("SONAR: SONAR_TYPE and " +
 				"SONAR_TYPES not defined for " + t);
 			throw ProtocolError.INVALID_PARAMETER;
 		}
-		catch(Exception e) {
+		catch (Exception e) {
 			System.err.println("SONAR: unmarshall \"" + p +
 				"\": " + e.getMessage());
 			throw ProtocolError.INVALID_PARAMETER;
@@ -127,10 +127,10 @@ abstract public class Namespace {
 		try {
 			return lookupObject(typeName(t), p);
 		}
-		catch(NoSuchFieldException e) {
-			for(String typ: typeNames(t)) {
+		catch (NoSuchFieldException e) {
+			for (String typ: typeNames(t)) {
 				Object o = lookupObject(typ, p);
-				if(o != null)
+				if (o != null)
 					return o;
 			}
 			return null;
@@ -139,10 +139,10 @@ abstract public class Namespace {
 
 	/** Unmarshall parameter strings into one java parameter */
 	public Object unmarshall(Class t, String[] v) throws ProtocolError {
-		if(t.isArray())
+		if (t.isArray())
 			return unmarshallArray(t.getComponentType(), v);
 		else {
-			if(v.length != 1)
+			if (v.length != 1)
 				throw ProtocolError.WRONG_PARAMETER_COUNT;
 			return unmarshall(t, v[0]);
 		}
@@ -153,7 +153,7 @@ abstract public class Namespace {
 		throws ProtocolError
 	{
 		Object[] values = makeArray(t, v.length);
-		for(int i = 0; i < v.length; i++)
+		for (int i = 0; i < v.length; i++)
 			values[i] = unmarshall(t, v[i]);
 		return values;
 	}
@@ -161,15 +161,15 @@ abstract public class Namespace {
 	/** Unmarshall multiple parameters */
 	public Object[] unmarshall(Class[] pt, String[] v) throws ProtocolError
 	{
-		if(pt.length == 1 && pt[0].isArray()) {
+		if (pt.length == 1 && pt[0].isArray()) {
 			return new Object[] {
 				unmarshall(pt[0], v)
 			};
 		}
-		if(pt.length != v.length)
+		if (pt.length != v.length)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		Object[] params = new Object[pt.length];
-		for(int i = 0; i < params.length; i++)
+		for (int i = 0; i < params.length; i++)
 			params[i] = unmarshall(pt[i], v[i]);
 		return params;
 	}
@@ -190,8 +190,8 @@ abstract public class Namespace {
 
 	/** Check if a set of capabilites has read privileges for a name */
 	private boolean canRead(Name n, Capability[] caps) {
-		for(Capability c: caps) {
-			if(c.getEnabled() && canRead(n, c))
+		for (Capability c: caps) {
+			if (c.getEnabled() && canRead(n, c))
 				return true;
 		}
 		return false;
@@ -203,10 +203,10 @@ abstract public class Namespace {
 	 * @return true If name can be read according to capability. */
 	private boolean canRead(Name n, Capability c) {
 		Iterator<SonarObject> it = iterator(Privilege.SONAR_TYPE);
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			SonarObject so = it.next();
-			if(so instanceof Privilege) {
-				if(canRead(n, c, (Privilege)so))
+			if (so instanceof Privilege) {
+				if (canRead(n, c, (Privilege) so))
 					return true;
 			}
 		}
@@ -238,8 +238,8 @@ abstract public class Namespace {
 
 	/** Check if a set of capabilites has update privileges for a name */
 	private boolean canUpdate(Name n, Capability[] caps) {
-		for(Capability c: caps) {
-			if(c.getEnabled() && canUpdate(n, c))
+		for (Capability c: caps) {
+			if (c.getEnabled() && canUpdate(n, c))
 				return true;
 		}
 		return false;
@@ -251,10 +251,10 @@ abstract public class Namespace {
 	 * @return true If name can be updated according to capability. */
 	private boolean canUpdate(Name n, Capability c) {
 		Iterator<SonarObject> it = iterator(Privilege.SONAR_TYPE);
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			SonarObject so = it.next();
-			if(so instanceof Privilege) {
-				if(canUpdate(n, c, (Privilege)so))
+			if (so instanceof Privilege) {
+				if (canUpdate(n, c, (Privilege) so))
 					return true;
 			}
 		}
@@ -286,8 +286,8 @@ abstract public class Namespace {
 
 	/** Check if a set of capabilites has add privileges for a name */
 	private boolean canAdd(Name n, Capability[] caps) {
-		for(Capability c: caps) {
-			if(c.getEnabled() && canAdd(n, c))
+		for (Capability c: caps) {
+			if (c.getEnabled() && canAdd(n, c))
 				return true;
 		}
 		return false;
@@ -299,10 +299,10 @@ abstract public class Namespace {
 	 * @return true If name can be added according to capability. */
 	private boolean canAdd(Name n, Capability c) {
 		Iterator<SonarObject> it = iterator(Privilege.SONAR_TYPE);
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			SonarObject so = it.next();
-			if(so instanceof Privilege) {
-				if(canAdd(n, c, (Privilege)so))
+			if (so instanceof Privilege) {
+				if (canAdd(n, c, (Privilege) so))
 					return true;
 			}
 		}
@@ -334,8 +334,8 @@ abstract public class Namespace {
 
 	/** Check if a set of capabilites has remove privileges for a name */
 	private boolean canRemove(Name n, Capability[] caps) {
-		for(Capability c: caps) {
-			if(c.getEnabled() && canRemove(n, c))
+		for (Capability c: caps) {
+			if (c.getEnabled() && canRemove(n, c))
 				return true;
 		}
 		return false;
@@ -347,10 +347,10 @@ abstract public class Namespace {
 	 * @return true If name can be removed according to capability. */
 	private boolean canRemove(Name n, Capability c) {
 		Iterator<SonarObject> it = iterator(Privilege.SONAR_TYPE);
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			SonarObject so = it.next();
-			if(so instanceof Privilege) {
-				if(canRemove(n, c, (Privilege)so))
+			if (so instanceof Privilege) {
+				if (canRemove(n, c, (Privilege) so))
 					return true;
 			}
 		}
