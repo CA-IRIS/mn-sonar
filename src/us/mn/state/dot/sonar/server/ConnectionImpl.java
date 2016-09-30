@@ -545,7 +545,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		Name name = new Name(params.get(1));
 		if (name.isObject()) {
-			if (!namespace.canAdd(name, user, address))
+			if (!namespace.canWrite(name, user, address))
 				throw PermissionDenied.create(name);
 			createObject(name);
 		} else
@@ -585,7 +585,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		if (params.size() != 2)
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		Name name = new Name(params.get(1));
-		if (!namespace.canRemove(name, user, address))
+		if (!namespace.canWrite(name, user, address))
 			throw PermissionDenied.create(name);
 		SonarObject obj = namespace.lookupObject(name);
 		if (obj != null) {
@@ -604,7 +604,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		Name name = new Name(params.get(1));
 		if (name.isAttribute()) {
-			if (!namespace.canUpdate(name, user, address))
+			if (!namespace.canWrite(name, user, address))
 				throw PermissionDenied.create(name);
 			setAttribute(name, params);
 		} else

@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,9 +27,22 @@ import us.mn.state.dot.sonar.Capability;
  */
 public class PrivilegeImpl implements Privilege {
 
-	/** Namespace access regex pattern */
-	static protected final Pattern NAMESPACE_PATTERN =
-		Pattern.compile("[A-Za-z0-9_.*+?()/]*");
+	/** Namespace type/attribute regex pattern */
+	static protected final Pattern TYPE_ATTR_PATTERN =
+		Pattern.compile("[A-Za-z0-9_]*");
+
+	/** Namespace object regex pattern */
+	static protected final Pattern OBJ_PATTERN =
+		Pattern.compile("[A-Za-z0-9_.*+?()]*");
+
+	/** Check for a valid namespace pattern */
+	static protected void checkPattern(Pattern p, String n)
+		throws NamespaceError
+	{
+		Matcher m = p.matcher(n);
+		if (!m.matches())
+			throw NamespaceError.NAME_INVALID;
+	}
 
 	/** Destroy a privilege */
 	public void destroy() {
@@ -37,14 +50,16 @@ public class PrivilegeImpl implements Privilege {
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
 
 	/** Privilege name */
-	protected final String name;
+	private final String name;
 
 	/** Get the SONAR object name */
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -61,88 +76,89 @@ public class PrivilegeImpl implements Privilege {
 	}
 
 	/** Capability */
-	protected Capability capability;
+	private Capability capability;
 
 	/** Get the capability */
+	@Override
 	public Capability getCapability() {
 		return capability;
 	}
 
-	/** Pattern for matching names */
-	protected String pattern = "";
+	/** Type name */
+	private String typeN = "";
 
-	/** Get the namespace pattern */
-	public String getPattern() {
-		return pattern;
+	/** Get the type name */
+	@Override
+	public String getTypeN() {
+		return typeN;
 	}
 
-	/** Check for a valid namespace pattern */
-	protected void checkPattern(String p) throws NamespaceError {
-		Matcher m = NAMESPACE_PATTERN.matcher(p);
-		if(!m.matches())
-			throw NamespaceError.PATTERN_INVALID;
+	/** Set the type name */
+	@Override
+	public void setTypeN(String n) {
+		typeN = n;
 	}
 
-	/** Set the namespace pattern */
-	public void setPattern(String p) {
-		pattern = p;
+	/** Set the type name */
+	public void doSetTypeN(String n) throws Exception {
+		checkPattern(TYPE_ATTR_PATTERN, n);
+		setTypeN(n);
 	}
 
-	/** Set the namespace pattern */
-	public void doSetPattern(String p) throws Exception {
-		checkPattern(p);
-		setPattern(p);
+	/** Object name */
+	private String objN = "";
+
+	/** Get the object name */
+	@Override
+	public String getObjN() {
+		return objN;
 	}
 
-	/** Read access privilege */
-	protected boolean priv_r = false;
-
-	/** Set the read privilege */
-	public void setPrivR(boolean p) {
-		priv_r = p;
+	/** Set the object name */
+	@Override
+	public void setObjN(String n) {
+		objN = n;
 	}
 
-	/** Get the read privilege */
-	public boolean getPrivR() {
-		return priv_r;
+	/** Set the object name */
+	public void doSetObjN(String n) throws Exception {
+		checkPattern(OBJ_PATTERN, n);
+		setObjN(n);
+	}
+
+	/** Attribute name */
+	private String attrN = "";
+
+	/** Get the attribute name */
+	@Override
+	public String getAttrN() {
+		return attrN;
+	}
+
+	/** Set the attribute name */
+	@Override
+	public void setAttrN(String n) {
+		attrN = n;
+	}
+
+	/** Set the attribute name */
+	public void doSetAttrN(String n) throws Exception {
+		checkPattern(TYPE_ATTR_PATTERN, n);
+		setAttrN(n);
 	}
 
 	/** Write access privilege */
-	protected boolean priv_w = false;
-
-	/** Set the write privilege */
-	public void setPrivW(boolean p) {
-		priv_w = p;
-	}
+	private boolean write = false;
 
 	/** Get the write privilege */
-	public boolean getPrivW() {
-		return priv_w;
+	@Override
+	public boolean getWrite() {
+		return write;
 	}
 
-	/** Create access privilege */
-	protected boolean priv_c = false;
-
-	/** Set the create privilege */
-	public void setPrivC(boolean p) {
-		priv_c = p;
-	}
-
-	/** Get the create privilege */
-	public boolean getPrivC() {
-		return priv_c;
-	}
-
-	/** Delete access privilege */
-	protected boolean priv_d = false;
-
-	/** Set the delete privilege */
-	public void setPrivD(boolean p) {
-		priv_d = p;
-	}
-
-	/** Get the delete privilege */
-	public boolean getPrivD() {
-		return priv_d;
+	/** Set the write privilege */
+	@Override
+	public void setWrite(boolean w) {
+		write = w;
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,10 +33,6 @@ public class NamespaceError extends SonarException {
 	/** Error thrown when a name already exists */
 	static public final NamespaceError NAME_EXISTS =
 		new NamespaceError("Name already exists");
-
-	/** Error thrown when a name pattern is invalid */
-	static public final NamespaceError PATTERN_INVALID =
-		new NamespaceError("Invalid name pattern");
 
 	/** Create a "Name unknown" exception */
 	static public NamespaceError nameUnknown(String name) {

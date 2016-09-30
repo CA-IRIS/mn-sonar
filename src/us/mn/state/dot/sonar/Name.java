@@ -124,8 +124,22 @@ public class Name {
 		return getTypePart() + SEP + SEP + getAttributePart();
 	}
 
-	/** Check if a name matches a pattern */
+	/** Check if a name matches a privilege */
 	public boolean matches(Privilege p) {
-		return path.matches(p.getPattern());
+		return p.getTypeN().equals(getTypePart())
+		    && matchesObj(p)
+		    && matchesAttr(p);
+	}
+
+	/** Check if an object matches a privilege */
+	private boolean matchesObj(Privilege p) {
+		String o = p.getObjN();
+		return "".equals(o) || getObjectPart().matches(o);
+	}
+
+	/** Check if an attribute matches a privilege */
+	private boolean matchesAttr(Privilege p) {
+		String a = p.getAttrN();
+		return "".equals(a) || getAttributePart().equals(a);
 	}
 }

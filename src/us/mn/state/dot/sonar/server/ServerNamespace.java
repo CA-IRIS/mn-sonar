@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -260,33 +260,13 @@ public class ServerNamespace extends Namespace {
 		return canRead(n, u);
 	}
 
-	/** Check if a user has update privileges for a name.  This can be
+	/** Check if a user has write privileges for a name.  This can be
 	 * overridden by a subclass to check a whitelist of addresses.
 	 * @param n Name to check.
 	 * @param u User to check.
 	 * @param a Inet address of connection.
-	 * @return true if update is allowed; false otherwise. */
-	public boolean canUpdate(Name n, User u, InetAddress a) {
-		return canUpdate(n, u);
-	}
-
-	/** Check if a user has add privileges for a name.  This can be
-	 * overridden by a subclass to check a whitelist of addresses.
-	 * @param n Name to check.
-	 * @param u User to check.
-	 * @param a Inet address of connection.
-	 * @return true if add is allowed; false otherwise. */
-	public boolean canAdd(Name n, User u, InetAddress a) {
-		return canAdd(n, u);
-	}
-
-	/** Check if a user has remove privileges for a name.  This can be
-	 * overridden by a subclass to check a whitelist of addresses.
-	 * @param n Name to check.
-	 * @param u User to check.
-	 * @param a Inet address of connection.
-	 * @return true if remove is allowed; false otherwise. */
-	public boolean canRemove(Name n, User u, InetAddress a) {
-		return canRemove(n, u);
+	 * @return true if write is allowed; false otherwise. */
+	public boolean canWrite(Name n, User u, InetAddress a) {
+		return canWrite(n, u);
 	}
 }

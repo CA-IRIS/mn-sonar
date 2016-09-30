@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,33 +27,27 @@ public interface Privilege extends SonarObject {
 	/** Get the capability */
 	Capability getCapability();
 
-	/** Get the namespace pattern */
-	String getPattern();
+	/** Get the type name */
+	String getTypeN();
 
-	/** Set the namespace pattern */
-	void setPattern(String p);
+	/** Set the type name */
+	void setTypeN(String n);
 
-	/** Set the read privilege */
-	void setPrivR(boolean p);
+	/** Get the object name */
+	String getObjN();
 
-	/** Get the read privilege */
-	boolean getPrivR();
+	/** Set the object name */
+	void setObjN(String n);
 
-	/** Set the write privilege */
-	void setPrivW(boolean p);
+	/** Get the attribute name */
+	String getAttrN();
+
+	/** Set the attribute name */
+	void setAttrN(String n);
 
 	/** Get the write privilege */
-	boolean getPrivW();
+	boolean getWrite();
 
-	/** Set the create privilege */
-	void setPrivC(boolean p);
-
-	/** Get the create privilege */
-	boolean getPrivC();
-
-	/** Set the delete privilege */
-	void setPrivD(boolean p);
-
-	/** Get the delete privilege */
-	boolean getPrivD();
+	/** Set the write privilege */
+	void setWrite(boolean w);
 }

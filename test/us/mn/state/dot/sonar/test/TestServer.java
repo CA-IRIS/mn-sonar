@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.sonar.test;
 
 import java.util.Properties;
+import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.TestObjImpl;
 import us.mn.state.dot.sonar.server.AccessMonitor;
@@ -36,6 +37,19 @@ public class TestServer {
 		return p;
 	}
 
+	static private void createPriv(ServerNamespace n, CapabilityImpl c,
+		String typeN) throws NamespaceError
+	{
+		PrivilegeImpl p = new PrivilegeImpl("admin", c);
+		p.setTypeN(typeN);
+		p.setWrite(false);
+		n.addObject(p);
+		p = new PrivilegeImpl("admin", c);
+		p.setTypeN(typeN);
+		p.setWrite(true);
+		n.addObject(p);
+	}
+
 	static protected ServerNamespace createNamespace()
 		throws SonarException
 	{
@@ -43,13 +57,12 @@ public class TestServer {
 		CapabilityImpl c = new CapabilityImpl("admin");
 		c.setEnabled(true);
 		n.addObject(c);
-		PrivilegeImpl p = new PrivilegeImpl("admin", c);
-		p.setPattern(".*");
-		p.setPrivR(true);
-		p.setPrivW(true);
-		p.setPrivC(true);
-		p.setPrivD(true);
-		n.addObject(p);
+		createPriv(n, c, "capability");
+		createPriv(n, c, "privilege");
+		createPriv(n, c, "role");
+		createPriv(n, c, "user");
+		createPriv(n, c, "connection");
+		createPriv(n, c, "test");
 		RoleImpl r = new RoleImpl("admin");
 		r.setCapabilities(new CapabilityImpl[] { c });
 		r.setEnabled(true);
