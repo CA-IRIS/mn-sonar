@@ -71,6 +71,12 @@ public class TaskProcessor {
 			DEBUG_TASK.log(msg + ": " + n);
 	}
 
+	/** Debug task elapsed time */
+	static public void debugElapsed(String msg, long el) {
+		if (DEBUG_TASK.isOpen())
+			DEBUG_TASK.log(msg + " ELAPSED: " + Long.toString(el));
+	}
+
 	/** Task processor job */
 	static abstract private class TaskJob extends Job {
 		private final String name;
@@ -94,13 +100,9 @@ public class TaskProcessor {
 				doPerform();
 			}
 			finally {
-				if (DEBUG_TASK.isOpen())
-					debugElapsed(st);
+				long el = currentTimeMillis() - st;
+				debugElapsed(name, el);
 			}
-		}
-		private void debugElapsed(long st) {
-			long el = currentTimeMillis() - st;
-			DEBUG_TASK.log(name + " ELAPSED: " + Long.toString(el));
 		}
 		abstract protected void doPerform() throws Exception;
 	}

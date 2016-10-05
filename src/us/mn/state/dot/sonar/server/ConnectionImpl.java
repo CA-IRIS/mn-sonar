@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import javax.net.ssl.SSLException;
+import static us.mn.state.dot.sched.TimeSteward.currentTimeMillis;
 import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.Message;
@@ -391,11 +392,18 @@ public class ConnectionImpl extends Conduit implements Connection {
 	protected void _processMessage(List<String> params)
 		throws SonarException
 	{
+		long st = currentTimeMillis();
 		String c = params.get(0);
 		if (c.length() != 1)
 			throw ProtocolError.INVALID_MESSAGE_CODE;
 		Message m = lookupMessage(c.charAt(0));
-		m.handle(this, params);
+		try {
+			m.handle(this, params);
+		}
+		finally {
+			long el = currentTimeMillis() - st;
+			TaskProcessor.debugElapsed(m.toString(), el);
+		}
 	}
 
 	/** Start writing data to client.
