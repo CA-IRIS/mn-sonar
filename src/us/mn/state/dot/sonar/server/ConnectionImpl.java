@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import javax.net.ssl.SSLException;
-import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Conduit;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.Message;
