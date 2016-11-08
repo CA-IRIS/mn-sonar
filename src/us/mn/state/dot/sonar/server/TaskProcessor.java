@@ -175,7 +175,7 @@ public class TaskProcessor {
 		LDAPSocketFactory.FACTORY = context.getSocketFactory();
 		String ldap_urls = props.getProperty("sonar.ldap.urls");
 		if (ldap_urls != null) {
-			for (String url: ldap_urls.split("[ \t]+"))
+			for (String url: ldap_urls.split("[ \t,]+"))
 				addProvider(new LDAPProvider(url));
 		}
 		session_file = props.getProperty("sonar.session.file");
