@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2016  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -164,6 +164,9 @@ public class TaskProcessor {
 	/** File to write session list */
 	private final String session_file;
 
+	/** User for current message processing */
+	private String proc_user = null;
+
 	/** Create a task processor */
 	public TaskProcessor(ServerNamespace n, Properties props,
 		AccessMonitor am) throws IOException, ConfigurationError
@@ -189,6 +192,11 @@ public class TaskProcessor {
 	/** Get the SONAR namespace */
 	public ServerNamespace getNamespace() {
 		return namespace;
+	}
+
+	/** Get user for current message processing */
+	public String getProcUser() {
+		return proc_user;
 	}
 
 	/** Get a list of active connections */
@@ -301,7 +309,9 @@ public class TaskProcessor {
 	void processMessages(final ConnectionImpl c) {
 		processor.addJob(new TaskJob("Processing msgs", c) {
 			protected void doPerform() {
+				proc_user = c.getUserName();
 				c.processMessages();
+				proc_user = null;
 			}
 		});
 	}

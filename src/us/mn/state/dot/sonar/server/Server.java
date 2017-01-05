@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,5 +80,10 @@ public final class Server {
 	/** Set the specified attribute in the server's namespace */
 	public void setAttribute(SonarObject o, String a) {
 		processor.scheduleSetAttribute(o, a);
+	}
+
+	/** Get user for current message processing */
+	public String getProcUser() {
+		return processor.getProcUser();
 	}
 }
