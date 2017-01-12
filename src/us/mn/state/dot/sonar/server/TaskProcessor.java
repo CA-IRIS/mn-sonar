@@ -30,8 +30,8 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.ExceptionHandler;
-import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.Scheduler;
+import us.mn.state.dot.sched.Work;
+import us.mn.state.dot.sched.Worker;
 import static us.mn.state.dot.sched.TimeSteward.currentTimeMillis;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Name;
@@ -77,31 +77,35 @@ public class TaskProcessor {
 			DEBUG_TASK.log(msg + " ELAPSED: " + Long.toString(el));
 	}
 
-	/** Task processor job */
-	static abstract private class TaskJob extends Job {
+	/** Task processor work */
+	static abstract private class TaskWork extends Work {
 		private final String name;
 		private final String conn;
-		private TaskJob(String n, ConnectionImpl c) {
+		private TaskWork(String n, ConnectionImpl c) {
 			name = n;
 			conn = (c != null) ? c.getName() : null;
 		}
-		private TaskJob(String n) {
+		private TaskWork(String n) {
 			this(n, null);
 		}
 		@Override public final void perform() throws Exception {
-			if (DEBUG_TASK.isOpen()) {
+			long st = 0;
+			final boolean op = DEBUG_TASK.isOpen();
+			if (op) {
+				st = currentTimeMillis();
 				if (conn != null)
 					DEBUG_TASK.log(name + ": " + conn);
 				else
 					DEBUG_TASK.log(name);
 			}
-			long st = currentTimeMillis();
 			try {
 				doPerform();
 			}
 			finally {
-				long el = currentTimeMillis() - st;
-				debugElapsed(name, el);
+				if (op) {
+					long el = currentTimeMillis() - st;
+					debugElapsed(name, el);
+				}
 			}
 		}
 		abstract protected void doPerform() throws Exception;
@@ -136,8 +140,8 @@ public class TaskProcessor {
 	/** SSL context */
 	private final SSLContext context;
 
-	/** Task processor scheduler */
-	private final Scheduler processor = new Scheduler("sonar_proc",
+	/** Task processor worker */
+	private final Worker processor = new Worker("sonar_proc",
  		new ExceptionHandler()
 	{
 		public boolean handle(Exception e) {
@@ -213,7 +217,7 @@ public class TaskProcessor {
 	public void scheduleConnect(final SelectionKey key,
 		final SocketChannel sc)
 	{
-		processor.addJob(new TaskJob("Connect") {
+		processor.addWork(new TaskWork("Connect") {
 			protected void doPerform() throws Exception {
 				try {
 					doConnect(key, sc);
@@ -245,7 +249,7 @@ public class TaskProcessor {
 
 	/** Schedule a disconnect on a selection key */
 	public void scheduleDisconnect(final SelectionKey key) {
-		processor.addJob(new TaskJob("Disconnect key") {
+		processor.addWork(new TaskWork("Disconnect key") {
 			protected void doPerform() {
 				disconnect(key);
 			}
@@ -256,7 +260,7 @@ public class TaskProcessor {
 	public void scheduleDisconnect(final ConnectionImpl c,
 		final String msg)
 	{
-		processor.addJob(new TaskJob("Disconnect", c) {
+		processor.addWork(new TaskWork("Disconnect", c) {
 			protected void doPerform() {
 				if (msg != null)
 					c.disconnect(msg);
@@ -307,7 +311,7 @@ public class TaskProcessor {
 
 	/** Process messages on one connection */
 	void processMessages(final ConnectionImpl c) {
-		processor.addJob(new TaskJob("Processing msgs", c) {
+		processor.addWork(new TaskWork("Processing msgs", c) {
 			protected void doPerform() {
 				proc_user = c.getUserName();
 				c.processMessages();
@@ -318,7 +322,7 @@ public class TaskProcessor {
 
 	/** Flush outgoing data for one connection */
 	void flush(final ConnectionImpl c) {
-		processor.addJob(new TaskJob("Flush", c) {
+		processor.addWork(new TaskWork("Flush", c) {
 			protected void doPerform() {
 				c.flush();
 			}
@@ -337,7 +341,7 @@ public class TaskProcessor {
 
 	/** Finish a LOGIN */
 	void finishLogin(final ConnectionImpl c, final UserImpl u) {
-		processor.addJob(new TaskJob("Finish LOGIN", c) {
+		processor.addWork(new TaskWork("Finish LOGIN", c) {
 			protected void doPerform() {
 				access_monitor.authenticate(c.getName(),
 					u.getName());
@@ -349,7 +353,7 @@ public class TaskProcessor {
 
 	/** Fail a LOGIN */
 	void failLogin(final ConnectionImpl c, final String name) {
-		processor.addJob(new TaskJob("Fail LOGIN", c) {
+		processor.addWork(new TaskWork("Fail LOGIN", c) {
 			protected void doPerform() {
 				access_monitor.failAuthentication(c.getName(),
 					name);
@@ -371,7 +375,7 @@ public class TaskProcessor {
 	{
 		// Need to copy password, since authenticator will clear it
 		final String pwd = new String(pwd_new);
-		processor.addJob(new TaskJob("Finish PASSWORD", c) {
+		processor.addWork(new TaskWork("Finish PASSWORD", c) {
 			protected void doPerform() {
 				try {
 					u.doSetPassword(pwd);
@@ -385,7 +389,7 @@ public class TaskProcessor {
 
 	/** Fail a PASSWORD */
 	void failPassword(final ConnectionImpl c, final String msg) {
-		processor.addJob(new TaskJob("Fail PASSWORD", c) {
+		processor.addWork(new TaskWork("Fail PASSWORD", c) {
 			protected void doPerform() {
 				c.failPassword(msg);
 			}
@@ -435,7 +439,7 @@ public class TaskProcessor {
 
 	/** Schedule an object to be added to the server's namespace */
 	public void scheduleAddObject(final SonarObject o) {
-		processor.addJob(new TaskJob("Add object") {
+		processor.addWork(new TaskWork("Add object") {
 			protected void doPerform() throws NamespaceError {
 				doAddObject(o);
 			}
@@ -457,15 +461,15 @@ public class TaskProcessor {
 			doStoreObject(o);
 			return;
 		}
-		Job job = new TaskJob("Store object") {
+		Work w = new TaskWork("Store object") {
 			protected void doPerform() throws SonarException {
 				doStoreObject(o);
 			}
 		};
-		processor.addJob(job);
+		processor.addWork(w);
 		try {
 			// Only wait for 30 seconds before giving up
-			job.waitForCompletion(30000);
+			w.waitForCompletion(30000);
 		}
 		catch (TimeoutException e) {
 			throw new SonarException(e);
@@ -481,7 +485,7 @@ public class TaskProcessor {
 
 	/** Remove the specified object from the server's namespace */
 	public void scheduleRemoveObject(final SonarObject o) {
-		processor.addJob(new TaskJob("Remove object") {
+		processor.addWork(new TaskWork("Remove object") {
 			protected void doPerform() throws SonarException {
 				doRemoveObject(o);
 			}
@@ -497,7 +501,7 @@ public class TaskProcessor {
 
 	/** Set the specified attribute in the server's namespace */
 	public void scheduleSetAttribute(final SonarObject o, final String a) {
-		processor.addJob(new TaskJob("Set attribute") {
+		processor.addWork(new TaskWork("Set attribute") {
 			protected void doPerform() throws SonarException {
 				doSetAttribute(o, a);
 			}
