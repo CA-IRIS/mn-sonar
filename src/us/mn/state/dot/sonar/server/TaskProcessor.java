@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -205,12 +206,9 @@ public class TaskProcessor {
 
 	/** Get a list of active connections */
 	private List<ConnectionImpl> getConnectionList() {
-		LinkedList<ConnectionImpl> clist =
-			new LinkedList<ConnectionImpl>();
 		synchronized (clients) {
-			clist.addAll(clients.values());
+			return new ArrayList<ConnectionImpl>(clients.values());
 		}
-		return clist;
 	}
 
 	/** Schedule a client connection */
