@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2016  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -296,8 +296,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 	void notifyAttribute(Name name, String[] params) {
 		User u = user;
 		if (u != null &&
-		   namespace.canRead(name, u, address) &&
-		   isWatching(name))
+		    isWatching(name) &&
+		    namespace.canRead(name, u, address))
 		{
 			notifyAttribute(name.toString(), params);
 		}
