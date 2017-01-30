@@ -103,7 +103,7 @@ public final class SelectorThread extends Thread {
 				return false;
 		}
 		catch (CancelledKeyException e) {
-			processor.scheduleDisconnect(skey);
+			handleDisconnect(skey, null, e.getMessage());
 		}
 		catch (IOException e) {
 			System.err.println("SONAR: selector I/O error " +
@@ -125,7 +125,7 @@ public final class SelectorThread extends Thread {
 	private void serviceClient(SelectionKey skey) {
 		ConnectionImpl c = processor.lookupClient(skey);
 		if (null == c) {
-			processor.scheduleDisconnect(skey);
+			handleDisconnect(skey, null, "No connection");
 			return;
 		}
 		try {
@@ -135,16 +135,34 @@ public final class SelectorThread extends Thread {
 				c.doRead();
 		}
 		catch (CancelledKeyException e) {
-			processor.scheduleDisconnect(c, "Key cancelled");
+			handleDisconnect(skey, c, "Key cancelled");
 		}
 		catch (EOFException e) {
-			processor.scheduleDisconnect(c, null);
+			handleDisconnect(skey, c, null);
 			/* Let the task processor perform the disconnect */
 			Thread.yield();
 		}
 		catch (IOException e) {
-			processor.scheduleDisconnect(c, "I/O error " +
-				e.getMessage());
+			handleDisconnect(skey, c, "I/O error " +e.getMessage());
 		}
+	}
+
+	/** Handle a disconnect */
+	private void handleDisconnect(SelectionKey skey, ConnectionImpl c,
+		String msg)
+	{
+		try {
+			skey.channel().close();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		finally {
+			skey.cancel();
+		}
+		if (c != null)
+			processor.scheduleDisconnect(c, msg);
+		else
+			processor.scheduleDisconnect(skey);
 	}
 }
