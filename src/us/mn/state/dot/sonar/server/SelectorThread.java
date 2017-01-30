@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,8 +64,9 @@ public final class SelectorThread extends Thread {
 	}
 
 	/** Selector loop to perfrom socket I/O */
+	@Override
 	public void run() {
-		while(true)
+		while (true)
 			doSelect();
 	}
 
@@ -74,7 +75,7 @@ public final class SelectorThread extends Thread {
 		try {
 			_doSelect();
 		}
-		catch(Exception e) {
+		catch (Exception e) {
 			System.err.println("SONAR: selector error " +
 				e.getMessage());
 			e.printStackTrace();
@@ -85,8 +86,8 @@ public final class SelectorThread extends Thread {
 	private void _doSelect() throws IOException {
 		selector.select();
 		Set<SelectionKey> readySet = selector.selectedKeys();
-		for(SelectionKey key: readySet) {
-			if(checkAccept(key))
+		for (SelectionKey key: readySet) {
+			if (checkAccept(key))
 				continue;
 			serviceClient(key);
 		}
@@ -96,15 +97,15 @@ public final class SelectorThread extends Thread {
 	/** Check if a new client is connecting */
 	private boolean checkAccept(SelectionKey key) {
 		try {
-			if(key.isAcceptable())
+			if (key.isAcceptable())
 				doAccept();
 			else
 				return false;
 		}
-		catch(CancelledKeyException e) {
+		catch (CancelledKeyException e) {
 			processor.scheduleDisconnect(key);
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			System.err.println("SONAR: selector I/O error " +
 				e.getMessage());
 			e.printStackTrace();
@@ -123,25 +124,25 @@ public final class SelectorThread extends Thread {
 	/** Do any pending read/write on a client connection */
 	private void serviceClient(SelectionKey key) {
 		ConnectionImpl c = processor.lookupClient(key);
-		if(c == null) {
+		if (null == c) {
 			processor.scheduleDisconnect(key);
 			return;
 		}
 		try {
-			if(key.isWritable())
+			if (key.isWritable())
 				c.doWrite();
-			if(key.isReadable())
+			if (key.isReadable())
 				c.doRead();
 		}
-		catch(CancelledKeyException e) {
+		catch (CancelledKeyException e) {
 			processor.scheduleDisconnect(c, "Key cancelled");
 		}
-		catch(EOFException e) {
+		catch (EOFException e) {
 			processor.scheduleDisconnect(c, null);
 			/* Let the task processor perform the disconnect */
 			Thread.yield();
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			processor.scheduleDisconnect(c, "I/O error " +
 				e.getMessage());
 		}
