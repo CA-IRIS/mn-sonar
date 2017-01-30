@@ -126,7 +126,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	protected final ServerNamespace namespace;
 
 	/** Selection key for the socket channel */
-	protected final SelectionKey key;
+	protected final SelectionKey skey;
 
 	/** Channel to client */
 	protected final SocketChannel channel;
@@ -150,7 +150,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	{
 		processor = p;
 		namespace = processor.getNamespace();
-		key = k;
+		skey = k;
 		channel = c;
 		state = new SSLState(this, processor.createSSLEngine());
 		address = c.socket().getInetAddress();
@@ -209,7 +209,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		synchronized (watching) {
 			watching.clear();
 		}
-		processor.disconnect(key);
+		processor.disconnect(skey);
 		try {
 			channel.close();
 		}
@@ -258,15 +258,15 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Enable writing data back to the client */
 	@Override
 	public void enableWrite() {
-		key.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
-		key.selector().wakeup();
+		skey.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+		skey.selector().wakeup();
 	}
 
 	/** Disable writing data back to the client */
 	@Override
 	public void disableWrite() {
-		key.interestOps(SelectionKey.OP_READ);
-		key.selector().wakeup();
+		skey.interestOps(SelectionKey.OP_READ);
+		skey.selector().wakeup();
 	}
 
 	/** Notify the client of a new object being added.

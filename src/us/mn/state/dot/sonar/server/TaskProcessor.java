@@ -212,17 +212,17 @@ public class TaskProcessor {
 	}
 
 	/** Schedule a client connection */
-	public void scheduleConnect(final SelectionKey key,
+	public void scheduleConnect(final SelectionKey skey,
 		final SocketChannel sc)
 	{
 		processor.addWork(new TaskWork("Connect") {
 			protected void doPerform() throws Exception {
 				try {
-					doConnect(key, sc);
+					doConnect(skey, sc);
 				}
 				catch (Exception e) {
 					// Don't leak channels
-					key.cancel();
+					skey.cancel();
 					sc.close();
 					throw e;
 				}
@@ -231,14 +231,14 @@ public class TaskProcessor {
 	}
 
 	/** Create a client connection */
-	private void doConnect(SelectionKey key, SocketChannel sc)
+	private void doConnect(SelectionKey skey, SocketChannel sc)
 		throws IOException, NamespaceError
 	{
-		ConnectionImpl con = new ConnectionImpl(this, key, sc);
+		ConnectionImpl con = new ConnectionImpl(this, skey, sc);
 		doAddObject(con);
 		access_monitor.connect(con.getName());
 		synchronized (clients) {
-			clients.put(key, con);
+			clients.put(skey, con);
 		}
 		updateSessionList();
 		// Enable OP_READ interest
@@ -246,10 +246,10 @@ public class TaskProcessor {
 	}
 
 	/** Schedule a disconnect on a selection key */
-	public void scheduleDisconnect(final SelectionKey key) {
+	public void scheduleDisconnect(final SelectionKey skey) {
 		processor.addWork(new TaskWork("Disconnect key") {
 			protected void doPerform() {
-				disconnect(key);
+				disconnect(skey);
 			}
 		});
 	}
@@ -269,11 +269,11 @@ public class TaskProcessor {
 	}
 
 	/** Disconnect the client associated with the selection key. */
-	void disconnect(SelectionKey key) {
-		key.cancel();
+	void disconnect(SelectionKey skey) {
+		skey.cancel();
 		ConnectionImpl c;
 		synchronized (clients) {
-			c = clients.remove(key);
+			c = clients.remove(skey);
 		}
 		debugTask("Disconnecting", c);
 		if (c != null) {
@@ -404,9 +404,9 @@ public class TaskProcessor {
 	}
 
 	/** Lookup the client connection for a selection key */
-	public ConnectionImpl lookupClient(SelectionKey key) {
+	public ConnectionImpl lookupClient(SelectionKey skey) {
 		synchronized (clients) {
-			return clients.get(key);
+			return clients.get(skey);
 		}
 	}
 

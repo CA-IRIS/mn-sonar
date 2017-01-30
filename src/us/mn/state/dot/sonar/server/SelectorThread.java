@@ -86,24 +86,24 @@ public final class SelectorThread extends Thread {
 	private void _doSelect() throws IOException {
 		selector.select();
 		Set<SelectionKey> readySet = selector.selectedKeys();
-		for (SelectionKey key: readySet) {
-			if (checkAccept(key))
+		for (SelectionKey skey: readySet) {
+			if (checkAccept(skey))
 				continue;
-			serviceClient(key);
+			serviceClient(skey);
 		}
 		readySet.clear();
 	}
 
 	/** Check if a new client is connecting */
-	private boolean checkAccept(SelectionKey key) {
+	private boolean checkAccept(SelectionKey skey) {
 		try {
-			if (key.isAcceptable())
+			if (skey.isAcceptable())
 				doAccept();
 			else
 				return false;
 		}
 		catch (CancelledKeyException e) {
-			processor.scheduleDisconnect(key);
+			processor.scheduleDisconnect(skey);
 		}
 		catch (IOException e) {
 			System.err.println("SONAR: selector I/O error " +
@@ -117,21 +117,21 @@ public final class SelectorThread extends Thread {
 	private void doAccept() throws IOException {
 		SocketChannel sc = channel.accept();
 		sc.configureBlocking(false);
-		SelectionKey key = sc.register(selector, 0);
-		processor.scheduleConnect(key, sc);
+		SelectionKey skey = sc.register(selector, 0);
+		processor.scheduleConnect(skey, sc);
 	}
 
 	/** Do any pending read/write on a client connection */
-	private void serviceClient(SelectionKey key) {
-		ConnectionImpl c = processor.lookupClient(key);
+	private void serviceClient(SelectionKey skey) {
+		ConnectionImpl c = processor.lookupClient(skey);
 		if (null == c) {
-			processor.scheduleDisconnect(key);
+			processor.scheduleDisconnect(skey);
 			return;
 		}
 		try {
-			if (key.isWritable())
+			if (skey.isWritable())
 				c.doWrite();
-			if (key.isReadable())
+			if (skey.isReadable())
 				c.doRead();
 		}
 		catch (CancelledKeyException e) {
