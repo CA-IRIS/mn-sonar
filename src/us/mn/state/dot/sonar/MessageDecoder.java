@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,7 +45,7 @@ public class MessageDecoder {
 	protected final StringBuilder m_buf = new StringBuilder();
 
 	/** List of decoded parameters */
-	protected LinkedList<String> params = new LinkedList<String>();
+	protected ArrayList<String> params = new ArrayList<String>();
 
 	/** Create a new SONAR message decoder */
 	public MessageDecoder(ByteBuffer in) throws IOException {
@@ -81,7 +81,7 @@ public class MessageDecoder {
 			if(c == Message.RECORD_SEP.code) {
 				completeParameter();
 				List<String> p = params;
-				params = new LinkedList<String>();
+				params = new ArrayList<String>();
 				return p;
 			} else if(c == Message.UNIT_SEP.code)
 				completeParameter();
