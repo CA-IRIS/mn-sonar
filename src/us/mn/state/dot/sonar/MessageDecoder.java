@@ -30,22 +30,22 @@ import java.util.List;
 public class MessageDecoder {
 
 	/** Everything on the wire is encoded to UTF-8 */
-	static protected final Charset UTF8 = Charset.forName("UTF-8");
+	static private final Charset UTF8 = Charset.forName("UTF-8");
 
 	/** Byte buffer to store incoming SONAR data */
-	protected final ByteBuffer app_in;
+	private final ByteBuffer app_in;
 
 	/** Byte buffer input stream */
-	protected final ByteBufferInputStream in_buf;
+	private final ByteBufferInputStream in_buf;
 
 	/** Char reader input stream */
-	protected InputStreamReader reader;
+	private InputStreamReader reader;
 
 	/** String builder to build decoded parameters */
-	protected final StringBuilder m_buf = new StringBuilder();
+	private final StringBuilder m_buf = new StringBuilder();
 
 	/** List of decoded parameters */
-	protected ArrayList<String> params = new ArrayList<String>();
+	private ArrayList<String> params = new ArrayList<String>();
 
 	/** Create a new SONAR message decoder */
 	public MessageDecoder(ByteBuffer in) throws IOException {
@@ -55,7 +55,7 @@ public class MessageDecoder {
 	}
 
 	/** Complete the current parameter */
-	protected void completeParameter() {
+	private void completeParameter() {
 		params.add(m_buf.toString());
 		m_buf.setLength(0);
 	}
@@ -72,18 +72,18 @@ public class MessageDecoder {
 	}
 
 	/** Decode messages */
-	protected List<String> _decode() throws IOException {
-		while(reader.ready()) {
+	private List<String> _decode() throws IOException {
+		while (reader.ready()) {
 			int ch = reader.read();
-			if(ch < 0)
+			if (ch < 0)
 				break;
-			char c = (char)ch;
-			if(c == Message.RECORD_SEP.code) {
+			char c = (char) ch;
+			if (Message.RECORD_SEP.code == c) {
 				completeParameter();
 				List<String> p = params;
 				params = new ArrayList<String>();
 				return p;
-			} else if(c == Message.UNIT_SEP.code)
+			} else if (Message.UNIT_SEP.code == c)
 				completeParameter();
 			else
 				m_buf.append(c);
@@ -94,7 +94,7 @@ public class MessageDecoder {
 	/** Debug the SONAR parameters */
 	public void debugParameters() {
 		StringBuilder b = new StringBuilder();
-		for(String s: params) {
+		for (String s: params) {
 			b.append(s);
 			b.append(' ');
 		}
