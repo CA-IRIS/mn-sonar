@@ -21,7 +21,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -114,7 +113,7 @@ public class TaskProcessor {
 
 	/** Get an array of protocol versions to enable */
 	static private String[] getProtocols(SSLEngine engine) {
-		LinkedList<String> enabled = new LinkedList<String>();
+		ArrayList<String> enabled = new ArrayList<String>();
 		for (String sp: engine.getSupportedProtocols()) {
 			if (sp.startsWith("TLS"))
 				enabled.add(sp);
@@ -124,7 +123,7 @@ public class TaskProcessor {
 
 	/** Get an array of cipher suites which should be enabled */
 	static private String[] getCipherSuites(SSLEngine engine) {
-		LinkedList<String> enabled = new LinkedList<String>();
+		ArrayList<String> enabled = new ArrayList<String>();
 		for (String cs: engine.getEnabledCipherSuites()) {
 			if (cs.startsWith("TLS_") && cs.contains("AES_128"))
 				enabled.add(cs);
