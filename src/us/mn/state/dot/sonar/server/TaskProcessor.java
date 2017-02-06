@@ -56,6 +56,9 @@ public class TaskProcessor {
 	/** SONAR task debug log */
 	static private final DebugLog DEBUG_TASK = new DebugLog("sonar_task");
 
+	/** SONAR time debug log */
+	static final DebugLog DEBUG_TIME = new DebugLog("sonar_time");
+
 	/** Debug a task */
 	static private void debugTask(String msg, ConnectionImpl c) {
 		if (DEBUG_TASK.isOpen()) {
@@ -72,34 +75,31 @@ public class TaskProcessor {
 			DEBUG_TASK.log(msg + ": " + n);
 	}
 
+	/** Minimum elapsed time to log tasks */
+	static private final int MIN_ELAPSED_LOG_MS = 500;
+
 	/** Debug task elapsed time */
-	static public void debugElapsed(String msg, long el) {
-		if (DEBUG_TASK.isOpen())
-			DEBUG_TASK.log(msg + " ELAPSED: " + Long.toString(el));
+	static void debugElapsed(String msg, long el) {
+		if (el > MIN_ELAPSED_LOG_MS)
+			DEBUG_TIME.log(msg + " ELAPSED: " + Long.toString(el));
 	}
 
 	/** Task processor work */
 	static abstract private class TaskWork extends Work {
 		private final String name;
-		private final String conn;
+		private final ConnectionImpl conn;
 		private TaskWork(String n, ConnectionImpl c) {
 			name = n;
-			conn = (c != null) ? c.getName() : null;
+			conn = c;
 		}
 		private TaskWork(String n) {
 			this(n, null);
 		}
 		@Override public final void perform() throws Exception {
-			long st = 0;
-			final boolean op = DEBUG_TASK.isOpen();
-			if (op) {
-				st = currentTimeMillis();
-				if (conn != null)
-					DEBUG_TASK.log(name + ": " + conn);
-				else
-					DEBUG_TASK.log(name);
-			}
+			final boolean op = DEBUG_TIME.isOpen();
+			final long st = (op) ? currentTimeMillis() : 0;
 			try {
+				debugTask(name, conn);
 				doPerform();
 			}
 			finally {

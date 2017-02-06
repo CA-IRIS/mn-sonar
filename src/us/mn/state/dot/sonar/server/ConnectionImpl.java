@@ -392,17 +392,27 @@ public class ConnectionImpl extends Conduit implements Connection {
 	protected void _processMessage(List<String> params)
 		throws SonarException
 	{
-		long st = currentTimeMillis();
 		String c = params.get(0);
 		if (c.length() != 1)
 			throw ProtocolError.INVALID_MESSAGE_CODE;
-		Message m = lookupMessage(c.charAt(0));
+		_processMessage(lookupMessage(c.charAt(0)), params);
+	}
+
+	/** Process one message from the client.
+	 * This may only be called on the Task Processor thread. */
+	private void _processMessage(Message m, List<String> params)
+		throws SonarException
+	{
+		final boolean op = TaskProcessor.DEBUG_TIME.isOpen();
+		final long st = (op) ? currentTimeMillis() : 0;
 		try {
 			m.handle(this, params);
 		}
 		finally {
-			long el = currentTimeMillis() - st;
-			TaskProcessor.debugElapsed(m.toString(), el);
+			if (op) {
+				long el = currentTimeMillis() - st;
+				TaskProcessor.debugElapsed(m.toString(), el);
+			}
 		}
 	}
 
