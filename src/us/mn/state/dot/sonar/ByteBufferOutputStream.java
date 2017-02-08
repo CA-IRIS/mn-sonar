@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,22 +26,22 @@ import java.nio.ByteBuffer;
 public class ByteBufferOutputStream extends OutputStream {
 
 	/** Allocate a byte buffer with at least n_bytes capacity */
-	static protected ByteBuffer allocate(int n_bytes) {
+	static private ByteBuffer allocate(int n_bytes) {
 		// Minimum buffer size is 2**10 (1024)
 		// Maximum buffer size is 2**31 (2 GB)
-		for(int i = 10; i < 32; i++) {
+		for (int i = 10; i < 32; i++) {
 			int cap = 1 << i;
-			if(cap >= n_bytes)
+			if (cap >= n_bytes)
 				return ByteBuffer.allocate(cap);
 		}
 		throw new IllegalArgumentException();
 	}
 
 	/** Default byte buffer (before expansion) */
-	protected final ByteBuffer o_buffer;
+	private final ByteBuffer o_buffer;
 
 	/** Byte buffer where data is written */
-	protected ByteBuffer buffer;
+	private ByteBuffer buffer;
 
 	/** Create a new byte buffer output stream */
 	public ByteBufferOutputStream() {
@@ -60,23 +60,25 @@ public class ByteBufferOutputStream extends OutputStream {
 	}
 
 	/** Write a single byte to the output stream */
+	@Override
 	public void write(int b) {
-		if(buffer.remaining() < 1)
+		if (buffer.remaining() < 1)
 			expand(1);
-		buffer.put((byte)b);
+		buffer.put((byte) b);
 	}
 
 	/** Write an array of bytes to the output stream */
+	@Override
 	public void write(byte[] b, int off, int len) {
-		if(off < 0 || len < 0 || off + len > b.length)
+		if (off < 0 || len < 0 || off + len > b.length)
 			throw new IndexOutOfBoundsException();
-		if(buffer.remaining() < len)
+		if (buffer.remaining() < len)
 			expand(len);
 		buffer.put(b, off, len);
 	}
 
 	/** Expand the buffer by the specified number of bytes */
-	protected void expand(int n_bytes) {
+	private void expand(int n_bytes) {
 		ByteBuffer buf = allocate(buffer.position() + n_bytes);
 		buffer.flip();
 		buf.put(buffer);
@@ -85,7 +87,7 @@ public class ByteBufferOutputStream extends OutputStream {
 
 	/** Compact the buffer */
 	public void compact() {
-		if(buffer.hasRemaining())
+		if (buffer.hasRemaining())
 			buffer.compact();
 		else {
 			buffer = o_buffer;
