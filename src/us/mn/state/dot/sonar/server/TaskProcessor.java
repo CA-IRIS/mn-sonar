@@ -20,6 +20,7 @@ import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -165,6 +166,10 @@ public class TaskProcessor {
 	private final Map<SelectionKey, ConnectionImpl> clients =
 		new HashMap<SelectionKey, ConnectionImpl>();
 
+	/** List of active client connections (protected by clients lock) */
+	private List<ConnectionImpl> conn_list =
+		new ArrayList<ConnectionImpl>();
+
 	/** File to write session list */
 	private final String session_file;
 
@@ -206,8 +211,14 @@ public class TaskProcessor {
 	/** Get a list of active connections */
 	private List<ConnectionImpl> getConnectionList() {
 		synchronized (clients) {
-			return new ArrayList<ConnectionImpl>(clients.values());
+			return conn_list;
 		}
+	}
+
+	/** Update list of active connections */
+	private void updateConnectionList() {
+		conn_list = Collections.unmodifiableList(
+			new ArrayList<ConnectionImpl>(clients.values()));
 	}
 
 	/** Schedule a client connection */
@@ -238,6 +249,7 @@ public class TaskProcessor {
 		access_monitor.connect(con.getName());
 		synchronized (clients) {
 			clients.put(skey, con);
+			updateConnectionList();
 		}
 		updateSessionList();
 		// Enable OP_READ interest
@@ -273,6 +285,7 @@ public class TaskProcessor {
 		ConnectionImpl c;
 		synchronized (clients) {
 			c = clients.remove(skey);
+			updateConnectionList();
 		}
 		debugTask("Disconnecting", c);
 		if (c != null) {
@@ -286,11 +299,10 @@ public class TaskProcessor {
 	private void updateSessionList() {
 		if (session_file == null)
 			return;
-		List<ConnectionImpl> clist = getConnectionList();
 		try {
 			FileWriter fw = new FileWriter(session_file);
 			try {
-				for (ConnectionImpl c: clist) {
+				for (ConnectionImpl c: getConnectionList()) {
 					fw.write(String.valueOf(
 						c.getSessionId()));
 					fw.append('\n');
@@ -412,8 +424,7 @@ public class TaskProcessor {
 	/** Notify all connections watching a name of an object add. */
 	private void notifyObject(SonarObject o) {
 		Name name = new Name(o);
-		List<ConnectionImpl> clist = getConnectionList();
-		for (ConnectionImpl c: clist)
+		for (ConnectionImpl c: getConnectionList())
 			c.notifyObject(name, o);
 	}
 
@@ -421,16 +432,14 @@ public class TaskProcessor {
 	void notifyAttribute(Name name, String[] params) {
 		debugTask("Notify attribute", name.toString());
 		if (namespace.isReadable(name)) {
-			List<ConnectionImpl> clist = getConnectionList();
-			for (ConnectionImpl c: clist)
+			for (ConnectionImpl c: getConnectionList())
 				c.notifyAttribute(name, params);
 		}
 	}
 
 	/** Notify all connections watching a name of an object remove. */
 	void notifyRemove(Name name) {
-		List<ConnectionImpl> clist = getConnectionList();
-		for (ConnectionImpl c: clist)
+		for (ConnectionImpl c: getConnectionList())
 			c.notifyRemove(name);
 	}
 
