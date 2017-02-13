@@ -506,19 +506,17 @@ public class TaskProcessor {
 	}
 
 	/** Set the specified attribute in the server's namespace */
-	public void scheduleSetAttribute(final SonarObject o, final String a) {
+	public void scheduleSetAttribute(SonarObject o, String a) {
+		final Name name = new Name(o, a);
 		processor.addWork(new TaskWork("Set attribute") {
 			protected void doPerform() throws SonarException {
-				doSetAttribute(o, a);
+				doSetAttribute(name);
 			}
 		});
 	}
 
 	/** Perform a "set attribute" task. */
-	private void doSetAttribute(SonarObject o, String aname)
-		throws SonarException
-	{
-		Name name = new Name(o, aname);
+	private void doSetAttribute(Name name) throws SonarException {
 		String[] v = namespace.getAttribute(name);
 		notifyAttribute(name, v);
 	}

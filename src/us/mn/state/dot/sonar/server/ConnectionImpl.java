@@ -305,7 +305,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Notify the client of an attribute change.
 	 * This may only be called on the Task Processor thread. */
-	protected void notifyAttribute(String name, String[] params) {
+	private void notifyAttribute(String name, String[] params) {
 		try {
 			state.encoder.encode(Message.ATTRIBUTE, name, params);
 			flush();
