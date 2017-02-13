@@ -430,7 +430,10 @@ public class TaskProcessor {
 
 	/** Notify all connections watching a name of an attribute change. */
 	void notifyAttribute(Name name, String[] params) {
-		debugTask("Notify attribute", name.toString());
+		if (DEBUG_TASK.isOpen()) {
+			debugTask("Notify attribute", name.toString() + " (" +
+				processor.size() + ")");
+		}
 		if (namespace.isReadable(name)) {
 			for (ConnectionImpl c: getConnectionList())
 				c.notifyAttribute(name, params);
