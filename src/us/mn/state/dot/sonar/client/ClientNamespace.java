@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,30 +51,30 @@ public class ClientNamespace extends Namespace {
 	/** Current object */
 	protected SonarObject cur_obj = null;
 
-	/** Get the TypeCache for the specified name */
+	/** Get the TypeCache for the current type */
 	private TypeCache getTypeCache() throws NamespaceError {
-		if(cur_type != null)
+		if (cur_type != null)
 			return cur_type;
 		else
-			throw NamespaceError.NAME_INVALID;
+			throw NamespaceError.nameInvalid("No cur_type");
 	}
 
 	/** Get the TypeCache for the specified name */
 	private TypeCache getTypeCache(Name name) throws NamespaceError {
 		String tname = name.getTypePart();
-		if(types.containsKey(tname)) {
+		if (types.containsKey(tname)) {
 			cur_type = types.get(tname);
 			return cur_type;
 		} else
-			throw NamespaceError.NAME_INVALID;
+			throw NamespaceError.nameInvalid(name);
 	}
 
 	/** Put a new object in the cache */
 	void putObject(String n) throws NamespaceError {
 		if(isAbsolute(n)) {
 			Name name = new Name(n);
-			if(!name.isObject())
-				throw NamespaceError.NAME_INVALID;
+			if (!name.isObject())
+				throw NamespaceError.nameInvalid(name);
 			cur_obj = getTypeCache(name).add(name.getObjectPart());
 		} else
 			cur_obj = getTypeCache().add(n);
@@ -84,8 +84,8 @@ public class ClientNamespace extends Namespace {
 	void removeObject(String n) throws NamespaceError {
 		if(isAbsolute(n)) {
 			Name name = new Name(n);
-			if(!name.isObject())
-				throw NamespaceError.NAME_INVALID;
+			if (!name.isObject())
+				throw NamespaceError.nameInvalid(name);
 			getTypeCache(name).remove(name.getObjectPart());
 		} else
 			getTypeCache().remove(n);
@@ -110,21 +110,21 @@ public class ClientNamespace extends Namespace {
 	private void updateAttribute(TypeCache t, SonarObject o, String a,
 		String[] v) throws SonarException
 	{
-		if(o == null)
-			throw NamespaceError.NAME_INVALID;
+		if (o == null)
+			throw NamespaceError.nameInvalid("No object");
 		t.updateAttribute(o, a, v);
 	}
 
 	/** Process a TYPE message from the server */
 	void setCurrentType(String t) throws NamespaceError {
-		if(t.equals("") || types.containsKey(t)) {
+		if (t.equals("") || types.containsKey(t)) {
 			if(t.equals("") && cur_type != null)
 				cur_type.enumerationComplete();
 			TypeCache tc = types.get(t);
 			cur_type = tc;
 			cur_obj = null;
 		} else
-			throw NamespaceError.NAME_INVALID;
+			throw NamespaceError.nameInvalid(t);
 	}
 
 	/** Lookup an object in the SONAR namespace.

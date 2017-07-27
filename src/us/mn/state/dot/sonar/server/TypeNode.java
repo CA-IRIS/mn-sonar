@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,8 +58,8 @@ public class TypeNode {
 
 	/** Create a new object in the type node */
 	public SonarObject createObject(String name) throws SonarException {
-		if(children.containsKey(name))
-			throw NamespaceError.NAME_EXISTS;
+		if (children.containsKey(name))
+			throw NamespaceError.nameExists(name);
 		return dispatcher.createObject(name);
 	}
 
@@ -67,8 +67,8 @@ public class TypeNode {
 	public void storeObject(SonarObject o) throws SonarException {
 		String name = o.getName();
 		synchronized(children) {
-			if(children.containsKey(name))
-				throw NamespaceError.NAME_EXISTS;
+			if (children.containsKey(name))
+				throw NamespaceError.nameExists(name);
 			dispatcher.storeObject(o);
 			children.put(name, o);
 		}
@@ -78,8 +78,8 @@ public class TypeNode {
 	public void addObject(SonarObject o) throws NamespaceError {
 		String name = o.getName();
 		synchronized(children) {
-			if(children.containsKey(name))
-				throw NamespaceError.NAME_EXISTS;
+			if (children.containsKey(name))
+				throw NamespaceError.nameExists(name);
 			else
 				children.put(name, o);
 		}
@@ -90,14 +90,14 @@ public class TypeNode {
 		String n = o.getName();
 		synchronized(children) {
 			SonarObject obj = children.remove(n);
-			if(obj == null)
+			if (obj == null)
 				throw NamespaceError.nameUnknown(n);
-			if(obj != o)
-				throw NamespaceError.NAME_EXISTS;
+			if (obj != o)
+				throw NamespaceError.nameExists(n);
 			try {
 				dispatcher.destroyObject(o);
 			}
-			catch(SonarException e) {
+			catch (SonarException e) {
 				children.put(n, o);
 				throw e;
 			}

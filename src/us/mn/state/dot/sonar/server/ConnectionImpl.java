@@ -566,7 +566,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 				throw PermissionDenied.create(name);
 			createObject(name);
 		} else
-			throw NamespaceError.NAME_INVALID;
+			throw NamespaceError.nameInvalid(name);
 	}
 
 	/** Create a new object in the server namespace.
@@ -609,7 +609,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			namespace.removeObject(obj);
 			processor.notifyRemove(name);
 		} else
-			throw NamespaceError.NAME_INVALID;
+			throw NamespaceError.nameInvalid(name);
 	}
 
 	/** Respond to an ATTRIBUTE message.
@@ -625,7 +625,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 				throw PermissionDenied.create(name);
 			setAttribute(name, params);
 		} else
-			throw NamespaceError.NAME_INVALID;
+			throw NamespaceError.nameInvalid(name);
 	}
 
 	/** Set the value of an attribute.

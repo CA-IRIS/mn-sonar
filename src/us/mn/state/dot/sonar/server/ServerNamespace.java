@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2016  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,10 +106,10 @@ public class ServerNamespace extends Namespace {
 	String[] getAttribute(Name name) throws SonarException {
 		TypeNode t = getTypeNode(name);
 		SonarObject o = t.lookupObject(name.getObjectPart());
-		if(o != null)
+		if (o != null)
 			return t.getValue(o, name.getAttributePart());
 		else
-			throw NamespaceError.NAME_INVALID;
+			throw NamespaceError.nameInvalid(name);
 	}
 
 	/** Remove an object from the namespace */
@@ -160,10 +160,10 @@ public class ServerNamespace extends Namespace {
 		throws SonarException, IOException
 	{
 		SonarObject o = lookupObject(name);
-		if(o != null)
+		if (o != null)
 			enumerateObject(enc, o);
 		else
-			throw NamespaceError.NAME_INVALID;
+			throw NamespaceError.nameInvalid(name);
 	}
 
 	/** Enumerate a named attribute */
@@ -183,16 +183,16 @@ public class ServerNamespace extends Namespace {
 	void enumerate(MessageEncoder enc, Name name) throws SonarException,
 		IOException
 	{
-		if(name.isRoot())
+		if (name.isRoot())
 			enumerateRoot(enc);
-		else if(name.isType())
+		else if (name.isType())
 			enumerateType(enc, name);
-		else if(name.isObject())
+		else if (name.isObject())
 			enumerateObject(enc, name);
-		else if(name.isAttribute())
+		else if (name.isAttribute())
 			enumerateAttribute(enc, name);
 		else
-			throw NamespaceError.NAME_INVALID;
+			throw NamespaceError.nameInvalid(name);
 	}
 
 	/** Register a new type in the namespace */
