@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,12 +58,12 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 	protected final Namespace namespace;
 
 	/** All SONAR objects of this type are put here.
-	 * All access must be synchronized on the "children" lock. */
+	 * All access must be synchronized on the "TypeCache" lock. */
 	private final ConcurrentHashMap<String, T> children =
 		new ConcurrentHashMap<String, T>(INITIAL_CAPACITY, 0.75f, 1);
 
 	/** Weak mapping from proxy object to attribute map.
-	 * All access must be synchronized on the "children" lock. */
+	 * All access must be synchronized on the "TypeCache" lock. */
 	private final WeakHashMap<T, AttributeMap> attributes =
 		new WeakHashMap<T, AttributeMap>();
 
@@ -124,7 +124,7 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 		T o = (T)Proxy.newProxyInstance(LOADER, ifaces, invoker);
 		AttributeMap amap = new AttributeMap(
 			invoker.createAttributes(name));
-		synchronized(children) {
+		synchronized (this) {
 			children.put(name, o);
 			attributes.put(o, amap);
 			phantom = o;
@@ -134,8 +134,8 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 
 	/** Get (or create) a proxy from the type cache */
 	T getProxy(String name) {
-		synchronized(children) {
-			if(children.containsKey(name))
+		synchronized (this) {
+			if (children.containsKey(name))
 				return children.get(name);
 			else
 				return createProxy(name);
@@ -145,7 +145,7 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 	/** Add a proxy to the type cache */
 	T add(String name) {
 		T o = getProxy(name);
-		synchronized(children) {
+		synchronized (this) {
 			notifyProxyAdded(o);
 		}
 		phantom = null;
@@ -154,7 +154,7 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 
 	/** Enumeration of proxy type is complete */
 	public void enumerationComplete() {
-		synchronized(children) {
+		synchronized (this) {
 			notifyEnumerationComplete();
 			enumerated = true;
 		}
@@ -162,7 +162,7 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 
 	/** Remove a proxy from the type cache */
 	T remove(String name) throws NamespaceError {
-		synchronized(children) {
+		synchronized (this) {
 			T proxy = children.remove(name);
 			if(proxy == null)
 				throw NamespaceError.nameUnknown(name);
@@ -186,7 +186,7 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 
 	/** Check if a proxy object is a zombie */
 	private boolean isZombie(T o) {
-		synchronized(children) {
+		synchronized (this) {
 			AttributeMap amap = attributes.get(o);
 			return amap != null && amap.zombie;
 		}
@@ -194,7 +194,7 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 
 	/** Lookup the attribute map for the given object */
 	private Map<String, Attribute> lookupAttributeMap(T o) {
-		synchronized(children) {
+		synchronized (this) {
 			AttributeMap amap = attributes.get(o);
 			return amap != null ? amap.attrs : null;
 		}
@@ -252,8 +252,8 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 	{
 		Attribute attr = lookupAttribute(o, a);
 		attr.setValue(namespace.unmarshall(attr.type, v));
-		synchronized(children) {
-			if(o != phantom)
+		synchronized (this) {
+			if (o != phantom)
 				notifyProxyChanged(o, a);
 		}
 	}
@@ -286,7 +286,7 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 
 	/** Add a ProxyListener */
 	public void addProxyListener(ProxyListener<T> l) {
-		synchronized(children) {
+		synchronized (this) {
 			listeners.add(l);
 			for(T proxy: children.values())
 				l.proxyAdded(proxy);
@@ -297,7 +297,7 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 
 	/** Remove a ProxyListener */
 	public void removeProxyListener(ProxyListener<T> l) {
-		synchronized(children) {
+		synchronized (this) {
 			listeners.remove(l);
 		}
 	}
