@@ -39,23 +39,23 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 	static private final int INITIAL_CAPACITY = 256;
 
 	/** Class loader needed to create proxy objects */
-	static protected final ClassLoader LOADER =
+	static private final ClassLoader LOADER =
 		TypeCache.class.getClassLoader();
 
 	/** Type name */
 	public final String tname;
 
 	/** Interfaces which proxies of this type implement */
-	protected final Class[] ifaces;
+	private final Class[] ifaces;
 
 	/** Sonar object proxy method invoker */
-	protected final SonarInvoker invoker;
+	private final SonarInvoker invoker;
 
 	/** Client (to send attribute update messages) */
-	protected final Client client;
+	private final Client client;
 
 	/** SONAR namespace */
-	protected final Namespace namespace;
+	private final Namespace namespace;
 
 	/** All SONAR objects of this type are put here.
 	 * All access must be synchronized on the "TypeCache" lock. */
@@ -95,33 +95,33 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 	}
 
 	/** Notify proxy listeners that a proxy has been added */
-	protected void notifyProxyAdded(T proxy) {
-		for(ProxyListener<T> l: listeners)
+	private void notifyProxyAdded(T proxy) {
+		for (ProxyListener<T> l: listeners)
 			l.proxyAdded(proxy);
 	}
 
 	/** Notify proxy listeners that enumeration has completed */
-	protected void notifyEnumerationComplete() {
-		for(ProxyListener<T> l: listeners)
+	private void notifyEnumerationComplete() {
+		for (ProxyListener<T> l: listeners)
 			l.enumerationComplete();
 	}
 
 	/** Notify proxy listeners that a proxy has been removed */
-	protected void notifyProxyRemoved(T proxy) {
-		for(ProxyListener<T> l: listeners)
+	private void notifyProxyRemoved(T proxy) {
+		for (ProxyListener<T> l: listeners)
 			l.proxyRemoved(proxy);
 	}
 
 	/** Notify proxy listeners that a proxy has been changed */
-	protected void notifyProxyChanged(T proxy, String a) {
-		for(ProxyListener<T> l: listeners)
+	private void notifyProxyChanged(T proxy, String a) {
+		for (ProxyListener<T> l: listeners)
 			l.proxyChanged(proxy, a);
 	}
 
 	/** Create a proxy in the type cache */
 	@SuppressWarnings("unchecked")
 	T createProxy(String name) {
-		T o = (T)Proxy.newProxyInstance(LOADER, ifaces, invoker);
+		T o = (T) Proxy.newProxyInstance(LOADER, ifaces, invoker);
 		AttributeMap amap = new AttributeMap(
 			invoker.createAttributes(name));
 		synchronized (this) {
@@ -164,10 +164,10 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 	T remove(String name) throws NamespaceError {
 		synchronized (this) {
 			T proxy = children.remove(name);
-			if(proxy == null)
+			if (proxy == null)
 				throw NamespaceError.nameUnknown(name);
 			AttributeMap amap = attributes.get(proxy);
-			if(amap != null)
+			if (amap != null)
 				amap.zombie = true;
 			notifyProxyRemoved(proxy);
 			return proxy;
@@ -201,13 +201,11 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 	}
 
 	/** Lookup an attribute of the given proxy */
-	protected Attribute lookupAttribute(T o, String a)
-		throws NamespaceError
-	{
+	private Attribute lookupAttribute(T o, String a) throws NamespaceError {
 		Map<String, Attribute> amap = lookupAttributeMap(o);
-		if(amap != null) {
+		if (amap != null) {
 			Attribute attr = amap.get(a);
-			if(attr != null)
+			if (attr != null)
 				return attr;
 			else
 				throw NamespaceError.nameUnknown(a);
@@ -218,7 +216,7 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 	/** Get the value of an attribute from the named proxy */
 	Object getAttribute(String n, String a) throws NamespaceError {
 		T obj = lookupObject(n);
-		if(obj == null)
+		if (obj == null)
 			throw NamespaceError.nameUnknown(n);
 		else
 			return getAttribute(obj, a);
@@ -239,10 +237,10 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 		throws SonarException
 	{
 		Attribute attr = lookupAttribute(o, a);
-		if(check && attr.valueEquals(args))
+		if (check && attr.valueEquals(args))
 			return;
 		String[] values = namespace.marshall(attr.type, args);
-		if(!isZombie(o))
+		if (!isZombie(o))
 			client.setAttribute(new Name(o, a), values);
 	}
 
@@ -260,7 +258,7 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 
 	/** Remove the specified object */
 	void removeObject(T o) {
-		if(!isZombie(o))
+		if (!isZombie(o))
 			client.removeObject(new Name(o));
 	}
 
@@ -271,7 +269,7 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 
 	/** Create an object with the specified attributes */
 	public void createObject(String oname, Map<String, Object> amap) {
-		for(Map.Entry<String, Object> entry: amap.entrySet()) {
+		for (Map.Entry<String, Object> entry: amap.entrySet()) {
 			Object v = entry.getValue();
 			String[] values = namespace.marshall(
 				v.getClass(), new Object[] { v });
@@ -288,9 +286,9 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 	public void addProxyListener(ProxyListener<T> l) {
 		synchronized (this) {
 			listeners.add(l);
-			for(T proxy: children.values())
+			for (T proxy: children.values())
 				l.proxyAdded(proxy);
-			if(enumerated)
+			if (enumerated)
 				l.enumerationComplete();
 		}
 	}
@@ -311,7 +309,7 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 
 	/** Watch for all attributes of the specified object */
 	public void watchObject(T proxy) {
-		if(!isZombie(proxy))
+		if (!isZombie(proxy))
 			client.enumerateName(new Name(tname, proxy.getName()));
 	}
 
@@ -319,7 +317,7 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 	 * object watch -- it does not prevent the type watch from causing
 	 * the object to be watched.  */
 	public void ignoreObject(T proxy) {
-		if(!isZombie(proxy))
+		if (!isZombie(proxy))
 			client.ignoreName(new Name(tname, proxy.getName()));
 	}
 
