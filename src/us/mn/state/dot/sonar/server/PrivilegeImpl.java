@@ -33,7 +33,7 @@ public class PrivilegeImpl implements Privilege {
 
 	/** Namespace object regex pattern */
 	static protected final Pattern OBJ_PATTERN =
-		Pattern.compile("[A-Za-z0-9_.*+?()]*");
+		Pattern.compile("[-A-Za-z0-9_.*+?()]*");
 
 	/** Check for a valid namespace pattern */
 	static protected void checkPattern(Pattern p, String n)
