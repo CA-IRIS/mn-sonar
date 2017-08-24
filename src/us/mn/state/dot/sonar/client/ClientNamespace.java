@@ -31,11 +31,6 @@ import us.mn.state.dot.sonar.SonarObject;
  */
 public class ClientNamespace extends Namespace {
 
-	/** Test if a SONAR path is absolute (versus relative) */
-	static protected boolean isAbsolute(String path) {
-		return path.contains(Name.SEP);
-	}
-
 	/** Map of all types in the cache */
 	private final HashMap<String, TypeCache> types =
 		new HashMap<String, TypeCache>();
@@ -71,7 +66,7 @@ public class ClientNamespace extends Namespace {
 
 	/** Put a new object in the cache */
 	void putObject(String n) throws NamespaceError {
-		if(isAbsolute(n)) {
+		if (Name.isAbsolute(n)) {
 			Name name = new Name(n);
 			if (!name.isObject())
 				throw NamespaceError.nameInvalid(name);
@@ -82,7 +77,7 @@ public class ClientNamespace extends Namespace {
 
 	/** Remove an object from the cache */
 	void removeObject(String n) throws NamespaceError {
-		if(isAbsolute(n)) {
+		if (Name.isAbsolute(n)) {
 			Name name = new Name(n);
 			if (!name.isObject())
 				throw NamespaceError.nameInvalid(name);
@@ -93,9 +88,9 @@ public class ClientNamespace extends Namespace {
 
 	/** Update an object attribute */
 	void updateAttribute(String n, String[] v) throws SonarException {
-		if(isAbsolute(n)) {
+		if (Name.isAbsolute(n)) {
 			Name name = new Name(n);
-			if(!name.isAttribute())
+			if (!name.isAttribute())
 				throw ProtocolError.WRONG_PARAMETER_COUNT;
 			TypeCache t = getTypeCache(name);
 			cur_obj = t.getProxy(name.getObjectPart());
@@ -118,7 +113,7 @@ public class ClientNamespace extends Namespace {
 	/** Process a TYPE message from the server */
 	void setCurrentType(String t) throws NamespaceError {
 		if (t.equals("") || types.containsKey(t)) {
-			if(t.equals("") && cur_type != null)
+			if (t.equals("") && cur_type != null)
 				cur_type.enumerationComplete();
 			TypeCache tc = types.get(t);
 			cur_type = tc;
@@ -132,9 +127,9 @@ public class ClientNamespace extends Namespace {
 	 * @param oname Sonar object name
 	 * @return Object from namespace or null if name does not exist */
 	public SonarObject lookupObject(String tname, String oname) {
-		if(oname != null) {
+		if (oname != null) {
 			TypeCache t = types.get(tname);
-			if(t != null)
+			if (t != null)
 				return t.lookupObject(oname);
 		}
 		return null;
@@ -146,7 +141,7 @@ public class ClientNamespace extends Namespace {
 	@SuppressWarnings("unchecked")
 	public Iterator<SonarObject> iterator(String tname) {
 		TypeCache t = types.get(tname);
-		if(t != null)
+		if (t != null)
 			return t.iterator();
 		else
 			return new EmptyIterator();
@@ -157,7 +152,7 @@ public class ClientNamespace extends Namespace {
 	 * @return Total number of objects of the specified type */
 	public int getCount(String tname) {
 		TypeCache t = types.get(tname);
-		if(t != null)
+		if (t != null)
 			return t.size();
 		else
 			return 0;
