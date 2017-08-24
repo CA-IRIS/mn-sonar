@@ -66,7 +66,7 @@ public class TypeNode {
 	/** Store an object in the type node */
 	public void storeObject(SonarObject o) throws SonarException {
 		String name = o.getName();
-		synchronized(children) {
+		synchronized (children) {
 			if (children.containsKey(name))
 				throw NamespaceError.nameExists(name);
 			dispatcher.storeObject(o);
@@ -77,7 +77,7 @@ public class TypeNode {
 	/** Add an object to the type node without storing */
 	public void addObject(SonarObject o) throws NamespaceError {
 		String name = o.getName();
-		synchronized(children) {
+		synchronized (children) {
 			if (children.containsKey(name))
 				throw NamespaceError.nameExists(name);
 			else
@@ -88,7 +88,7 @@ public class TypeNode {
 	/** Remove an object from the type node */
 	public void removeObject(SonarObject o) throws SonarException {
 		String n = o.getName();
-		synchronized(children) {
+		synchronized (children) {
 			SonarObject obj = children.remove(n);
 			if (obj == null)
 				throw NamespaceError.nameUnknown(n);
@@ -127,15 +127,15 @@ public class TypeNode {
 	{
 		assert(o.getTypeName() == name);
 		boolean first = true;
-		for(String a: dispatcher.getReadableAttributes()) {
+		for (String a: dispatcher.getReadableAttributes()) {
 			String[] v = getValue(o, a);
-			if(first) {
+			if (first) {
 				a = new Name(o, a).toString();
 				first = false;
 			}
 			enc.encode(Message.ATTRIBUTE, a, v);
 		}
-		if(first)
+		if (first)
 			enc.encode(Message.TYPE, name);
 		enc.encode(Message.OBJECT, o.getName());
 	}
@@ -146,8 +146,8 @@ public class TypeNode {
 	{
 		// We must synchronize here to ensure that no objects are
 		// added or removed while enumerating
-		synchronized(children) {
-			for(SonarObject o: children.values())
+		synchronized (children) {
+			for (SonarObject o: children.values())
 				enumerateObject(enc, o);
 		}
 	}
@@ -162,7 +162,7 @@ public class TypeNode {
 		String oname = name.getObjectPart();
 		String aname = name.getAttributePart();
 		SonarObject o = children.get(oname);
-		if(o != null) {
+		if (o != null) {
 			dispatcher.setValue(o, aname, v);
 			return null;
 		} else {

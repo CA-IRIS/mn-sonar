@@ -47,7 +47,7 @@ public class ServerNamespace extends Namespace {
 
 	/** Get a type node from the namespace */
 	private TypeNode _getTypeNode(String t) {
-		synchronized(root) {
+		synchronized (root) {
 			return root.get(t);
 		}
 	}
@@ -55,7 +55,7 @@ public class ServerNamespace extends Namespace {
 	/** Get a type node from the namespace */
 	private TypeNode getTypeNode(SonarObject o) {
 		TypeNode n = _getTypeNode(o.getTypeName());
-		if(n == null)
+		if (n == null)
 			return registerType(o);
 		else
 			return n;
@@ -64,7 +64,7 @@ public class ServerNamespace extends Namespace {
 	/** Get a type node from the namespace by name */
 	private TypeNode getTypeNode(Name name) throws NamespaceError {
 		TypeNode t = _getTypeNode(name.getTypePart());
-		if(t == null)
+		if (t == null)
 			throw NamespaceError.nameUnknown(name.toString());
 		else
 			return t;
@@ -96,7 +96,7 @@ public class ServerNamespace extends Namespace {
 			TypeNode t = getTypeNode(name);
 			return t.isReadable(name.getAttributePart());
 		}
-		catch(NamespaceError e) {
+		catch (NamespaceError e) {
 			// Unregistered type
 			return false;
 		}
@@ -120,9 +120,9 @@ public class ServerNamespace extends Namespace {
 
 	/** Lookup the object with the specified name */
 	SonarObject lookupObject(Name name) {
-		if(name.isObject()) {
+		if (name.isObject()) {
 			TypeNode t = _getTypeNode(name.getTypePart());
-			if(t != null)
+			if (t != null)
 				return t.lookupObject(name.getObjectPart());
 		}
 		return null;
@@ -130,8 +130,8 @@ public class ServerNamespace extends Namespace {
 
 	/** Enumerate the root of the namespace */
 	private void enumerateRoot(MessageEncoder enc) throws IOException {
-		synchronized(root) {
-			for(TypeNode t: root.values())
+		synchronized (root) {
+			for (TypeNode t: root.values())
 				enc.encode(Message.TYPE, t.name);
 		}
 		enc.encode(Message.TYPE);
@@ -183,7 +183,7 @@ public class ServerNamespace extends Namespace {
 	/** Register a new type in the namespace */
 	public TypeNode registerType(String n, Class c) {
 		TypeNode node = new TypeNode(this, n, c);
-		synchronized(root) {
+		synchronized (root) {
 			root.put(n, node);
 		}
 		return node;
@@ -218,7 +218,7 @@ public class ServerNamespace extends Namespace {
 	 * @return Iterator of all objects of the type. */
 	public Iterator<SonarObject> iterator(String tname) {
 		TypeNode t = _getTypeNode(tname);
-		if(t != null)
+		if (t != null)
 			return t.iterator();
 		else
 			return new EmptyIterator();
@@ -229,7 +229,7 @@ public class ServerNamespace extends Namespace {
 	 * @return Total number of objects of the specified type */
 	public int getCount(String tname) {
 		TypeNode t = _getTypeNode(tname);
-		if(t != null)
+		if (t != null)
 			return t.size();
 		else
 			return 0;
