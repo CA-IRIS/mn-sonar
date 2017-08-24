@@ -45,6 +45,7 @@ public class PrivilegeImpl implements Privilege {
 	}
 
 	/** Destroy a privilege */
+	@Override
 	public void destroy() {
 		// Subclasses must remove privilege from backing store
 	}
@@ -62,6 +63,12 @@ public class PrivilegeImpl implements Privilege {
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	/** Check group membership */
+	@Override
+	public boolean isInGroup(String g) {
+		return false;
 	}
 
 	/** Create a new privilege */

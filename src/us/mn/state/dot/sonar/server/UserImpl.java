@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,11 +25,13 @@ import us.mn.state.dot.sonar.User;
 public class UserImpl implements User {
 
 	/** Destroy a user */
+	@Override
 	public void destroy() {
 		// Subclasses must remove user from backing store
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -38,8 +40,15 @@ public class UserImpl implements User {
 	protected final String name;
 
 	/** Get the SONAR object name */
+	@Override
 	public String getName() {
 		return name;
+	}
+
+	/** Check group membership */
+	@Override
+	public boolean isInGroup(String g) {
+		return false;
 	}
 
 	/** Create a new user */
@@ -52,11 +61,13 @@ public class UserImpl implements User {
 	protected String fullName;
 
 	/** Set the user's full name */
+	@Override
 	public void setFullName(String n) {
 		fullName = n;
 	}
 
 	/** Get the user's full name */
+	@Override
 	public String getFullName() {
 		return fullName;
 	}
@@ -65,6 +76,7 @@ public class UserImpl implements User {
 	protected String password;
 
 	/** Set the password */
+	@Override
 	public void setPassword(String pwd) {
 		password = pwd;
 	}
@@ -79,11 +91,13 @@ public class UserImpl implements User {
 	protected String dn;
 
 	/** Set the LDAP Distinguished Name */
+	@Override
 	public void setDn(String d) {
 		dn = d;
 	}
 
 	/** Get the LDAP Distinguished Name */
+	@Override
 	public String getDn() {
 		return dn;
 	}
@@ -92,12 +106,14 @@ public class UserImpl implements User {
 	protected RoleImpl role;
 
 	/** Set the role */
+	@Override
 	public void setRole(Role r) {
-		if(r instanceof RoleImpl)
-			role = (RoleImpl)r;
+		if (r instanceof RoleImpl)
+			role = (RoleImpl) r;
 	}
 
 	/** Get the role */
+	@Override
 	public Role getRole() {
 		return role;
 	}
@@ -106,11 +122,13 @@ public class UserImpl implements User {
 	protected boolean enabled;
 
 	/** Set the enabled flag */
+	@Override
 	public void setEnabled(boolean e) {
 		enabled = e;
 	}
 
 	/** Get the enabled flag */
+	@Override
 	public boolean getEnabled() {
 		return enabled;
 	}

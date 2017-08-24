@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,11 +24,13 @@ import us.mn.state.dot.sonar.Capability;
 public class CapabilityImpl implements Capability {
 
 	/** Destroy a capability */
+	@Override
 	public void destroy() {
 		// Subclasses must remove capability from backing store
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -37,8 +39,15 @@ public class CapabilityImpl implements Capability {
 	protected final String name;
 
 	/** Get the SONAR object name */
+	@Override
 	public String getName() {
 		return name;
+	}
+
+	/** Check group membership */
+	@Override
+	public boolean isInGroup(String g) {
+		return false;
 	}
 
 	/** Create a new capability */
@@ -50,11 +59,13 @@ public class CapabilityImpl implements Capability {
 	protected boolean enabled;
 
 	/** Enable or disable the capability */
+	@Override
 	public void setEnabled(boolean e) {
 		enabled = e;
 	}
 
 	/** Get the enabled flag */
+	@Override
 	public boolean getEnabled() {
 		return enabled;
 	}

@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,9 @@ public interface SonarObject {
 
 	/** Get the SONAR object name */
 	String getName();
+
+	/** Check group membership */
+	boolean isInGroup(String g);
 
 	/** Destroy the SONAR object */
 	void destroy();

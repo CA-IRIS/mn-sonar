@@ -83,6 +83,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -91,8 +92,15 @@ public class ConnectionImpl extends Conduit implements Connection {
 	protected final String hostport;
 
 	/** Get the SONAR object name */
+	@Override
 	public String getName() {
 		return hostport;
+	}
+
+	/** Check group membership */
+	@Override
+	public boolean isInGroup(String g) {
+		return false;
 	}
 
 	/** User logged in on the connection.
@@ -101,6 +109,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Get the user logged in on the connection.
 	 * May be null (before a successful login). */
+	@Override
 	public User getUser() {
 		return user;
 	}
@@ -115,6 +124,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	protected final long sessionId;
 
 	/** Get the SONAR session ID */
+	@Override
 	public long getSessionId() {
 		return sessionId;
 	}

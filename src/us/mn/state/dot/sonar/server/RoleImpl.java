@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,11 +25,13 @@ import us.mn.state.dot.sonar.Role;
 public class RoleImpl implements Role {
 
 	/** Destroy a role */
+	@Override
 	public void destroy() {
 		// Subclasses must remove role from backing store
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -38,8 +40,15 @@ public class RoleImpl implements Role {
 	protected final String name;
 
 	/** Get the SONAR object name */
+	@Override
 	public String getName() {
 		return name;
+	}
+
+	/** Check group membership */
+	@Override
+	public boolean isInGroup(String g) {
+		return false;
 	}
 
 	/** Create a new role */
@@ -51,11 +60,13 @@ public class RoleImpl implements Role {
 	protected boolean enabled;
 
 	/** Enable or disable the role */
+	@Override
 	public void setEnabled(boolean e) {
 		enabled = e;
 	}
 
 	/** Get the enabled flag */
+	@Override
 	public boolean getEnabled() {
 		return enabled;
 	}
@@ -64,14 +75,16 @@ public class RoleImpl implements Role {
 	protected CapabilityImpl[] capabilities = new CapabilityImpl[0];
 
 	/** Set the capabilities */
+	@Override
 	public void setCapabilities(Capability[] c) {
 		CapabilityImpl[] _c = new CapabilityImpl[c.length];
-		for(int i = 0; i < c.length; i++)
-			_c[i] = (CapabilityImpl)c[i];
+		for (int i = 0; i < c.length; i++)
+			_c[i] = (CapabilityImpl) c[i];
 		capabilities = _c;
 	}
 
 	/** Get the capabilities */
+	@Override
 	public Capability[] getCapabilities() {
 		return capabilities;
 	}
