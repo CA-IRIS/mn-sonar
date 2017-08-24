@@ -152,21 +152,6 @@ public class TypeNode {
 		}
 	}
 
-	/** Enumerate an attribute for all objects of the type node */
-	public void enumerateAttribute(MessageEncoder enc, String aname)
-		throws SonarException, IOException
-	{
-		// We must synchronize here to ensure that no objects are
-		// added or removed while enumerating
-		synchronized(children) {
-			for(SonarObject o: children.values()) {
-				String a = new Name(o, aname).toString();
-				String[] v = dispatcher.getValue(o, aname);
-				enc.encode(Message.ATTRIBUTE, a, v);
-			}
-		}
-	}
-
 	/** Set the value of an attribute.
 	 * @param name Attribute name in SONAR namespace.
 	 * @param v New attribute value.

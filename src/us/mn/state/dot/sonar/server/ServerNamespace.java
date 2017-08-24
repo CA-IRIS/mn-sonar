@@ -166,19 +166,6 @@ public class ServerNamespace extends Namespace {
 			throw NamespaceError.nameInvalid(name);
 	}
 
-	/** Enumerate a named attribute */
-	private void enumerateAttribute(MessageEncoder enc, Name name)
-		throws SonarException, IOException
-	{
-		if(name.getObjectPart().equals("")) {
-			TypeNode t = getTypeNode(name);
-			t.enumerateAttribute(enc, name.getAttributePart());
-		} else {
-			String[] v = getAttribute(name);
-			enc.encode(Message.ATTRIBUTE, name.toString(), v);
-		}
-	}
-
 	/** Enumerate everything contained by a name in the namespace */
 	void enumerate(MessageEncoder enc, Name name) throws SonarException,
 		IOException
@@ -189,8 +176,6 @@ public class ServerNamespace extends Namespace {
 			enumerateType(enc, name);
 		else if (name.isObject())
 			enumerateObject(enc, name);
-		else if (name.isAttribute())
-			enumerateAttribute(enc, name);
 		else
 			throw NamespaceError.nameInvalid(name);
 	}
