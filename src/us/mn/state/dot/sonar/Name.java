@@ -19,7 +19,7 @@ package us.mn.state.dot.sonar;
  *
  * @author Douglas Lau
  */
-public class Name {
+public class Name implements PrivChecker {
 
 	/** Name separator */
 	static private final String SEP = "/";
@@ -130,20 +130,20 @@ public class Name {
 	}
 
 	/** Check if a name matches a privilege */
-	public boolean matches(Privilege p) {
+	public boolean check(Privilege p) {
 		return p.getTypeN().equals(getTypePart())
-		    && matchesObj(p)
-		    && matchesAttr(p);
+		    && checkObj(p)
+		    && checkAttr(p);
 	}
 
 	/** Check if an object matches a privilege */
-	private boolean matchesObj(Privilege p) {
+	private boolean checkObj(Privilege p) {
 		String o = p.getObjN();
 		return "".equals(o) || getObjectPart().matches(o);
 	}
 
 	/** Check if an attribute matches a privilege */
-	private boolean matchesAttr(Privilege p) {
+	private boolean checkAttr(Privilege p) {
 		String a = p.getAttrN();
 		return "".equals(a) || getAttributePart().equals(a);
 	}

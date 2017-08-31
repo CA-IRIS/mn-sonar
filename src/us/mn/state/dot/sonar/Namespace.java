@@ -174,35 +174,35 @@ abstract public class Namespace {
 		return params;
 	}
 
-	/** Check if a user has read privileges for a name.
-	 * @param n Name to check.
+	/** Check if a user has read privileges.
+	 * @param pc Privilege checker.
 	 * @param u User to check.
-	 * @return true If name can be read by user. */
-	public boolean canRead(Name n, User u) {
-		return u.getEnabled() && canRead(n, u.getRole());
+	 * @return true If user has read privileges. */
+	public boolean canRead(PrivChecker pc, User u) {
+		return u.getEnabled() && canRead(pc, u.getRole());
 	}
 
-	/** Check if a role has read privileges for a name */
-	private boolean canRead(Name n, Role r) {
+	/** Check if a role has read privileges */
+	private boolean canRead(PrivChecker pc, Role r) {
 		return r != null
 		    && r.getEnabled()
-		    && canRead(n, r.getCapabilities());
+		    && canRead(pc, r.getCapabilities());
 	}
 
-	/** Check if a set of capabilites has read privileges for a name */
-	private boolean canRead(Name n, Capability[] caps) {
+	/** Check if a set of capabilites has read privileges */
+	private boolean canRead(PrivChecker pc, Capability[] caps) {
 		for (Capability c: caps) {
-			if (c.getEnabled() && canRead(n, c))
+			if (c.getEnabled() && canRead(pc, c))
 				return true;
 		}
 		return false;
 	}
 
-	/** Check if a capability has read privileges for a name.
-	 * @param n Name to check.
+	/** Check if a capability has read privileges.
+	 * @param pc Privilege checker.
 	 * @param c Capability to check.
-	 * @return true If name can be read according to capability. */
-	private boolean canRead(Name n, Capability c) {
+	 * @return true If capability has read privileges. */
+	private boolean canRead(PrivChecker pc, Capability c) {
 		Iterator<SonarObject> it = iterator(Privilege.SONAR_TYPE);
 		while (it.hasNext()) {
 			SonarObject so = it.next();
@@ -210,43 +210,43 @@ abstract public class Namespace {
 				Privilege p = (Privilege) so;
 				if ((!p.getWrite()) &&
 				     (p.getCapability() == c) &&
-				     n.matches(p))
+				     pc.check(p))
 					return true;
 			}
 		}
 		return false;
 	}
 
-	/** Check if a user has write privileges for a name.
-	 * @param n Name to check.
+	/** Check if a user has write privileges.
+	 * @param pc Privilege checker.
 	 * @param u User to check.
-	 * @return true If name can be written by user. */
-	public boolean canWrite(Name n, User u) {
+	 * @return true If user has write privileges. */
+	public boolean canWrite(PrivChecker pc, User u) {
 		return u.getEnabled()
-		    && canWrite(n, u.getRole());
+		    && canWrite(pc, u.getRole());
 	}
 
-	/** Check if a role has write privileges for a name */
-	private boolean canWrite(Name n, Role r) {
+	/** Check if a role has write privileges */
+	private boolean canWrite(PrivChecker pc, Role r) {
 		return r != null
 		    && r.getEnabled()
-		    && canWrite(n, r.getCapabilities());
+		    && canWrite(pc, r.getCapabilities());
 	}
 
-	/** Check if a set of capabilites has write privileges for a name */
-	private boolean canWrite(Name n, Capability[] caps) {
+	/** Check if a set of capabilites has write privileges */
+	private boolean canWrite(PrivChecker pc, Capability[] caps) {
 		for (Capability c: caps) {
-			if (c.getEnabled() && canWrite(n, c))
+			if (c.getEnabled() && canWrite(pc, c))
 				return true;
 		}
 		return false;
 	}
 
-	/** Check if a capability has write privileges for a name.
-	 * @param n Name to check.
+	/** Check if a capability has write privileges.
+	 * @param pc Privilege checker.
 	 * @param c Capability to check.
-	 * @return true If capability has write privileges for the name. */
-	private boolean canWrite(Name n, Capability c) {
+	 * @return true If capability has write privileges. */
+	private boolean canWrite(PrivChecker pc, Capability c) {
 		Iterator<SonarObject> it = iterator(Privilege.SONAR_TYPE);
 		while (it.hasNext()) {
 			SonarObject so = it.next();
@@ -254,7 +254,7 @@ abstract public class Namespace {
 				Privilege p = (Privilege) so;
 				if (p.getWrite() &&
 				   (p.getCapability() == c) &&
-				    n.matches(p))
+				    pc.check(p))
 					return true;
 			}
 		}
