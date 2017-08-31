@@ -24,6 +24,7 @@ import us.mn.state.dot.sonar.MessageEncoder;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.PrivChecker;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.User;
@@ -235,23 +236,23 @@ public class ServerNamespace extends Namespace {
 			return 0;
 	}
 
-	/** Check if a user has read privileges for a name.  This can be
-	 * overridden by a subclass to check a whitelist of addresses.
-	 * @param n Name to check.
+	/** Check if a user has read privileges.  This can be overridden by a
+	 * subclass to check a whitelist of addresses.
+	 * @param pc Privilege checker.
 	 * @param u User to check.
 	 * @param a Inet address of connection.
 	 * @return true if read is allowed; false otherwise. */
-	public boolean canRead(Name n, User u, InetAddress a) {
-		return canRead(n, u);
+	public boolean canRead(PrivChecker pc, User u, InetAddress a) {
+		return canRead(pc, u);
 	}
 
-	/** Check if a user has write privileges for a name.  This can be
-	 * overridden by a subclass to check a whitelist of addresses.
-	 * @param n Name to check.
+	/** Check if a user has write privileges.  This can be overridden by a
+	 * subclass to check a whitelist of addresses.
+	 * @param pc Privilege checker.
 	 * @param u User to check.
 	 * @param a Inet address of connection.
 	 * @return true if write is allowed; false otherwise. */
-	public boolean canWrite(Name n, User u, InetAddress a) {
-		return canWrite(n, u);
+	public boolean canWrite(PrivChecker pc, User u, InetAddress a) {
+		return canWrite(pc, u);
 	}
 }
