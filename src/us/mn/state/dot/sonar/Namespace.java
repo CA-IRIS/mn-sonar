@@ -178,83 +178,53 @@ abstract public class Namespace {
 	 * @param pc Privilege checker.
 	 * @param u User to check.
 	 * @return true If user has read privileges. */
-	public boolean canRead(PrivChecker pc, User u) {
-		return u.getEnabled() && canRead(pc, u.getRole());
-	}
-
-	/** Check if a role has read privileges */
-	private boolean canRead(PrivChecker pc, Role r) {
-		return r != null
-		    && r.getEnabled()
-		    && canRead(pc, r.getCapabilities());
-	}
-
-	/** Check if a set of capabilites has read privileges */
-	private boolean canRead(PrivChecker pc, Capability[] caps) {
-		for (Capability c: caps) {
-			if (c.getEnabled() && canRead(pc, c))
-				return true;
-		}
-		return false;
-	}
-
-	/** Check if a capability has read privileges.
-	 * @param pc Privilege checker.
-	 * @param c Capability to check.
-	 * @return true If capability has read privileges. */
-	private boolean canRead(PrivChecker pc, Capability c) {
-		Iterator<SonarObject> it = iterator(Privilege.SONAR_TYPE);
-		while (it.hasNext()) {
-			SonarObject so = it.next();
-			if (so instanceof Privilege) {
-				Privilege p = (Privilege) so;
-				if ((!p.getWrite()) &&
-				     (p.getCapability() == c) &&
-				     pc.check(p))
-					return true;
+	public boolean canRead(final PrivChecker pc, User u) {
+		return u.getEnabled() && checkPriv(new PrivChecker() {
+			public boolean check(Privilege p) {
+				return !p.getWrite() && pc.check(p);
 			}
-		}
-		return false;
+		}, u.getRole());
 	}
 
 	/** Check if a user has write privileges.
 	 * @param pc Privilege checker.
 	 * @param u User to check.
 	 * @return true If user has write privileges. */
-	public boolean canWrite(PrivChecker pc, User u) {
-		return u.getEnabled()
-		    && canWrite(pc, u.getRole());
+	public boolean canWrite(final PrivChecker pc, User u) {
+		return u.getEnabled() && checkPriv(new PrivChecker() {
+			public boolean check(Privilege p) {
+				return p.getWrite() && pc.check(p);
+			}
+		}, u.getRole());
 	}
 
-	/** Check if a role has write privileges */
-	private boolean canWrite(PrivChecker pc, Role r) {
+	/** Check if a role has privileges */
+	private boolean checkPriv(PrivChecker pc, Role r) {
 		return r != null
 		    && r.getEnabled()
-		    && canWrite(pc, r.getCapabilities());
+		    && checkPriv(pc, r.getCapabilities());
 	}
 
-	/** Check if a set of capabilites has write privileges */
-	private boolean canWrite(PrivChecker pc, Capability[] caps) {
+	/** Check if a set of capabilites has privileges */
+	private boolean checkPriv(PrivChecker pc, Capability[] caps) {
 		for (Capability c: caps) {
-			if (c.getEnabled() && canWrite(pc, c))
+			if (c.getEnabled() && checkPriv(pc, c))
 				return true;
 		}
 		return false;
 	}
 
-	/** Check if a capability has write privileges.
+	/** Check if a capability has privileges.
 	 * @param pc Privilege checker.
 	 * @param c Capability to check.
-	 * @return true If capability has write privileges. */
-	private boolean canWrite(PrivChecker pc, Capability c) {
+	 * @return true If capability has privileges. */
+	private boolean checkPriv(PrivChecker pc, Capability c) {
 		Iterator<SonarObject> it = iterator(Privilege.SONAR_TYPE);
 		while (it.hasNext()) {
 			SonarObject so = it.next();
 			if (so instanceof Privilege) {
 				Privilege p = (Privilege) so;
-				if (p.getWrite() &&
-				   (p.getCapability() == c) &&
-				    pc.check(p))
+				if ((p.getCapability() == c) && pc.check(p))
 					return true;
 			}
 		}
