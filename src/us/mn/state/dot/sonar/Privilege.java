@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2016  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,12 @@ public interface Privilege extends SonarObject {
 
 	/** Set the object name */
 	void setObjN(String n);
+
+	/** Get the group name */
+	String getGroupN();
+
+	/** Set the group name */
+	void setGroupN(String n);
 
 	/** Get the attribute name */
 	String getAttrN();

@@ -27,13 +27,17 @@ import us.mn.state.dot.sonar.Capability;
  */
 public class PrivilegeImpl implements Privilege {
 
-	/** Namespace type/attribute regex pattern */
-	static protected final Pattern TYPE_ATTR_PATTERN =
-		Pattern.compile("[A-Za-z0-9_]*");
+	/** Namespace regex pattern */
+	static private final Pattern PATTERN = Pattern.compile("[A-Za-z0-9_]*");
 
 	/** Namespace object regex pattern */
 	static protected final Pattern OBJ_PATTERN =
 		Pattern.compile("[-A-Za-z0-9_.*+?()]*");
+
+	/** Check for a valid namespace pattern */
+	static protected void checkPattern(String n) throws NamespaceError {
+		checkPattern(PATTERN, n);
+	}
 
 	/** Check for a valid namespace pattern */
 	static protected void checkPattern(Pattern p, String n)
@@ -108,7 +112,7 @@ public class PrivilegeImpl implements Privilege {
 
 	/** Set the type name */
 	public void doSetTypeN(String n) throws Exception {
-		checkPattern(TYPE_ATTR_PATTERN, n);
+		checkPattern(n);
 		setTypeN(n);
 	}
 
@@ -133,6 +137,27 @@ public class PrivilegeImpl implements Privilege {
 		setObjN(n);
 	}
 
+	/** Group name */
+	private String groupN = "";
+
+	/** Get the group name */
+	@Override
+	public String getGroupN() {
+		return groupN;
+	}
+
+	/** Set the group name */
+	@Override
+	public void setGroupN(String n) {
+		groupN = n;
+	}
+
+	/** Set the group name */
+	public void doSetGroupN(String n) throws Exception {
+		checkPattern(n);
+		setGroupN(n);
+	}
+
 	/** Attribute name */
 	private String attrN = "";
 
@@ -150,7 +175,7 @@ public class PrivilegeImpl implements Privilege {
 
 	/** Set the attribute name */
 	public void doSetAttrN(String n) throws Exception {
-		checkPattern(TYPE_ATTR_PATTERN, n);
+		checkPattern(n);
 		setAttrN(n);
 	}
 
