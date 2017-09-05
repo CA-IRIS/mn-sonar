@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -131,13 +131,13 @@ public class AttributeDispatcher {
 	private final HashMap<String, Method> getters =
 		new HashMap<String, Method>();
 
-	/** Get an array of readable attributes */
-	public String[] getReadableAttributes() {
+	/** Get an array of gettable attributes */
+	public String[] getGettableAttributes() {
 		return getters.keySet().toArray(EMPTY_STRING);
 	}
 
-	/** Test if an attribute is readable */
-	public boolean isReadable(String a) {
+	/** Test if an attribute is gettable */
+	public boolean isGettable(String a) {
 		return getters.containsKey(a);
 	}
 

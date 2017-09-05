@@ -109,9 +109,9 @@ public class TypeNode {
 		return children.get(n);
 	}
 
-	/** Test if an attribute is readable */
-	public boolean isReadable(String a) {
-		return dispatcher.isReadable(a);
+	/** Test if an attribute is gettable */
+	public boolean isGettable(String a) {
+		return dispatcher.isGettable(a);
 	}
 
 	/** Get the value of an attribute */
@@ -127,7 +127,7 @@ public class TypeNode {
 	{
 		assert(o.getTypeName() == name);
 		boolean first = true;
-		for (String a: dispatcher.getReadableAttributes()) {
+		for (String a: dispatcher.getGettableAttributes()) {
 			String[] v = getValue(o, a);
 			if (first) {
 				a = new Name(o, a).toString();

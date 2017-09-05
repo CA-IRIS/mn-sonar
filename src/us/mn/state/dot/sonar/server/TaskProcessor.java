@@ -434,7 +434,7 @@ public class TaskProcessor {
 			debugTask("Notify attribute", name.toString() + " (" +
 				processor.size() + ")");
 		}
-		if (namespace.isReadable(name)) {
+		if (namespace.isGettable(name)) {
 			for (ConnectionImpl c: getConnectionList())
 				c.notifyAttribute(name, params);
 		}

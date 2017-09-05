@@ -91,11 +91,11 @@ public class ServerNamespace extends Namespace {
 		t.setField(phantom, name.getAttributePart(), v);
 	}
 
-	/** Test if an attribute is readable */
-	boolean isReadable(Name name) {
+	/** Test if an attribute is gettable */
+	boolean isGettable(Name name) {
 		try {
 			TypeNode t = getTypeNode(name);
-			return t.isReadable(name.getAttributePart());
+			return t.isGettable(name.getAttributePart());
 		}
 		catch (NamespaceError e) {
 			// Unregistered type
