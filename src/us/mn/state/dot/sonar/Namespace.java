@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2016  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -180,8 +180,8 @@ abstract public class Namespace {
 	 * @return true If user has read privileges. */
 	public boolean canRead(final PrivChecker pc, User u) {
 		return u.getEnabled() && checkPriv(new PrivChecker() {
-			public boolean check(Privilege p) {
-				return !p.getWrite() && pc.check(p);
+			public boolean checkPriv(Privilege p) {
+				return !p.getWrite() && pc.checkPriv(p);
 			}
 		}, u.getRole());
 	}
@@ -192,8 +192,8 @@ abstract public class Namespace {
 	 * @return true If user has write privileges. */
 	public boolean canWrite(final PrivChecker pc, User u) {
 		return u.getEnabled() && checkPriv(new PrivChecker() {
-			public boolean check(Privilege p) {
-				return p.getWrite() && pc.check(p);
+			public boolean checkPriv(Privilege p) {
+				return p.getWrite() && pc.checkPriv(p);
 			}
 		}, u.getRole());
 	}
@@ -224,7 +224,7 @@ abstract public class Namespace {
 			SonarObject so = it.next();
 			if (so instanceof Privilege) {
 				Privilege p = (Privilege) so;
-				if ((p.getCapability() == c) && pc.check(p))
+				if ((p.getCapability() == c) && pc.checkPriv(p))
 					return true;
 			}
 		}

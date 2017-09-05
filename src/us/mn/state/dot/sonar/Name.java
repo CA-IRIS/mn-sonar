@@ -130,9 +130,11 @@ public class Name implements PrivChecker {
 	}
 
 	/** Check if a name matches a privilege */
-	public boolean check(Privilege p) {
+	@Override
+	public boolean checkPriv(Privilege p) {
 		return p.getTypeN().equals(getTypePart())
 		    && checkObj(p)
+		    && checkGroup(p)
 		    && checkAttr(p);
 	}
 
@@ -140,6 +142,14 @@ public class Name implements PrivChecker {
 	private boolean checkObj(Privilege p) {
 		String o = p.getObjN();
 		return "".equals(o) || getObjectPart().matches(o);
+	}
+
+	/** Check if a group matches a privilege */
+	private boolean checkGroup(Privilege p) {
+		// NOTE: a Name cannot match a group, so any Privilege
+		//       containing a group will not match
+		String g = p.getGroupN();
+		return "".equals(g);
 	}
 
 	/** Check if an attribute matches a privilege */

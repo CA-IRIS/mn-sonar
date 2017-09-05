@@ -22,5 +22,5 @@ package us.mn.state.dot.sonar;
 public interface PrivChecker {
 
 	/** Check if privilege matches */
-	boolean check(Privilege p);
+	boolean checkPriv(Privilege p);
 }
