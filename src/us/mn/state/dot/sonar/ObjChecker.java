@@ -47,13 +47,13 @@ public class ObjChecker implements PrivChecker {
 		    && checkAttr(p);
 	}
 
-	/** Check if an object matches a privilege */
+	/** Check if the object matches a privilege */
 	private boolean checkObj(Privilege p) {
 		String o = p.getObjN();
-		return "".equals(o) || obj.getName().equals(o);
+		return "".equals(o) || obj.getName().matches(o);
 	}
 
-	/** Check if a group matches a privilege */
+	/** Check if the object matches a privilege group */
 	private boolean checkGroup(Privilege p) {
 		String g = p.getGroupN();
 		return "".equals(g) || obj.isInGroup(g);

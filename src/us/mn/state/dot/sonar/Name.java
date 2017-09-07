@@ -148,8 +148,7 @@ public class Name implements PrivChecker {
 	private boolean checkGroup(Privilege p) {
 		// NOTE: a Name cannot match a group, so any Privilege
 		//       containing a group will not match
-		String g = p.getGroupN();
-		return "".equals(g);
+		return "".equals(p.getGroupN());
 	}
 
 	/** Check if an attribute matches a privilege */
