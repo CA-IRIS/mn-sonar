@@ -32,6 +32,7 @@ import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Message;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.Props;
 import us.mn.state.dot.sonar.ProtocolError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SSLState;
@@ -74,17 +75,8 @@ class ClientConduit extends Conduit {
 	static private SocketChannel createChannel(Properties props)
 		throws ConfigurationError, IOException
 	{
-		int p;
-		String h = props.getProperty("sonar.host");
-		if (h == null)
-			throw new ConfigurationError(
-				"Missing sonar.host property");
-		try {
-			p = Integer.parseInt(props.getProperty("sonar.port"));
-		}
-		catch (NumberFormatException e) {
-			throw new ConfigurationError("Invalid sonar.port");
-		}
+		String h = Props.getProp(props, "sonar.host");
+		int p = Props.getIntProp(props, "sonar.port");
 		return createChannel(h, p);
 	}
 

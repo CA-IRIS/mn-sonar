@@ -17,6 +17,7 @@ package us.mn.state.dot.sonar.server;
 import java.io.IOException;
 import java.util.Properties;
 import us.mn.state.dot.sonar.ConfigurationError;
+import us.mn.state.dot.sonar.Props;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
 
@@ -26,16 +27,6 @@ import us.mn.state.dot.sonar.SonarObject;
  * @author Douglas Lau
  */
 public final class Server {
-
-	/** Get the port from a set of properties */
-	static private int getPort(Properties p) throws ConfigurationError {
-		try {
-			return Integer.parseInt(p.getProperty("sonar.port"));
-		}
-		catch(NumberFormatException e) {
-			throw new ConfigurationError("Invalid sonar.port");
-		}
-	}
 
 	/** Selector thread */
 	private final SelectorThread thread;
@@ -47,7 +38,7 @@ public final class Server {
 	public Server(ServerNamespace n, Properties props,
 		AccessMonitor am) throws IOException, ConfigurationError
 	{
-		int port = getPort(props);
+		int port = Props.getIntProp(props, "sonar.port");
 		processor = new TaskProcessor(n, props, am);
 		thread = new SelectorThread(processor, port);
 	}

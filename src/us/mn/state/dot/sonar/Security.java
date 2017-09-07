@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,33 +33,32 @@ import javax.net.ssl.TrustManagerFactory;
 public class Security {
 
 	/** Load a KeyStore in the jks format */
-	static protected KeyStore loadKeyStore(String keystore)
+	static private KeyStore loadKeyStore(String keystore)
 		throws GeneralSecurityException, ConfigurationError
 	{
 		try {
 			return loadKeyStore(createURL(keystore).openStream());
 		}
-		catch(IOException e) {
-			throw new ConfigurationError("Cannot read " + keystore +
-				", " + e.getMessage());
+		catch (IOException e) {
+			throw ConfigurationError.cannotRead(keystore, e);
 		}
 	}
 
 	/** Create a URL for the specified keystore */
-	static protected URL createURL(String keystore) throws IOException {
+	static private URL createURL(String keystore) throws IOException {
 		File file = new File(keystore);
-		if(file.exists())
+		if (file.exists())
 			return file.toURI().toURL();
 		String cwd = System.getProperty("user.dir");
 		file = new File(cwd, keystore);
-		if(file.exists())
+		if (file.exists())
 			return file.toURI().toURL();
 		else
 			return new URL(keystore);
 	}
 
 	/** Load a KeyStore from an InputStream in the jks format */
-	static protected KeyStore loadKeyStore(InputStream is)
+	static private KeyStore loadKeyStore(InputStream is)
 		throws IOException, GeneralSecurityException
 	{
 		try {
@@ -73,7 +72,7 @@ public class Security {
 	}
 
 	/** Create and configure an SSL context */
-	static protected SSLContext _createContext(String keystore, String pwd)
+	static private SSLContext _createContext(String keystore, String pwd)
 		throws GeneralSecurityException, ConfigurationError
 	{
 		SSLContext context = SSLContext.getInstance("TLS");
@@ -90,15 +89,11 @@ public class Security {
 	}
 
 	/** Create and configure an SSL context */
-	static protected SSLContext _createContext(Properties props)
+	static private SSLContext _createContext(Properties props)
 		throws GeneralSecurityException, ConfigurationError
 	{
-		String keystore = props.getProperty("keystore.file");
-		if(keystore == null)
-			throw new ConfigurationError("Keystore not specified");
-		String pwd = props.getProperty("keystore.password");
-		if(pwd == null)
-			throw new ConfigurationError("Password not specified");
+		String keystore = Props.getProp(props, "keystore.file");
+		String pwd = Props.getProp(props, "keystore.password");
 		return _createContext(keystore, pwd);
 	}
 
@@ -109,9 +104,8 @@ public class Security {
 		try {
 			return _createContext(props);
 		}
-		catch(GeneralSecurityException e) {
-			throw new ConfigurationError("Keystore error: " +
-				e.getMessage());
+		catch (GeneralSecurityException e) {
+			throw ConfigurationError.generalSecurity(e);
 		}
 	}
 }

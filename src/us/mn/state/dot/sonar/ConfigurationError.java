@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.sonar;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import us.mn.state.dot.sonar.SonarException;
 
 /**
@@ -24,7 +26,33 @@ import us.mn.state.dot.sonar.SonarException;
 public class ConfigurationError extends SonarException {
 
 	/** Create a new configuration error exception */
-	public ConfigurationError(String m) {
+	private ConfigurationError(String m) {
 		super("Configuration Error: " + m);
+	}
+
+	/** Create an "invalid int" error */
+	static public ConfigurationError invalidInt(String p) {
+		return new ConfigurationError("Invalid int: " + p);
+	}
+
+	/** Create a "missing property" error */
+	static public ConfigurationError missingProperty(String p) {
+		return new ConfigurationError("Missing " + p + " property");
+	}
+
+	/** Create a "cannot read" error */
+	static public ConfigurationError cannotRead(String keystore,
+		IOException e)
+	{
+		return new ConfigurationError("Cannot read " + keystore + ", " +
+			e.getMessage());
+	}
+
+	/** Create a "general security" error */
+	static public ConfigurationError generalSecurity(
+		GeneralSecurityException e)
+	{
+		return new ConfigurationError("Security error, " +
+			e.getMessage());
 	}
 }
