@@ -35,6 +35,7 @@ import us.mn.state.dot.sonar.Message;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.ObjChecker;
 import us.mn.state.dot.sonar.ProtocolError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
@@ -631,11 +632,22 @@ public class ConnectionImpl extends Conduit implements Connection {
 			throw ProtocolError.WRONG_PARAMETER_COUNT;
 		Name name = new Name(params.get(1));
 		if (name.isAttribute()) {
-			if (!namespace.canWrite(name, user, address))
+			if (!checkWriteAttr(name))
 				throw PermissionDenied.create(name);
 			setAttribute(name, params);
 		} else
 			throw NamespaceError.nameInvalid(name);
+	}
+
+	/** Check if an attribute if writable */
+	private boolean checkWriteAttr(Name name) {
+		// NOTE: ObjChecker must be used here, because the Name class
+		//       does not support group Privilege checks.
+		SonarObject obj = namespace.lookupObject(name.getTypePart(),
+			name.getObjectPart());
+		return (obj != null)
+		     && namespace.canWrite(new ObjChecker(obj,
+		        name.getAttributePart()), user, address);
 	}
 
 	/** Set the value of an attribute.
