@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,25 +29,30 @@ public class PermissionDenied extends SonarException {
 		super("Permission denied: " + m);
 	}
 
-	/** Thrown when LOGIN authentication has failed */
-	static public final PermissionDenied AUTHENTICATION_FAILED =
-		new PermissionDenied("Authentication failed");
+	/** Create an "authentication failed" error */
+	static public PermissionDenied authenticationFailed() {
+		return new PermissionDenied("Authentication failed");
+	}
 
-	/** Thrown when a name cannot be added */
-	static public final PermissionDenied CANNOT_ADD =
-		new PermissionDenied("Unable to add object");
+	/** Create a "cannot add" error */
+	static public PermissionDenied cannotAdd() {
+		return new PermissionDenied("Unable to add object");
+	}
 
-	/** Thrown when a name cannot be removed */
-	static public final PermissionDenied CANNOT_REMOVE =
-		new PermissionDenied("Unable to remove object");
+	/** Create a "cannot remove" error */
+	static public PermissionDenied cannotRemove() {
+		return new PermissionDenied("Unable to remove object");
+	}
 
-	/** Thrown when an attribute cannot be read */
-	static public final PermissionDenied CANNOT_READ =
-		new PermissionDenied("Unable to read attribute");
+	/** Create a "cannot read" error */
+	static public PermissionDenied cannotRead() {
+		return new PermissionDenied("Unable to read attribute");
+	}
 
-	/** Thrown when an attribute cannot be written */
-	static public final PermissionDenied CANNOT_WRITE =
-		new PermissionDenied("Unable to write attribute");
+	/** Create a "cannot write" error */
+	static public PermissionDenied cannotWrite() {
+		return new PermissionDenied("Unable to write attribute");
+	}
 
 	/** Create a new "insufficient privileges" exception */
 	static public PermissionDenied create(Name n) {

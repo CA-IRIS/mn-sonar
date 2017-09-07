@@ -490,7 +490,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	public void failLogin() {
 		try {
 			state.encoder.encode(Message.SHOW, PermissionDenied.
-				AUTHENTICATION_FAILED.getMessage());
+				authenticationFailed().getMessage());
 			flush();
 		}
 		catch (IOException e) {

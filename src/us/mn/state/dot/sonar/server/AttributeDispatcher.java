@@ -229,7 +229,7 @@ public class AttributeDispatcher {
 	/** Create a new object with the given name */
 	public SonarObject createObject(String name) throws SonarException {
 		if (constructor == null)
-			throw PermissionDenied.CANNOT_ADD;
+			throw PermissionDenied.cannotAdd();
 		Object[] params = { name };
 		try {
 			return (SonarObject)constructor.newInstance(params);
@@ -263,14 +263,14 @@ public class AttributeDispatcher {
 	/** Store the given object */
 	public void storeObject(SonarObject o) throws SonarException {
 		if (storer == null)
-			throw PermissionDenied.CANNOT_ADD;
+			throw PermissionDenied.cannotAdd();
 		invoke(o, storer, EMPTY_STRING);
 	}
 
 	/** Destroy the given object */
 	public void destroyObject(SonarObject o) throws SonarException {
 		if (destroyer == null)
-			throw PermissionDenied.CANNOT_REMOVE;
+			throw PermissionDenied.cannotRemove();
 		invoke(o, destroyer, EMPTY_STRING);
 	}
 
@@ -280,7 +280,7 @@ public class AttributeDispatcher {
 	{
 		Method m = setters.get(a);
 		if (m == null)
-			throw PermissionDenied.CANNOT_WRITE;
+			throw PermissionDenied.cannotWrite();
 		invoke(o, m, v);
 	}
 
@@ -325,7 +325,7 @@ public class AttributeDispatcher {
 	{
 		Method m = getters.get(a);
 		if (m == null)
-			throw PermissionDenied.CANNOT_READ;
+			throw PermissionDenied.cannotRead();
 		Object result = _invoke(o, m, NO_PARAMS);
 		if (result instanceof Object[]) {
 			Object[] r = (Object [])result;
