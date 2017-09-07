@@ -129,9 +129,19 @@ public class Name implements PrivChecker {
 		return getTypePart() + SEP + SEP + getAttributePart();
 	}
 
-	/** Check if a name matches a privilege */
+	/** Check for read privilege.
+	 * @param p Privilege to check. */
 	@Override
-	public boolean checkPriv(Privilege p) {
+	public boolean checkRead(Privilege p) {
+		return p.getTypeN().equals(getTypePart());
+	}
+
+	/** Check for write privilege.
+	 * @param p Privilege to check. */
+	@Override
+	public boolean checkWrite(Privilege p) {
+		// NOTE: object, group and attribute checks are
+		//       only valid for write privileges.
 		return p.getTypeN().equals(getTypePart())
 		    && checkObj(p)
 		    && checkGroup(p)

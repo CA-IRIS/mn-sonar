@@ -38,9 +38,19 @@ public class ObjChecker implements PrivChecker {
 		attr = a;
 	}
 
-	/** Check if privilege matches */
+	/** Check for read privilege.
+	 * @param p Privilege to check. */
 	@Override
-	public boolean checkPriv(Privilege p) {
+	public boolean checkRead(Privilege p) {
+		return p.getTypeN().equals(obj.getTypeName());
+	}
+
+	/** Check for write privilege.
+	 * @param p Privilege to check. */
+	@Override
+	public boolean checkWrite(Privilege p) {
+		// NOTE: object, group and attribute checks are
+		//       only valid for write privileges.
 		return p.getTypeN().equals(obj.getTypeName())
 		    && checkObj(p)
 		    && checkGroup(p)
