@@ -16,6 +16,9 @@ package us.mn.state.dot.sonar;
 
 /**
  * A privilege controls access to the SONAR namespace.
+ * Type name is used to match either read or write privileges.
+ * Object, group and attribute names match only with write privileges.
+ * For read privileges, these must be blank (empty string).
  *
  * @author Douglas Lau
  */
