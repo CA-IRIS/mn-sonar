@@ -126,6 +126,7 @@ public class ClientNamespace extends Namespace {
 	 * @param tname Sonar type name
 	 * @param oname Sonar object name
 	 * @return Object from namespace or null if name does not exist */
+	@Override
 	public SonarObject lookupObject(String tname, String oname) {
 		if (oname != null) {
 			TypeCache t = types.get(tname);
@@ -138,6 +139,7 @@ public class ClientNamespace extends Namespace {
 	/** Get an iterator for all objects of a type.
 	 * @param tname Sonar type name.
 	 * @return Iterator of all objects of the type. */
+	@Override
 	@SuppressWarnings("unchecked")
 	public Iterator<SonarObject> iterator(String tname) {
 		TypeCache t = types.get(tname);
@@ -150,6 +152,7 @@ public class ClientNamespace extends Namespace {
 	/** Get a count of the number of objects of the specified type.
 	 * @param tname Sonar type name
 	 * @return Total number of objects of the specified type */
+	@Override
 	public int getCount(String tname) {
 		TypeCache t = types.get(tname);
 		if (t != null)
