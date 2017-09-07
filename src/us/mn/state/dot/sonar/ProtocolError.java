@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,27 +26,28 @@ public class ProtocolError extends SonarException {
 		super("Protocol error: " + m);
 	}
 
-	/** Error thrown when authentication is required */
-	static public final ProtocolError AUTHENTICATION_REQUIRED =
-		new ProtocolError("Authentication required");
+	/** Create authentication required exception */
+	static public ProtocolError authenticationRequired() {
+		return new ProtocolError("Authentication required");
+	}
 
-	/** Error thrown when a second authentication attempt is made */
-	static public final ProtocolError ALREADY_LOGGED_IN =
-		new ProtocolError("Already logged in");
+	/** Create "already logged in" exception */
+	static public ProtocolError alreadyLoggedIn() {
+		return new ProtocolError("Already logged in");
+	}
 
-	/** Error thrown when an invalid message code is received */
-	static public final ProtocolError INVALID_MESSAGE_CODE =
-		new ProtocolError("Invalid message code");
+	/** Create "invalid message code" exception */
+	static public ProtocolError invalidMessageCode() {
+		return new ProtocolError("Invalid message code");
+	}
 
-	/** Error thrown when the wrong number of parameters are received */
-	static public final ProtocolError WRONG_PARAMETER_COUNT =
-		new ProtocolError("Wrong number of parameters");
+	/** Create "wrong parameter count" exception */
+	static public ProtocolError wrongParameterCount() {
+		return new ProtocolError("Wrong number of parameters");
+	}
 
-	/** Error thrown when an invalid parameter is received */
-	static public final ProtocolError INVALID_PARAMETER =
-		new ProtocolError("Invalid parameter");
-
-	/** Error thrown when trying to IGNORE an object not being watched */
-	static public final ProtocolError NOT_WATCHING =
-		new ProtocolError("Not watching name");
+	/** Create "invalid parameter" exception */
+	static public ProtocolError invalidParameter() {
+		return new ProtocolError("Invalid parameter");
+	}
 }

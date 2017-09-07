@@ -91,7 +91,7 @@ public class ClientNamespace extends Namespace {
 		if (Name.isAbsolute(n)) {
 			Name name = new Name(n);
 			if (!name.isAttribute())
-				throw ProtocolError.WRONG_PARAMETER_COUNT;
+				throw ProtocolError.wrongParameterCount();
 			TypeCache t = getTypeCache(name);
 			cur_obj = t.getProxy(name.getObjectPart());
 			String a = name.getAttributePart();

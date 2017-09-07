@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2015  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,12 +51,12 @@ abstract public class Conduit {
 
 	/** Handle a LOGIN message */
 	public void doLogin(List<String> p) throws SonarException {
-		throw ProtocolError.INVALID_MESSAGE_CODE;
+		throw ProtocolError.invalidMessageCode();
 	}
 
 	/** Handle a PASSWORD message */
 	public void doPassword(List<String> p) throws SonarException {
-		throw ProtocolError.INVALID_MESSAGE_CODE;
+		throw ProtocolError.invalidMessageCode();
 	}
 
 	/** Handle a QUIT message */
@@ -64,12 +64,12 @@ abstract public class Conduit {
 
 	/** Handle an ENUMERATE message */
 	public void doEnumerate(List<String> p) throws SonarException {
-		throw ProtocolError.INVALID_MESSAGE_CODE;
+		throw ProtocolError.invalidMessageCode();
 	}
 
 	/** Handle an IGNORE message */
 	public void doIgnore(List<String> p) throws SonarException {
-		throw ProtocolError.INVALID_MESSAGE_CODE;
+		throw ProtocolError.invalidMessageCode();
 	}
 
 	/** Handle an OBJECT message */
@@ -83,11 +83,11 @@ abstract public class Conduit {
 
 	/** Handle a TYPE message */
 	public void doType(List<String> p) throws SonarException {
-		throw ProtocolError.INVALID_MESSAGE_CODE;
+		throw ProtocolError.invalidMessageCode();
 	}
 
 	/** Handle a SHOW message */
 	public void doShow(List<String> p) throws SonarException {
-		throw ProtocolError.INVALID_MESSAGE_CODE;
+		throw ProtocolError.invalidMessageCode();
 	}
 }

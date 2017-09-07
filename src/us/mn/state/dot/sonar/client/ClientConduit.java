@@ -58,7 +58,7 @@ class ClientConduit extends Conduit {
 			if (code == m.code)
 				return m;
 		}
-		throw ProtocolError.INVALID_MESSAGE_CODE;
+		throw ProtocolError.invalidMessageCode();
 	}
 
 	/** Create and configure a socket channel */
@@ -262,7 +262,7 @@ class ClientConduit extends Conduit {
 	private void processMessage(List<String> params) throws SonarException {
 		String c = params.get(0);
 		if (c.length() != 1)
-			throw ProtocolError.INVALID_MESSAGE_CODE;
+			throw ProtocolError.invalidMessageCode();
 		Message m = lookupMessage(c.charAt(0));
 		m.handle(this, params);
 	}
@@ -284,7 +284,7 @@ class ClientConduit extends Conduit {
 	@Override
 	public void doQuit(List<String> p) throws SonarException {
 		if (p.size() != 1)
-			throw ProtocolError.WRONG_PARAMETER_COUNT;
+			throw ProtocolError.wrongParameterCount();
 		disconnect();
 	}
 
@@ -292,7 +292,7 @@ class ClientConduit extends Conduit {
 	@Override
 	public void doObject(List<String> p) throws SonarException {
 		if (p.size() != 2)
-			throw ProtocolError.WRONG_PARAMETER_COUNT;
+			throw ProtocolError.wrongParameterCount();
 		namespace.putObject(p.get(1));
 	}
 
@@ -300,7 +300,7 @@ class ClientConduit extends Conduit {
 	@Override
 	public void doRemove(List<String> p) throws SonarException {
 		if (p.size() != 2)
-			throw ProtocolError.WRONG_PARAMETER_COUNT;
+			throw ProtocolError.wrongParameterCount();
 		namespace.removeObject(p.get(1));
 	}
 
@@ -308,7 +308,7 @@ class ClientConduit extends Conduit {
 	@Override
 	public void doAttribute(List<String> p) throws SonarException {
 		if (p.size() < 2)
-			throw ProtocolError.WRONG_PARAMETER_COUNT;
+			throw ProtocolError.wrongParameterCount();
 		p.remove(0);
 		String name = p.remove(0);
 		namespace.updateAttribute(name, p.toArray(new String[0]));
@@ -318,7 +318,7 @@ class ClientConduit extends Conduit {
 	@Override
 	public void doType(List<String> p) throws SonarException {
 		if (p.size() > 2)
-			throw ProtocolError.WRONG_PARAMETER_COUNT;
+			throw ProtocolError.wrongParameterCount();
 		if (p.size() > 1)
 			namespace.setCurrentType(p.get(1));
 		else {
@@ -353,7 +353,7 @@ class ClientConduit extends Conduit {
 	@Override
 	public void doShow(List<String> p) throws SonarException {
 		if (p.size() != 2)
-			throw ProtocolError.WRONG_PARAMETER_COUNT;
+			throw ProtocolError.wrongParameterCount();
 		if (!loggedIn)
 			notifyLogin();
 		String m = p.get(1);

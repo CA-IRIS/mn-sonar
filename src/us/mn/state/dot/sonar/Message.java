@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,6 +112,6 @@ public enum Message {
 
 	/** Handle a received message */
 	public void handle(Conduit c, List<String> p) throws SonarException {
-		throw ProtocolError.INVALID_MESSAGE_CODE;
+		throw ProtocolError.invalidMessageCode();
 	}
 }

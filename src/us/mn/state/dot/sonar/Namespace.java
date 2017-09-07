@@ -93,12 +93,12 @@ abstract public class Namespace {
 				return Double.valueOf(p);
 		}
 		catch (NumberFormatException e) {
-			throw ProtocolError.INVALID_PARAMETER;
+			throw ProtocolError.invalidParameter();
 		}
 		if (SonarObject.class.isAssignableFrom(t))
 			return unmarshallObject(t, p);
 		else
-			throw ProtocolError.INVALID_PARAMETER;
+			throw ProtocolError.invalidParameter();
 	}
 
 	/** Unmarshall a SONAR object reference */
@@ -111,12 +111,12 @@ abstract public class Namespace {
 		catch (NoSuchFieldException e) {
 			System.err.println("SONAR: SONAR_TYPE and " +
 				"SONAR_TYPES not defined for " + t);
-			throw ProtocolError.INVALID_PARAMETER;
+			throw ProtocolError.invalidParameter();
 		}
 		catch (Exception e) {
 			System.err.println("SONAR: unmarshall \"" + p +
 				"\": " + e.getMessage());
-			throw ProtocolError.INVALID_PARAMETER;
+			throw ProtocolError.invalidParameter();
 		}
 	}
 
@@ -143,7 +143,7 @@ abstract public class Namespace {
 			return unmarshallArray(t.getComponentType(), v);
 		else {
 			if (v.length != 1)
-				throw ProtocolError.WRONG_PARAMETER_COUNT;
+				throw ProtocolError.wrongParameterCount();
 			return unmarshall(t, v[0]);
 		}
 	}
@@ -167,7 +167,7 @@ abstract public class Namespace {
 			};
 		}
 		if (pt.length != v.length)
-			throw ProtocolError.WRONG_PARAMETER_COUNT;
+			throw ProtocolError.wrongParameterCount();
 		Object[] params = new Object[pt.length];
 		for (int i = 0; i < params.length; i++)
 			params[i] = unmarshall(pt[i], v[i]);

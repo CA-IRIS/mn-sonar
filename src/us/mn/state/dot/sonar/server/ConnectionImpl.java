@@ -72,7 +72,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		for (Message m: MESSAGES)
 			if (code == m.code)
 				return m;
-		throw ProtocolError.INVALID_MESSAGE_CODE;
+		throw ProtocolError.invalidMessageCode();
 	}
 
 	/** Random number generator for session IDs */
@@ -350,7 +350,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Check that the client is logged in */
 	protected void checkLoggedIn() throws SonarException {
 		if (user == null)
-			throw ProtocolError.AUTHENTICATION_REQUIRED;
+			throw ProtocolError.authenticationRequired();
 	}
 
 	/** Process any incoming messages.
@@ -405,7 +405,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	{
 		String c = params.get(0);
 		if (c.length() != 1)
-			throw ProtocolError.INVALID_MESSAGE_CODE;
+			throw ProtocolError.invalidMessageCode();
 		_processMessage(lookupMessage(c.charAt(0)), params);
 	}
 
@@ -456,9 +456,9 @@ public class ConnectionImpl extends Conduit implements Connection {
 	@Override
 	public void doLogin(List<String> params) throws SonarException {
 		if (user != null)
-			throw ProtocolError.ALREADY_LOGGED_IN;
+			throw ProtocolError.alreadyLoggedIn();
 		if (params.size() != 3)
-			throw ProtocolError.WRONG_PARAMETER_COUNT;
+			throw ProtocolError.wrongParameterCount();
 		String name = params.get(1);
 		String password = params.get(2);
 		doLogin(name, password.toCharArray());
@@ -503,7 +503,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	public void doPassword(List<String> params) throws SonarException {
 		checkLoggedIn();
 		if (params.size() != 3)
-			throw ProtocolError.WRONG_PARAMETER_COUNT;
+			throw ProtocolError.wrongParameterCount();
 		char[] pwd_current = params.get(1).toCharArray();
 		char[] pwd_new = params.get(2).toCharArray();
 		processor.changePassword(this, user, pwd_current, pwd_new);
@@ -533,7 +533,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	public void doEnumerate(List<String> params) throws SonarException {
 		checkLoggedIn();
 		if (params.size() > 2)
-			throw ProtocolError.WRONG_PARAMETER_COUNT;
+			throw ProtocolError.wrongParameterCount();
 		Name name = createName(params);
 		if (!namespace.canRead(name, user, address))
 			throw PermissionDenied.create(name);
@@ -559,7 +559,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	public void doIgnore(List<String> params) throws SonarException {
 		checkLoggedIn();
 		if (params.size() != 2)
-			throw ProtocolError.WRONG_PARAMETER_COUNT;
+			throw ProtocolError.wrongParameterCount();
 		Name name = new Name(params.get(1));
 		stopWatching(name);
 	}
@@ -570,7 +570,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	public void doObject(List<String> params) throws SonarException {
 		checkLoggedIn();
 		if (params.size() != 2)
-			throw ProtocolError.WRONG_PARAMETER_COUNT;
+			throw ProtocolError.wrongParameterCount();
 		Name name = new Name(params.get(1));
 		if (name.isObject()) {
 			if (!namespace.canWrite(name, user, address))
@@ -611,7 +611,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	public void doRemove(List<String> params) throws SonarException {
 		checkLoggedIn();
 		if (params.size() != 2)
-			throw ProtocolError.WRONG_PARAMETER_COUNT;
+			throw ProtocolError.wrongParameterCount();
 		Name name = new Name(params.get(1));
 		if (!namespace.canWrite(name, user, address))
 			throw PermissionDenied.create(name);
@@ -629,7 +629,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	public void doAttribute(List<String> params) throws SonarException {
 		checkLoggedIn();
 		if (params.size() < 2)
-			throw ProtocolError.WRONG_PARAMETER_COUNT;
+			throw ProtocolError.wrongParameterCount();
 		Name name = new Name(params.get(1));
 		if (name.isAttribute()) {
 			if (!checkWriteAttr(name))
