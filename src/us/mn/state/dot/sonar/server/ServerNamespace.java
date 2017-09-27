@@ -121,11 +121,9 @@ public class ServerNamespace extends Namespace {
 
 	/** Lookup the object with the specified name */
 	SonarObject lookupObject(Name name) {
-		if (name.isObject()) {
-			return lookupObject(name.getTypePart(),
-				name.getObjectPart());
-		}
-		return null;
+		return name.isObject()
+		      ?	_lookupObject(name.getTypePart(), name.getObjectPart())
+		      : null;
 	}
 
 	/** Enumerate the root of the namespace */
@@ -206,16 +204,22 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Lookup an object in the SONAR namespace.
-	 * @param tname Sonar type name
-	 * @param oname Sonar object name
+	 * @param tname Sonar type name.
+	 * @param oname Sonar object name (may be null).
 	 * @return Object from namespace or null if name does not exist */
 	@Override
 	public SonarObject lookupObject(String tname, String oname) {
+		return (oname != null) ? _lookupObject(tname, oname) : null;
+	}
+
+	/** Lookup an object in the SONAR namespace.
+	 * @param tname Sonar type name.
+	 * @param oname Sonar object name (may not be null).
+	 * @return Object from namespace or null if name does not exist */
+	private SonarObject _lookupObject(String tname, String oname) {
+		assert oname != null;
 		TypeNode t = _getTypeNode(tname);
-		if (t != null)
-			return t.lookupObject(oname);
-		else
-			return null;
+		return (t != null) ? t.lookupObject(oname) : null;
 	}
 
 	/** Get an iterator for all objects of a type.
