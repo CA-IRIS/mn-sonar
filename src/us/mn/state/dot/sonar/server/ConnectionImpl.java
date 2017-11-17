@@ -582,7 +582,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Create a new object in the server namespace.
 	 * This may only be called on the Task Processor thread. */
-	protected void createObject(Name name) throws SonarException {
+	private void createObject(Name name) throws SonarException {
 		SonarObject o = getObject(name);
 		processor.doStoreObject(o);
 		phantom = null;
@@ -590,7 +590,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Get the specified object (either phantom or new object).
 	 * This may only be called on the Task Processor thread. */
-	protected SonarObject getObject(Name name) throws SonarException {
+	private SonarObject getObject(Name name) throws SonarException {
 		if (isPhantom(name))
 			return phantom;
 		else
@@ -641,13 +641,17 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Check if an attribute if writable */
 	private boolean checkWriteAttr(Name name) {
-		// NOTE: ObjChecker must be used here, because the Name class
-		//       does not support group Privilege checks.
+		// NOTE: Use ObjChecker if the object exists in order to support
+		//       group Privilege checks.
 		SonarObject obj = namespace.lookupObject(name.getTypePart(),
 			name.getObjectPart());
-		return (obj != null)
-		     && namespace.canWrite(new ObjChecker(obj,
-		        name.getAttributePart()), user, address);
+		if (obj != null) {
+			return namespace.canWrite(new ObjChecker(obj,
+			       name.getAttributePart()), user, address);
+		} else {
+			// This check is only needed for phantom objects
+			return namespace.canWrite(name, user, address);
+		}
 	}
 
 	/** Set the value of an attribute.
