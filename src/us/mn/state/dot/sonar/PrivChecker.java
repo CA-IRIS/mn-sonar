@@ -28,4 +28,7 @@ public interface PrivChecker {
 	/** Check for write privilege.
 	 * @param p Privilege to check. */
 	boolean checkWrite(Privilege p);
+
+	/** Get the object type part */
+	String getTypePart();
 }

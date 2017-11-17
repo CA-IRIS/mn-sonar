@@ -96,6 +96,7 @@ public class Name implements PrivChecker {
 	}
 
 	/** Get the type part */
+	@Override
 	public String getTypePart() {
 		if (parts.length > 0)
 			return parts[0];

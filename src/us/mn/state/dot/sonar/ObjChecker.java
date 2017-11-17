@@ -38,6 +38,12 @@ public class ObjChecker implements PrivChecker {
 		attr = a;
 	}
 
+	/** Get type part */
+	@Override
+	public String getTypePart() {
+		return obj.getTypeName();
+	}
+
 	/** Check for read privilege.
 	 * @param p Privilege to check. */
 	@Override
