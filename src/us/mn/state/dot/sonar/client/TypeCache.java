@@ -21,11 +21,13 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import us.mn.state.dot.sonar.GroupChecker;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.sonar.User;
 
 /**
  * A type cache represents the first-level nodes in the SONAR namespace. It
@@ -34,6 +36,13 @@ import us.mn.state.dot.sonar.SonarObject;
  * @author Douglas Lau
  */
 public class TypeCache<T extends SonarObject> implements Iterable<T> {
+
+	/** Default group checker for types */
+	static private final GroupChecker NO_GROUP = new GroupChecker() {
+		public boolean checkGroup(Name name, User u, String g) {
+			return false;
+		}
+	};
 
 	/** Initial capacity of type hash */
 	static private final int INITIAL_CAPACITY = 256;
@@ -57,6 +66,9 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 	/** SONAR namespace */
 	private final Namespace namespace;
 
+	/** Group privilege checker */
+	public final GroupChecker group_chk;
+
 	/** All SONAR objects of this type are put here.
 	 * All access must be synchronized on the "TypeCache" lock. */
 	private final ConcurrentHashMap<String, T> children =
@@ -78,13 +90,21 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 	private final LinkedList<ProxyListener<T>> listeners =
 		new LinkedList<ProxyListener<T>>();
 
-	/** Create a type cache. NOTE: because of limitations with generics
-	 * and reflection, the interface must be passed to the constructor in
-	 * addition to the &lt;T&gt; qualifier. These types must be identical!
+	/** Create a type cache.
+	 *
+	 * NOTE: because of limitations with generics and reflection, the
+	 * interface must be passed to the constructor in addition to the
+	 * &lt;T&gt; qualifier.
+	 * These types must be identical!
 	 * For example, to create a cache of Users, do this:
-	 * <code>new TypeCache&lt;User&gt;(User.class)</code> */
-	public TypeCache(Class iface, Client c) throws NoSuchFieldException,
-		IllegalAccessException
+	 * <code>new TypeCache&lt;User&gt;(User.class, client)</code>
+	 *
+	 * @param iface Interface extending SonarObject.
+	 * @param c Sonar Client.
+	 * @param gc Group privilege checker.
+	 */
+	public TypeCache(Class iface, Client c, GroupChecker gc)
+		throws NoSuchFieldException, IllegalAccessException
 	{
 		assert SonarObject.class.isAssignableFrom(iface);
 		tname = Namespace.typeName(iface);
@@ -92,6 +112,18 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 		invoker = new SonarInvoker(this, iface);
 		client = c;
 		namespace = client.getNamespace();
+		group_chk = (gc != null) ? gc : NO_GROUP;
+	}
+
+	/** Create a type cache.
+	 *
+	 * @param iface Interface extending SonarObject.
+	 * @param c Sonar Client.
+	 */
+	public TypeCache(Class iface, Client c) throws NoSuchFieldException,
+		IllegalAccessException
+	{
+		this(iface, c, null);
 	}
 
 	/** Notify proxy listeners that a proxy has been added */

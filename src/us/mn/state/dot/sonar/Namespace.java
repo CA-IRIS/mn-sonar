@@ -179,7 +179,7 @@ abstract public class Namespace {
 	 * @param u User to check.
 	 * @return true If user has read privileges. */
 	public boolean canRead(Name name, User u) {
-		return u.getEnabled() && checkPriv(name, u.getRole(), false);
+		return checkPriv(name, u, false);
 	}
 
 	/** Check if a user has write privileges.
@@ -187,38 +187,54 @@ abstract public class Namespace {
 	 * @param u User to check.
 	 * @return true If user has write privileges. */
 	public boolean canWrite(Name name, User u) {
-		return u.getEnabled() && checkPriv(name, u.getRole(), true);
+		return checkPriv(name, u, true);
 	}
 
-	/** Check if a role has privileges */
-	private boolean checkPriv(Name name, Role r, boolean write) {
-		return r != null
+	/** Check if a user has privileges.
+	 * @param name Name to check.
+	 * @param u User to check.
+	 * @param write Check for write privilege.
+	 * @return true If user has specified privileges. */
+	private boolean checkPriv(Name name, User u, boolean write) {
+		Role r = u.getRole();
+		return u.getEnabled()
+		    && (r != null)
 		    && r.getEnabled()
-		    && checkPriv(name, r.getCapabilities(), write);
+		    && checkPriv(name, u, r.getCapabilities(), write);
 	}
 
-	/** Check if a set of capabilites has privileges */
-	private boolean checkPriv(Name name, Capability[] caps, boolean write) {
+	/** Check if a user has privileges for a set of capabilites.
+	 * @param name Name to check.
+	 * @param u User to check.
+	 * @param caps Capabilities to check.
+	 * @param write Check for write privilege.
+	 * @return true If user has specified privileges. */
+	private boolean checkPriv(Name name, User u, Capability[] caps,
+		boolean write)
+	{
 		for (Capability c: caps) {
-			if (c.getEnabled() && checkPriv(name, c, write))
+			if (c.getEnabled() && checkPriv(name, u, c, write))
 				return true;
 		}
 		return false;
 	}
 
-	/** Check if a capability has privileges.
+	/** Check if a user has privileges for a capability.
 	 * @param name Name to check.
+	 * @param u User to check.
 	 * @param c Capability to check.
 	 * @param write Check for write privilege.
 	 * @return true If capability has privileges. */
-	private boolean checkPriv(Name name, Capability c, boolean write) {
+	private boolean checkPriv(Name name, User u, Capability c,
+		boolean write)
+	{
 		Iterator<SonarObject> it = iterator(Privilege.SONAR_TYPE);
 		while (it.hasNext()) {
 			SonarObject so = it.next();
 			if (so instanceof Privilege) {
 				Privilege p = (Privilege) so;
 				if ((p.getCapability() == c)
-				  && checkPriv(name, p, write))
+				  && checkPriv(name, u, p, write))
 					return true;
 			}
 		}
@@ -226,15 +242,28 @@ abstract public class Namespace {
 	}
 
 	/** Check for read/write privilege */
-	private boolean checkPriv(Name name, Privilege p, boolean write) {
+	private boolean checkPriv(Name name, User u, Privilege p,
+		boolean write)
+	{
 		if (p.getWrite() == write) {
-			if (write)
-				return name.checkWrite(p);
-			else
+			if (write) {
+				return name.checkWrite(p)
+				    && checkGroupWrite(name, u, p);
+			} else
 				return name.checkRead(p);
 		} else
 			return false;
 	}
+
+	/** Check for group write privilege */
+	private boolean checkGroupWrite(Name name, User u, Privilege p) {
+		String g = p.getGroupN();
+		return "".equals(g)
+		    || getGroupChecker(name).checkGroup(name, u, g);
+	}
+
+	/** Get the group checker for a name type */
+	abstract protected GroupChecker getGroupChecker(Name name);
 
 	/** Lookup an object in the SONAR namespace.
 	 * @param tname Sonar type name

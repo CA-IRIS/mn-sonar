@@ -138,11 +138,10 @@ public class Name {
 	/** Check for write privilege.
 	 * @param p Privilege to check. */
 	public boolean checkWrite(Privilege p) {
-		// NOTE: object, group and attribute checks are
+		// NOTE: object and attribute checks are
 		//       only valid for write privileges.
 		return p.getTypeN().equals(getTypePart())
 		    && checkObj(p)
-		    && checkGroup(p)
 		    && checkAttr(p);
 	}
 
@@ -150,13 +149,6 @@ public class Name {
 	private boolean checkObj(Privilege p) {
 		String o = p.getObjN();
 		return "".equals(o) || getObjectPart().matches(o);
-	}
-
-	/** Check if a group matches a privilege */
-	private boolean checkGroup(Privilege p) {
-		// NOTE: a Name cannot match a group, so any Privilege
-		//       containing a group will not match
-		return "".equals(p.getGroupN());
 	}
 
 	/** Check if an attribute matches a privilege */

@@ -17,12 +17,14 @@ package us.mn.state.dot.sonar.client;
 import java.util.Iterator;
 import java.util.HashMap;
 import us.mn.state.dot.sonar.EmptyIterator;
+import us.mn.state.dot.sonar.GroupChecker;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.ProtocolError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.sonar.User;
 
 /**
  * The client namespace is a cache which contains SonarObject proxies.
@@ -30,6 +32,13 @@ import us.mn.state.dot.sonar.SonarObject;
  * @author Douglas Lau
  */
 public class ClientNamespace extends Namespace {
+
+	/** Default group checker for types */
+	static private final GroupChecker NO_GROUP = new GroupChecker() {
+		public boolean checkGroup(Name name, User u, String g) {
+			return false;
+		}
+	};
 
 	/** Map of all types in the cache */
 	private final HashMap<String, TypeCache> types =
@@ -159,5 +168,17 @@ public class ClientNamespace extends Namespace {
 			return t.size();
 		else
 			return 0;
+	}
+
+	/** Get the group checker for a name type */
+	@Override
+	protected GroupChecker getGroupChecker(Name name) {
+		TypeCache t = getTypeCacheOrNull(name);
+		return (t != null) ? t.group_chk : NO_GROUP;
+	}
+
+	/** Get the TypeCache for the specified name (or null) */
+	private TypeCache getTypeCacheOrNull(Name name) {
+		return types.get(name.getTypePart());
 	}
 }

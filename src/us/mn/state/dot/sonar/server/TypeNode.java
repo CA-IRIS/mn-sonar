@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
+import us.mn.state.dot.sonar.GroupChecker;
 import us.mn.state.dot.sonar.Message;
 import us.mn.state.dot.sonar.MessageEncoder;
 import us.mn.state.dot.sonar.Name;
@@ -40,6 +41,9 @@ public class TypeNode {
 	/** Type name */
 	public final String name;
 
+	/** Group privilege checker */
+	public final GroupChecker group_chk;
+
 	/** All child objects of this type are put here.  Note: we still
 	 * synchronize on updates to this hash map to prevent inconsistency.
 	 * Synchronization is not needed to read or iterate over the map. */
@@ -51,8 +55,9 @@ public class TypeNode {
 	private final AttributeDispatcher dispatcher;
 
 	/** Create a namespace type node */
-	public TypeNode(Namespace ns, String n, Class c) {
+	public TypeNode(Namespace ns, String n, Class c, GroupChecker gc) {
 		name = n;
+		group_chk = gc;
 		dispatcher = new AttributeDispatcher(c, ns);
 	}
 
