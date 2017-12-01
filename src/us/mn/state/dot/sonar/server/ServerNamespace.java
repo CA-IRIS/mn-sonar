@@ -24,7 +24,6 @@ import us.mn.state.dot.sonar.MessageEncoder;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
-import us.mn.state.dot.sonar.PrivChecker;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.User;
@@ -178,7 +177,10 @@ public class ServerNamespace extends Namespace {
 			throw NamespaceError.nameInvalid(name);
 	}
 
-	/** Register a new type in the namespace */
+	/** Register a new type in the namespace.
+	 * @param n Type name.
+	 * @param c Type class.
+	 * @return New type node. */
 	public TypeNode registerType(String n, Class c) {
 		TypeNode node = new TypeNode(this, n, c);
 		synchronized (root) {
@@ -248,21 +250,21 @@ public class ServerNamespace extends Namespace {
 
 	/** Check if a user has read privileges.  This can be overridden by a
 	 * subclass to check a whitelist of addresses.
-	 * @param pc Privilege checker.
+	 * @param name Name to check.
 	 * @param u User to check.
 	 * @param a Inet address of connection.
 	 * @return true if read is allowed; false otherwise. */
-	public boolean canRead(PrivChecker pc, User u, InetAddress a) {
-		return canRead(pc, u);
+	public boolean canRead(Name name, User u, InetAddress a) {
+		return canRead(name, u);
 	}
 
 	/** Check if a user has write privileges.  This can be overridden by a
 	 * subclass to check a whitelist of addresses.
-	 * @param pc Privilege checker.
+	 * @param name Name to check.
 	 * @param u User to check.
 	 * @param a Inet address of connection.
 	 * @return true if write is allowed; false otherwise. */
-	public boolean canWrite(PrivChecker pc, User u, InetAddress a) {
-		return canWrite(pc, u);
+	public boolean canWrite(Name name, User u, InetAddress a) {
+		return canWrite(name, u);
 	}
 }

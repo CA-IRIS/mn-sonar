@@ -44,12 +44,6 @@ public class CapabilityImpl implements Capability {
 		return name;
 	}
 
-	/** Check group membership */
-	@Override
-	public boolean isInGroup(String g) {
-		return false;
-	}
-
 	/** Create a new capability */
 	public CapabilityImpl(String n) {
 		name = n;

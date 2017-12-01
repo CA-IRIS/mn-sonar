@@ -19,7 +19,7 @@ package us.mn.state.dot.sonar;
  *
  * @author Douglas Lau
  */
-public class Name implements PrivChecker {
+public class Name {
 
 	/** Name separator */
 	static private final String SEP = "/";
@@ -96,7 +96,6 @@ public class Name implements PrivChecker {
 	}
 
 	/** Get the type part */
-	@Override
 	public String getTypePart() {
 		if (parts.length > 0)
 			return parts[0];
@@ -132,14 +131,12 @@ public class Name implements PrivChecker {
 
 	/** Check for read privilege.
 	 * @param p Privilege to check. */
-	@Override
 	public boolean checkRead(Privilege p) {
 		return p.getTypeN().equals(getTypePart());
 	}
 
 	/** Check for write privilege.
 	 * @param p Privilege to check. */
-	@Override
 	public boolean checkWrite(Privilege p) {
 		// NOTE: object, group and attribute checks are
 		//       only valid for write privileges.

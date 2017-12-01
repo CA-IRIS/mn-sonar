@@ -45,12 +45,6 @@ public class RoleImpl implements Role {
 		return name;
 	}
 
-	/** Check group membership */
-	@Override
-	public boolean isInGroup(String g) {
-		return false;
-	}
-
 	/** Create a new role */
 	public RoleImpl(String n) {
 		name = n;

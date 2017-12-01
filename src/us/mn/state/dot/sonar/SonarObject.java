@@ -30,9 +30,6 @@ public interface SonarObject {
 	/** Get the SONAR object name */
 	String getName();
 
-	/** Check group membership */
-	boolean isInGroup(String g);
-
 	/** Destroy the SONAR object */
 	void destroy();
 }

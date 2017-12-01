@@ -35,7 +35,6 @@ import us.mn.state.dot.sonar.Message;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
-import us.mn.state.dot.sonar.ObjChecker;
 import us.mn.state.dot.sonar.ProtocolError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
@@ -96,12 +95,6 @@ public class ConnectionImpl extends Conduit implements Connection {
 	@Override
 	public String getName() {
 		return hostport;
-	}
-
-	/** Check group membership */
-	@Override
-	public boolean isInGroup(String g) {
-		return false;
 	}
 
 	/** User logged in on the connection.
@@ -641,17 +634,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Check if an attribute if writable */
 	private boolean checkWriteAttr(Name name) {
-		// NOTE: Use ObjChecker if the object exists in order to support
-		//       group Privilege checks.
-		SonarObject obj = namespace.lookupObject(name.getTypePart(),
-			name.getObjectPart());
-		if (obj != null) {
-			return namespace.canWrite(new ObjChecker(obj,
-			       name.getAttributePart()), user, address);
-		} else {
-			// This check is only needed for phantom objects
-			return namespace.canWrite(name, user, address);
-		}
+		return namespace.canWrite(name, user, address);
 	}
 
 	/** Set the value of an attribute.

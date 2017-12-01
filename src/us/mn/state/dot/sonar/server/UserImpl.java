@@ -45,12 +45,6 @@ public class UserImpl implements User {
 		return name;
 	}
 
-	/** Check group membership */
-	@Override
-	public boolean isInGroup(String g) {
-		return false;
-	}
-
 	/** Create a new user */
 	public UserImpl(String n) {
 		name = n;

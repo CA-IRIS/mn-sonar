@@ -69,12 +69,6 @@ public class PrivilegeImpl implements Privilege {
 		return name;
 	}
 
-	/** Check group membership */
-	@Override
-	public boolean isInGroup(String g) {
-		return false;
-	}
-
 	/** Create a new privilege */
 	public PrivilegeImpl(String n) {
 		name = n;

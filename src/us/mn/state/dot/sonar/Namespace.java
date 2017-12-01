@@ -175,52 +175,50 @@ abstract public class Namespace {
 	}
 
 	/** Check if a user has read privileges.
-	 * @param pc Privilege checker.
+	 * @param name Name to check.
 	 * @param u User to check.
 	 * @return true If user has read privileges. */
-	public boolean canRead(PrivChecker pc, User u) {
-		return u.getEnabled() && checkPriv(pc, u.getRole(), false);
+	public boolean canRead(Name name, User u) {
+		return u.getEnabled() && checkPriv(name, u.getRole(), false);
 	}
 
 	/** Check if a user has write privileges.
-	 * @param pc Privilege checker.
+	 * @param name Name to check.
 	 * @param u User to check.
 	 * @return true If user has write privileges. */
-	public boolean canWrite(PrivChecker pc, User u) {
-		return u.getEnabled() && checkPriv(pc, u.getRole(), true);
+	public boolean canWrite(Name name, User u) {
+		return u.getEnabled() && checkPriv(name, u.getRole(), true);
 	}
 
 	/** Check if a role has privileges */
-	private boolean checkPriv(PrivChecker pc, Role r, boolean write) {
+	private boolean checkPriv(Name name, Role r, boolean write) {
 		return r != null
 		    && r.getEnabled()
-		    && checkPriv(pc, r.getCapabilities(), write);
+		    && checkPriv(name, r.getCapabilities(), write);
 	}
 
 	/** Check if a set of capabilites has privileges */
-	private boolean checkPriv(PrivChecker pc, Capability[] caps,
-		boolean write)
-	{
+	private boolean checkPriv(Name name, Capability[] caps, boolean write) {
 		for (Capability c: caps) {
-			if (c.getEnabled() && checkPriv(pc, c, write))
+			if (c.getEnabled() && checkPriv(name, c, write))
 				return true;
 		}
 		return false;
 	}
 
 	/** Check if a capability has privileges.
-	 * @param pc Privilege checker.
+	 * @param name Name to check.
 	 * @param c Capability to check.
 	 * @param write Check for write privilege.
 	 * @return true If capability has privileges. */
-	private boolean checkPriv(PrivChecker pc, Capability c, boolean write) {
+	private boolean checkPriv(Name name, Capability c, boolean write) {
 		Iterator<SonarObject> it = iterator(Privilege.SONAR_TYPE);
 		while (it.hasNext()) {
 			SonarObject so = it.next();
 			if (so instanceof Privilege) {
 				Privilege p = (Privilege) so;
 				if ((p.getCapability() == c)
-				  && checkPriv(pc, p, write))
+				  && checkPriv(name, p, write))
 					return true;
 			}
 		}
@@ -228,12 +226,12 @@ abstract public class Namespace {
 	}
 
 	/** Check for read/write privilege */
-	private boolean checkPriv(PrivChecker pc, Privilege p, boolean write) {
+	private boolean checkPriv(Name name, Privilege p, boolean write) {
 		if (p.getWrite() == write) {
 			if (write)
-				return pc.checkWrite(p);
+				return name.checkWrite(p);
 			else
-				return pc.checkRead(p);
+				return name.checkRead(p);
 		} else
 			return false;
 	}
