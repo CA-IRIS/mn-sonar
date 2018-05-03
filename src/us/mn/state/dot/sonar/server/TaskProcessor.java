@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2017  Minnesota Department of Transportation
+ * Copyright (C) 2006-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -126,7 +126,7 @@ public class TaskProcessor {
 	static private String[] getCipherSuites(SSLEngine engine) {
 		ArrayList<String> enabled = new ArrayList<String>();
 		for (String cs: engine.getEnabledCipherSuites()) {
-			if (cs.startsWith("TLS_") && cs.contains("AES_128"))
+			if (cs.contains("AES_128") || cs.contains("AES_256"))
 				enabled.add(cs);
 		}
 		return enabled.toArray(new String[0]);
