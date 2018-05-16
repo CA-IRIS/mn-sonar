@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2017  Minnesota Department of Transportation
+ * Copyright (C) 2006-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@ package us.mn.state.dot.sonar.server;
 
 import java.util.LinkedList;
 import us.mn.state.dot.sched.ExceptionHandler;
-import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.Scheduler;
+import us.mn.state.dot.sched.Work;
+import us.mn.state.dot.sched.Worker;
 
 /**
  * Simple class to authenticate a user with an LDAP server.
@@ -43,7 +43,7 @@ public class Authenticator {
 	}
 
 	/** Authentication thread */
-	private final Scheduler auth_sched = new Scheduler("sonar_auth",
+	private final Worker auth_sched = new Worker("sonar_auth",
 		new ExceptionHandler()
 	{
 		public boolean handle(Exception e) {
@@ -63,7 +63,7 @@ public class Authenticator {
 
 	/** Add an authentication provider */
 	public void addProvider(final AuthProvider ap) {
-		auth_sched.addJob(new Job() {
+		auth_sched.addWork(new Work() {
 			public void perform() {
 				// Add to beginning of list, so that LDAP
 				// providers will be checked last
@@ -81,7 +81,7 @@ public class Authenticator {
 	void authenticate(final ConnectionImpl c, final UserImpl u,
 		final String name, final char[] password)
 	{
-		auth_sched.addJob(new Job() {
+		auth_sched.addWork(new Work() {
 			public void perform() {
 				doAuthenticate(c, u, name, password);
 			}
@@ -118,7 +118,7 @@ public class Authenticator {
 	void changePassword(final ConnectionImpl c, final UserImpl u,
 		final char[] pwd_current, final char[] pwd_new)
 	{
-		auth_sched.addJob(new Job() {
+		auth_sched.addWork(new Work() {
 			public void perform() {
 				doChangePassword(c, u, pwd_current, pwd_new);
 			}
