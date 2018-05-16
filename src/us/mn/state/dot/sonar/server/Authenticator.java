@@ -38,7 +38,7 @@ public class Authenticator {
 
 	/** Clear a password in memory */
 	static private void clearPassword(char[] pwd) {
-		for(int i = 0; i < pwd.length; i++)
+		for (int i = 0; i < pwd.length; i++)
 			pwd[i] = '\0';
 	}
 
@@ -93,7 +93,7 @@ public class Authenticator {
 		String name, char[] pwd)
 	{
 		try {
-			if(authenticate(user, pwd))
+			if (authenticate(user, pwd))
 				processor.finishLogin(c, user);
 			else
 				processor.failLogin(c, name);
@@ -105,9 +105,9 @@ public class Authenticator {
 
 	/** Authenticate a user's credentials */
 	private boolean authenticate(UserImpl user, char[] pwd) {
-		if(isUserEnabled(user) && isPasswordSane(pwd)) {
-			for(AuthProvider p: providers) {
-				if(p.authenticate(user, pwd))
+		if (isUserEnabled(user) && isPasswordSane(pwd)) {
+			for (AuthProvider p: providers) {
+				if (p.authenticate(user, pwd))
 					return true;
 			}
 		}
@@ -130,7 +130,7 @@ public class Authenticator {
 		char[] pwd_current, char[] pwd_new)
 	{
 		try {
-			if(authenticate(user, pwd_current))
+			if (authenticate(user, pwd_current))
 				processor.finishPassword(c, user, pwd_new);
 			else {
 				processor.failPassword(c, PermissionDenied.
