@@ -122,16 +122,6 @@ public class TaskProcessor {
 		return enabled.toArray(new String[0]);
 	}
 
-	/** Get an array of cipher suites which should be enabled */
-	static private String[] getCipherSuites(SSLEngine engine) {
-		ArrayList<String> enabled = new ArrayList<String>();
-		for (String cs: engine.getEnabledCipherSuites()) {
-			if (cs.contains("AES_128") || cs.contains("AES_256"))
-				enabled.add(cs);
-		}
-		return enabled.toArray(new String[0]);
-	}
-
 	/** SONAR namespace being served */
 	private final ServerNamespace namespace;
 
@@ -173,6 +163,9 @@ public class TaskProcessor {
 	/** File to write session list */
 	private final String session_file;
 
+	/** Regex to match cipher suites */
+	private final String cipher_suites;
+
 	/** User for current message processing */
 	private String proc_user = null;
 
@@ -191,6 +184,7 @@ public class TaskProcessor {
 				addProvider(new LDAPProvider(url));
 		}
 		session_file = props.getProperty("sonar.session.file");
+		cipher_suites = props.getProperty("sonar.cipher.suites");
 	}
 
 	/** Add an authentication provider */
@@ -409,9 +403,20 @@ public class TaskProcessor {
 	public SSLEngine createSSLEngine() {
 		SSLEngine engine = context.createSSLEngine();
 		engine.setEnabledProtocols(getProtocols(engine));
-		engine.setEnabledCipherSuites(getCipherSuites(engine));
+		if (cipher_suites != null)
+			engine.setEnabledCipherSuites(getCipherSuites(engine));
 		engine.setUseClientMode(false);
 		return engine;
+	}
+
+	/** Get an array of cipher suites which should be enabled */
+	private String[] getCipherSuites(SSLEngine engine) {
+		ArrayList<String> enabled = new ArrayList<String>();
+		for (String cs: engine.getEnabledCipherSuites()) {
+			if (cs.matches(cipher_suites))
+				enabled.add(cs);
+		}
+		return enabled.toArray(new String[0]);
 	}
 
 	/** Lookup the client connection for a selection key */
