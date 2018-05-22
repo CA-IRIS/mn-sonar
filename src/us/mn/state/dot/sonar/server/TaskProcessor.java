@@ -334,6 +334,8 @@ public class TaskProcessor {
 
 	/** Authenticate a user connection */
 	void authenticate(ConnectionImpl c, String name, char[] password) {
+		if (DEBUG.isOpen())
+			DEBUG.log("authenticating: " + name);
 		authenticator.authenticate(c, lookupUser(name), name, password);
 	}
 
@@ -344,6 +346,8 @@ public class TaskProcessor {
 
 	/** Finish a LOGIN */
 	void finishLogin(final ConnectionImpl c, final UserImpl u) {
+		if (DEBUG.isOpen())
+			DEBUG.log("finish LOGIN: " + u.getName());
 		processor.addWork(new TaskWork("Finish LOGIN", c) {
 			protected void doPerform() {
 				access_monitor.authenticate(c.getName(),
@@ -356,6 +360,8 @@ public class TaskProcessor {
 
 	/** Fail a LOGIN */
 	void failLogin(final ConnectionImpl c, final String name) {
+		if (DEBUG.isOpen())
+			DEBUG.log("fail LOGIN: " + name);
 		processor.addWork(new TaskWork("Fail LOGIN", c) {
 			protected void doPerform() {
 				access_monitor.failAuthentication(c.getName(),
