@@ -335,7 +335,7 @@ public class TaskProcessor {
 	/** Authenticate a user connection */
 	void authenticate(ConnectionImpl c, String name, char[] password) {
 		if (DEBUG.isOpen())
-			DEBUG.log("authenticating: " + name);
+			DEBUG.log("authenticating " + name + " on " + c);
 		authenticator.authenticate(c, lookupUser(name), name, password);
 	}
 

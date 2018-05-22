@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2017  Minnesota Department of Transportation
+ * Copyright (C) 2006-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -94,6 +94,12 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Get the SONAR object name */
 	@Override
 	public String getName() {
+		return hostport;
+	}
+
+	/** Get a string representation */
+	@Override
+	public String toString() {
 		return hostport;
 	}
 
