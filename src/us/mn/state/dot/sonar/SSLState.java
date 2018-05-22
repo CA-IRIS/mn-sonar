@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2015  Minnesota Department of Transportation
+ * Copyright (C) 2006-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,31 +29,28 @@ import javax.net.ssl.SSLSession;
 public class SSLState {
 
 	/** Size (in bytes) of network buffers */
-	static protected final int NETWORK_SIZE = 1 << 16;
+	static private final int NETWORK_SIZE = 1 << 16;
 
 	/** Conduit */
-	protected final Conduit conduit;
+	private final Conduit conduit;
 
 	/** SSL engine */
-	protected final SSLEngine engine;
-
-	/** SSL engine handshake status */
-	protected SSLEngineResult.HandshakeStatus hs;
+	private final SSLEngine engine;
 
 	/** Byte buffer to store outgoing encrypted network data */
-	protected final ByteBuffer net_out;
+	private final ByteBuffer net_out;
 
 	/** Byte buffer to store incoming encrypted network data */
-	protected final ByteBuffer net_in;
+	private final ByteBuffer net_in;
 
 	/** Byte buffer to store incoming SONAR data */
-	protected final ByteBuffer app_in;
+	private final ByteBuffer app_in;
 
 	/** Byte buffer to wrap outgoing SSL data */
-	protected final ByteBuffer ssl_out;
+	private final ByteBuffer ssl_out;
 
 	/** Byte buffer to unwrap incoming SSL data */
-	protected final ByteBuffer ssl_in;
+	private final ByteBuffer ssl_in;
 
 	/** Decoder for messages received */
 	public final MessageDecoder decoder;
@@ -94,14 +91,14 @@ public class SSLState {
 	 * This may only be called on the Task Processor thread. */
 	public boolean doRead() throws SSLException {
 		doUnwrap();
-		while(doHandshake());
+		while (doHandshake());
 		return app_in.position() > 0;
 	}
 
 	/** Do something to progress handshaking */
-	protected boolean doHandshake() throws SSLException {
-		hs = engine.getHandshakeStatus();
-		switch(hs) {
+	private boolean doHandshake() throws SSLException {
+		SSLEngineResult.HandshakeStatus hs = engine.getHandshakeStatus();
+		switch (hs) {
 		case NEED_TASK:
 			doTask();
 			return true;
@@ -118,7 +115,7 @@ public class SSLState {
 	/** Write data to the network output buffer.
 	 * This may only be called on the Task Processor thread. */
 	public void doWrite() throws SSLException {
-		if(canWrite())
+		if (canWrite())
 			doWrap();
 		else
 			conduit.enableWrite();
@@ -132,20 +129,20 @@ public class SSLState {
 
 	/** Check if data can be written to network buffer */
 	public boolean canWrite() {
-		synchronized(net_out) {
+		synchronized (net_out) {
 			return net_out.remaining() > ssl_out.capacity();
 		}
 	}
 
 	/** Perform a delegated SSL engine task */
-	protected void doTask() {
+	private void doTask() {
 		Runnable task = engine.getDelegatedTask();
-		if(task != null)
+		if (task != null)
 			task.run();
 	}
 
 	/** Wrap application data into SSL buffer */
-	protected void doWrap() throws SSLException {
+	private void doWrap() throws SSLException {
 		ssl_out.clear();
 		ByteBuffer app_out = encoder.getBuffer();
 		app_out.flip();
@@ -157,21 +154,21 @@ public class SSLState {
 		}
 		ssl_out.flip();
 		int n_bytes;
-		synchronized(net_out) {
+		synchronized (net_out) {
 			net_out.put(ssl_out);
 			n_bytes = net_out.position();
 		}
-		if(n_bytes > 0)
+		if (n_bytes > 0)
 			conduit.enableWrite();
 	}
 
 	/** Unwrap SSL data into appcliation buffer */
-	protected boolean doUnwrap() throws SSLException {
-		synchronized(net_in) {
+	private boolean doUnwrap() throws SSLException {
+		synchronized (net_in) {
 			net_in.flip();
 			try {
 				int n_rem = net_in.remaining();
-				if(n_rem > 0) {
+				if (n_rem > 0) {
 					ssl_in.clear();
 					engine.unwrap(net_in, ssl_in);
 					ssl_in.flip();
