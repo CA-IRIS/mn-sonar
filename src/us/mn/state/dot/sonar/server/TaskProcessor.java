@@ -404,9 +404,10 @@ public class TaskProcessor {
 	/** Create an SSL engine in the server context */
 	public SSLEngine createSSLEngine() {
 		SSLEngine engine = context.createSSLEngine();
-		engine.setEnabledProtocols(getProtocols(engine));
-		if (cipher_suites != null)
+		if (cipher_suites != null) {
+			engine.setEnabledProtocols(getProtocols(engine));
 			engine.setEnabledCipherSuites(getCipherSuites(engine));
+		}
 		engine.setUseClientMode(false);
 		return engine;
 	}
