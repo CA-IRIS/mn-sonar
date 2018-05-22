@@ -20,6 +20,7 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
+import us.mn.state.dot.sched.DebugLog;
 
 /**
  * The SSL state manages buffers and handshaking for one SSL connection.
@@ -27,6 +28,9 @@ import javax.net.ssl.SSLSession;
  * @author Douglas Lau
  */
 public class SSLState {
+
+	/** SONAR TLS debug log */
+	static private final DebugLog DEBUG_TLS = new DebugLog("sonar_tls");
 
 	/** Size (in bytes) of network buffers */
 	static private final int NETWORK_SIZE = 1 << 16;
@@ -98,6 +102,7 @@ public class SSLState {
 	/** Do something to progress handshaking */
 	private boolean doHandshake() throws SSLException {
 		SSLEngineResult.HandshakeStatus hs = engine.getHandshakeStatus();
+		debugHandshake(hs);
 		switch (hs) {
 		case NEED_TASK:
 			doTask();
@@ -109,6 +114,16 @@ public class SSLState {
 			return doUnwrap();
 		default:
 			return false;
+		}
+	}
+
+	/** Debug a TLS handshake */
+	private void debugHandshake(SSLEngineResult.HandshakeStatus hs) {
+		if (hs != SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING) {
+			if (DEBUG_TLS.isOpen()) {
+				DEBUG_TLS.log("TLS handshake " + hs + " for " +
+					conduit.getName());
+			}
 		}
 	}
 
