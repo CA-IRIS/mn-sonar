@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2017  Minnesota Department of Transportation
+ * Copyright (C) 2006-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -209,6 +209,23 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 	/** Lookup a proxy from the given name */
 	public T lookupObject(String n) {
 		return children.get(n);
+	}
+
+	/** Lookup a proxy from the given name, while waiting */
+	public T lookupObjectWait(String n) {
+		// wait up to 20 seconds for proxy to be created
+		for (int i = 0; i < 200; i++) {
+			T proxy = lookupObject(n);
+			if (proxy != null)
+				return proxy;
+			try {
+				Thread.sleep(100);
+			}
+			catch (InterruptedException e) {
+				// Ignore
+			}
+		}
+		return null;
 	}
 
 	/** Get the size of the cache */
