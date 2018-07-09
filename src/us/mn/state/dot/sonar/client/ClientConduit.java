@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2017  Minnesota Department of Transportation
+ * Copyright (C) 2006-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -339,10 +339,8 @@ class ClientConduit extends Conduit {
 		if (disposed)
 			return false;
 		try {
-			long start = System.currentTimeMillis();
 			wait(LOGIN_MS);
-			long elapsed = System.currentTimeMillis() - start;
-			return elapsed >= LOGIN_MS;
+			return !loggedIn;
 		}
 		catch (InterruptedException e) {
 			return false;
