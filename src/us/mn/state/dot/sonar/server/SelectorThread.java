@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2017  Minnesota Department of Transportation
+ * Copyright (C) 2006-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,10 @@ import java.util.Set;
  *
  * @author Douglas Lau
  */
-public final class SelectorThread extends Thread {
+public final class SelectorThread {
+
+	/** Thread group for selector thread */
+	static private final ThreadGroup GROUP = new ThreadGroup("SONAR");
 
 	/** Create and configure a server socket channel */
 	static private ServerSocketChannel createChannel(int port)
@@ -53,19 +56,31 @@ public final class SelectorThread extends Thread {
 	/** Socket channel to listen for new client connections */
 	private final ServerSocketChannel channel;
 
+	/** Thread to run select loop */
+	private final Thread thread;
+
 	/** Create a new selector thread */
 	public SelectorThread(TaskProcessor tp, int port) throws IOException {
 		processor = tp;
 		selector = Selector.open();
 		channel = createChannel(port);
 		channel.register(selector, SelectionKey.OP_ACCEPT);
-		setDaemon(true);
-		start();
+ 		thread = new Thread(GROUP, "selector") {
+			@Override public void run() {
+				doRun();
+			}
+		};
+		thread.setDaemon(true);
+		thread.start();
+	}
+
+	/** Join the thread */
+	public void join() throws InterruptedException {
+		thread.join();
 	}
 
 	/** Selector loop to perfrom socket I/O */
-	@Override
-	public void run() {
+	private void doRun() {
 		while (true)
 			doSelect();
 	}
