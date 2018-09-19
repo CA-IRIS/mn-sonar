@@ -141,8 +141,7 @@ public class TaskProcessor {
 			else if (e instanceof SSLException)
 				DEBUG.log("SSL error " + e.getMessage());
 			else {
-				System.err.println("SONAR: error " +
-					e.getMessage());
+				System.err.println("SONAR " + e.getMessage());
 				e.printStackTrace();
 			}
 			return true;
@@ -478,9 +477,16 @@ public class TaskProcessor {
 			doStoreObject(o);
 			return;
 		}
+		// Array used to capture exception from processor thread
+		final SonarException[] se = new SonarException[1];
 		Work w = new TaskWork("Store object") {
-			protected void doPerform() throws SonarException {
-				doStoreObject(o);
+			protected void doPerform() {
+				try {
+					doStoreObject(o);
+				}
+				catch (SonarException e) {
+					se[0] = e;
+				}
 			}
 		};
 		processor.addWork(w);
@@ -491,6 +497,9 @@ public class TaskProcessor {
 		catch (TimeoutException e) {
 			throw new SonarException(e);
 		}
+		// If an exception was captured, wrap and throw
+		if (se[0] != null)
+			throw new SonarException(se[0]);
 	}
 
 	/** Store an object in the server's namespace. */
